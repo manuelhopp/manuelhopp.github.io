@@ -19,16 +19,16 @@ const profileData = {
     // 2. About Me Text (Supports HTML tags like <strong>)
     about: `
         <p class="mb-4">
-        I am a postdoctoral researcher at the Hector Research Institute of Education Sciences and Psychology. I integrate <strong>educational psychology</strong> with <strong>computational network analysis</strong> to examine the structural determinants of motivation and learning.
+        I am a postdoctoral researcher at the Hector Research Institute of Education Sciences and Psychology. I integrate <strong>educational psychology with computational network analysis</strong> to examine the structural determinants of learning.
         </p>
         <p class="mb-4">
-        My research focuses on identifying the structural attributes of learning materials that spark student curiosity. I utilize <strong>Large Language Models</strong> (LLMs) and <strong>persistent homology</strong> (computational tools for analyzing the shape of data) to model "content topology" (the structural landscape of text). This work quantifies how information architecture affects the reader, offering a framework to improve the motivational efficacy of learning resources.
+        My research models <strong>"content topology"</strong> (the structural landscape of text) using <strong>persistent homology</strong> (mathematical tools for analyzing data shapes) and <strong>Large Language Models</strong> (LLMs). My primary objective is to investigate how this information architecture shapes the trajectory of student <strong>curiosity and motivation</strong>.
         </p>
         <p class="mb-4">
-        In parallel, I investigate the predictive capacity of text embeddings (mathematical representations that map text to numerical vectors) and the evaluative reliability (consistency of automated scoring) of Large Language Models. Future work will extend to neurophysiological analysis (measuring biological responses), specifically examining the brain activity patterns of children during engagement with educational content.
+        In parallel, I assess the predictive capacity of text embeddings and the evaluative reliability of LLMs. Future work will extend to neurophysiological analysis (measuring biological responses) to examine the brain activity patterns of children during engagement with educational content.
         </p>
         <p>
-        Previously, during my PhD, I investigated peer influence, loneliness, and creativity-driven friendship formation using social network analysis.
+        Previously, during my PhD, I investigated peer influence, loneliness, and creativity-driven friendship formation using social network analysis in educational settings.
         </p>
         `,
 
