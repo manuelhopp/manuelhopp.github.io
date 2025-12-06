@@ -19,7 +19,7 @@ const profileData = {
     // 2. About Me Text (Supports HTML tags like <strong>)
     about: `
         <p class="mb-4">
-        I am a postdoctoral researcher at the Hector Research Institute of Education Sciences and Psychology. I integrate <strong>educational psychology</strong> with <strong>computational network analysis</strong> to examine the structural determinants of talent development.
+        I am a postdoctoral researcher at the Hector Research Institute of Education Sciences and Psychology. I integrate <strong>educational psychology</strong> with <strong>computational network analysis</strong> to examine the structural determinants of motivation and learning.
         </p>
         <p class="mb-4">
         My research focuses on identifying the structural attributes of learning materials that spark student curiosity. I utilize <strong>Large Language Models</strong> (LLMs) and <strong>persistent homology</strong> (computational tools for analyzing the shape of data) to model "content topology" (the structural landscape of text). This work quantifies how information architecture affects the reader, offering a framework to improve the motivational efficacy of learning resources.
@@ -41,6 +41,15 @@ const profileData = {
         "LLMs",
         "AI",
         "Persistent Homology"
+    ],
+
+    // 3b. Additional Skills
+    skills: [
+        "Photography",
+        "Video and Audio Production",
+        "3D Design",
+        "IT",
+        "Arch, btw :)"
     ],
 
     // 4. Research Highlights

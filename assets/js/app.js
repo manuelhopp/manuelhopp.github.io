@@ -25,34 +25,34 @@ tailwind.config = {
    2. CONTENT RENDERING & EMAIL ENCRYPTION
    ========================================= */
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Helper: Safely get element
     const el = (id) => document.getElementById(id);
 
     // --- A. Render Personal Info ---
-    if(el('profile-name')) el('profile-name').textContent = profileData.personal.name;
-    if(el('nav-name')) el('nav-name').textContent = profileData.personal.name;
-    if(el('profile-role')) el('profile-role').textContent = profileData.personal.role;
-    if(el('profile-inst')) el('profile-inst').innerHTML = `${profileData.personal.institution}<br>${profileData.personal.university}`;
-    if(el('profile-img')) el('profile-img').src = profileData.personal.imagePath;
+    if (el('profile-name')) el('profile-name').textContent = profileData.personal.name;
+    if (el('nav-name')) el('nav-name').textContent = profileData.personal.name;
+    if (el('profile-role')) el('profile-role').textContent = profileData.personal.role;
+    if (el('profile-inst')) el('profile-inst').innerHTML = `${profileData.personal.institution}<br>${profileData.personal.university}`;
+    if (el('profile-img')) el('profile-img').src = profileData.personal.imagePath;
 
     // --- B. Render Email (Obfuscation) ---
     // The email is assembled here. It does not exist in the HTML source.
     const mailLinks = document.querySelectorAll('.email-link');
     const fullEmail = `${profileData.personal.emailUser}@${profileData.personal.emailDomain}`;
-    
+
     mailLinks.forEach(link => {
         link.href = `mailto:${fullEmail}`;
         // Only set text content if the link is empty or explicitly asks for the address
-        if(link.classList.contains('show-email-text')) {
-             link.textContent = "Contact Me"; 
+        if (link.classList.contains('show-email-text')) {
+            link.textContent = "Contact Me";
         }
     });
 
     // --- C. Render About & Highlights ---
-    if(el('about-content')) el('about-content').innerHTML = profileData.about;
-    
-    if(el('highlights-list')) {
+    if (el('about-content')) el('about-content').innerHTML = profileData.about;
+
+    if (el('highlights-list')) {
         el('highlights-list').innerHTML = profileData.highlights.map(item => `
             <li class="flex items-start">
                 <i class="ph ph-check-circle text-blue-500 mt-1 mr-3 flex-shrink-0"></i>
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- D. Render Interests (Badges) ---
-    if(el('interests-list')) {
+    if (el('interests-list')) {
         el('interests-list').innerHTML = profileData.interests.map(interest => `
             <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
                 ${interest}
@@ -70,8 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
     }
 
+    // --- D2. Render Skills (Badges) ---
+    if (el('skills-list')) {
+        el('skills-list').innerHTML = profileData.skills.map(skill => `
+            <span class="px-3 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
+                ${skill}
+            </span>
+        `).join('');
+    }
+
     // --- E. Render Publications ---
-    if(el('publications-list')) {
+    if (el('publications-list')) {
         el('publications-list').innerHTML = profileData.publications.map(pub => `
             <div class="relative">
                 <div class="absolute -left-6 top-1.5 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 bg-blue-500"></div>
@@ -89,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- F. Render Teaching ---
-    if(el('teaching-list')) {
+    if (el('teaching-list')) {
         el('teaching-list').innerHTML = profileData.teaching.map(item => `
             <li class="flex gap-3">
                 <i class="ph ${item.icon} text-blue-500 text-lg mt-0.5"></i>
@@ -102,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- G. Render Talks ---
-    if(el('talks-list')) {
+    if (el('talks-list')) {
         el('talks-list').innerHTML = profileData.talks.map(talk => `
             <div class="flex gap-4">
                 <div class="flex-shrink-0 mt-1">
@@ -156,7 +165,7 @@ const canvas = document.getElementById('network-canvas');
 if (canvas) {
     const ctx = canvas.getContext('2d');
     let width, height, particles = [];
-    
+
     const config = {
         count: 60,
         distance: 150,
@@ -202,7 +211,7 @@ if (canvas) {
     function animate() {
         ctx.clearRect(0, 0, width, height);
         const isDark = document.documentElement.classList.contains('dark');
-        
+
         for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
                 const dx = particles[i].x - particles[j].x;
