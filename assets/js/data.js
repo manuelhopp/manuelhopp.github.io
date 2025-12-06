@@ -7,7 +7,7 @@ const profileData = {
     // 1. Personal Details
     // Email is split to prevent bots from scraping it (Obfuscation).
     personal: {
-        name: "Dr. Manuel D.S. Hopp",
+        name: "Dr. Manuel D. S. Hopp",
         role: "Postdoctoral Researcher",
         institution: "Hector Research Institute of Education Sciences and Psychology",
         university: "University of Tübingen",
