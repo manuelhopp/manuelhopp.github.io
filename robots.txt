@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://mds-hopp.github.io/sitemap.xml
+Sitemap: https://manuelhopp.github.io/sitemap.xml
