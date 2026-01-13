@@ -37,9 +37,9 @@ const profileData = {
         "Educational Psychology",
         "Curiosity",
         "Talent Development",
-        "Network Analysis",
-        "LLMs",
         "AI",
+        "LLMs",
+        "Network Analysis",
         "Persistent Homology"
     ],
 
