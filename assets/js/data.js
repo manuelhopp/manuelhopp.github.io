@@ -46,10 +46,10 @@ const profileData = {
 
     // 3b. Additional Skills
     skills: [
-        "Photography",
-        "Video and Audio Production",
-        "3D Design",
         "IT",
+        "Video and Audio Production",
+        "Photography",
+        "3D Design",
         "Arch, btw :)"
     ],
 
