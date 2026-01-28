@@ -6,22 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impressum | Dr. Manuel D. S. Hopp</title>
     <meta name="robots" content="noindex, follow">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap"
-        rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/style.css">
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Merriweather', 'serif'] },
-                }
-            }
-        }
-    </script>
+    <script src="assets/js/tailwind-3.4.js"></script>
+
+    <script src="assets/js/phosphor.js"></script>
 </head>
 
 <body class="bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-gray-200 flex flex-col min-h-screen">
@@ -47,13 +36,16 @@
 
             <h2 class="text-xl font-bold mt-6 mb-2">Kontakt</h2>
             <p>
-                E-Mail: <span class="email-protect" data-user="manuel.hopp" data-domain="uni-tuebingen.de"></span><br>
+                E-Mail: <span class="email-protect" data-user="bWFudWVsLmhvcHA="
+                    data-domain="dW5pLXR1ZWJpbmdlbi5kZQ=="></span><br>
                 Telefon: Auf Anfrage
             </p>
 
             <script>
                 document.querySelectorAll('.email-protect').forEach(el => {
-                    const email = el.dataset.user + '@' + el.dataset.domain;
+                    const user = atob(el.dataset.user);
+                    const domain = atob(el.dataset.domain);
+                    const email = user + '@' + domain;
                     el.innerHTML = `<a href="mailto:${email}" class="text-blue-600 dark:text-blue-400 hover:underline">${email}</a>`;
                 });
             </script>

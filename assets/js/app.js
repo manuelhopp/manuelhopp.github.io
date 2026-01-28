@@ -36,10 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el('profile-inst')) el('profile-inst').innerHTML = `${profileData.personal.institution}<br>${profileData.personal.university}`;
     if (el('profile-img')) el('profile-img').src = profileData.personal.imagePath;
 
-    // --- B. Render Email (Obfuscation) ---
-    // The email is assembled here. It does not exist in the HTML source.
+    // --- B. Render Email (Base64 Obfuscation) ---
+    // The email is decoded and assembled here. It does not exist in plaintext in the source.
     const mailLinks = document.querySelectorAll('.email-link');
-    const fullEmail = `${profileData.personal.emailUser}@${profileData.personal.emailDomain}`;
+    const decodedUser = atob(profileData.personal.emailUser);
+    const decodedDomain = atob(profileData.personal.emailDomain);
+    const fullEmail = `${decodedUser}@${decodedDomain}`;
 
     mailLinks.forEach(link => {
         link.href = `mailto:${fullEmail}`;

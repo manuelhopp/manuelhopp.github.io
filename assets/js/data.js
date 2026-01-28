@@ -5,14 +5,15 @@
 
 const profileData = {
     // 1. Personal Details
-    // Email is split to prevent bots from scraping it (Obfuscation).
+    // Email is Base64 encoded to prevent bots from scraping it (Obfuscation).
+    // Decoded: manuel.hopp@uni-tuebingen.de
     personal: {
         name: "Dr. Manuel D. S. Hopp",
         role: "Postdoctoral Researcher",
         institution: "Hector Research Institute of Education Sciences and Psychology",
         university: "University of Tübingen",
-        emailUser: "manuel.hopp",     // Part before @
-        emailDomain: "uni-tuebingen.de", // Part after @
+        emailUser: "bWFudWVsLmhvcHA=",       // Base64 encoded part before @
+        emailDomain: "dW5pLXR1ZWJpbmdlbi5kZQ==", // Base64 encoded part after @
         imagePath: "assets/images/Manuel_D._S._Hopp.png" // Update this path if you move the image
     },
 
