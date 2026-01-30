@@ -1,6 +1,6 @@
 # 🌐 Manuel D. S. Hopp Personal Homepage
 
-This repository contains the files for my personal academic and professional homepage, hosted at manuelhopp.github.io.
+This repository contains the files for my personal academic and professional homepage, hosted at [manuelhopp.github.io](https://manuelhopp.github.io).
 
 
 ## License
