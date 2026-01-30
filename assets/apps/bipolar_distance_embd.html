@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bipolar Projection: (b-a)/(a+b)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            touch-action: none;
+            background-color: #f8fafc; /* Slate 50 */
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
+        }
+
+        .dark body {
+            background-color: #111827; /* Gray 900 */
+            background-image: radial-gradient(#374151 1.5px, transparent 1.5px);
+        }
+
+        .math-font {
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* High Contrast Glass Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .glass-panel {
+                background: rgba(31, 41, 55, 0.9);
+                border: 1px solid rgba(255,255,255,0.1);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+                color: #f3f4f6;
+            }
+        }
+
+        .transition-all-custom {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bar-fill {
+            transition: width 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4b5563;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col relative text-slate-900 dark:text-slate-100">
+
+    <!-- Canvas Layer -->
+    <canvas id="geometryCanvas" class="absolute inset-0 w-full h-full z-0"></canvas>
+
+    <!-- UI Overlay (Top Left) -->
+    <div class="z-10 absolute top-8 left-8 w-80 flex flex-col gap-4 pointer-events-none">
+
+        <!-- Main Card -->
+        <div class="glass-panel p-6 rounded-xl pointer-events-auto transition-all-custom hover:shadow-xl border-l-4 border-slate-500 dark:border-slate-400">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                    Bipolar Projection
+                </h1>
+                <button id="resetBtn" class="text-[11px] uppercase tracking-wider bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded font-bold transition-colors shadow-sm" title="Reset View">
+                    Reset
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Formula -->
+                <div class="flex justify-center items-center py-1 opacity-90">
+                    <div class="math-font text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-3">
+                        <span class="italic text-slate-500 dark:text-slate-400">v</span> =
+                        <div class="flex flex-col items-center justify-center leading-none mx-1 text-sm">
+                            <span class="border-b-2 border-slate-300 dark:border-slate-500 pb-1 mb-1 block">b - a</span>
+                            <span class="block">a + b</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics -->
+                <div class="space-y-5">
+                    <!-- Variable A -->
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-2 font-medium text-slate-600 dark:text-slate-300 tracking-tight">
+                            <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#334155] dark:bg-[#94a3b8]"></div> <strong class="text-slate-900 dark:text-white font-bold">a</strong> (distance H &lt;-&gt; T)</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
+                            <div id="bar-a" class="h-full bg-[#334155] dark:bg-[#94a3b8] bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Variable B -->
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-2 font-medium text-slate-600 dark:text-slate-300 tracking-tight">
+                            <span class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-[#9f1239] dark:bg-[#fb7185]"></div> <strong class="text-slate-900 dark:text-white font-bold">b</strong> (distance D &lt;-&gt; T)</span>
+                        </div>
+                        <div class="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden border border-slate-300 dark:border-slate-600">
+                            <div id="bar-b" class="h-full bg-[#9f1239] dark:bg-[#fb7185] bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toggle Control -->
+        <div class="glass-panel px-5 py-3 rounded-xl pointer-events-auto flex items-center justify-between border-l-4 border-slate-300 dark:border-slate-600">
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
+                Iso-Curve
+            </span>
+            <label class="flex items-center cursor-pointer relative">
+                <input type="checkbox" id="showIsoLines" class="sr-only" checked>
+                <div class="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full border border-slate-300 dark:border-slate-500 transition-colors duration-200"></div>
+                <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-200 transform translate-x-0"></div>
+            </label>
+        </div>
+    </div>
+
+    <!-- Signature (Bottom Centered) -->
+    <div class="z-10 absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none opacity-60">
+        <p class="text-[10px] text-slate-400 dark:text-slate-500 font-medium tracking-tight">
+            Created with Gemini 3 model family, by Manuel Hopp
+        </p>
+    </div>
+
+    <!-- Legend (Bottom Right) -->
+    <div class="z-10 absolute bottom-8 right-8 pointer-events-none">
+        <div class="glass-panel p-5 rounded-xl pointer-events-auto border-r-4 border-slate-500 dark:border-slate-400">
+            <div class="flex flex-col gap-2 text-[11px] font-medium uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-900 dark:text-white min-w-[1.5rem]">D:</span> Disharmony Embedding
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-900 dark:text-white min-w-[1.5rem]">H:</span> Harmony Embedding
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-900 dark:text-white min-w-[1.5rem]">T:</span> Teacher Embedding
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const canvas = document.getElementById('geometryCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // State
+    let width, height;
+    let isDragging = null;
+
+    // High Contrast / Elegant Palette
+    const colors = {
+        H: '#334155',
+        H_dark: '#94a3b8',
+        D: '#9f1239',
+        D_dark: '#fb7185',
+        T: '#000000',
+        text: '#000000',
+        pointFill: '#ffffff'
+    };
+
+    // Points
+    const points = {
+        H: { x: 0, y: 0, label: 'H' },
+        D: { x: 0, y: 0, label: 'D' },
+        T: { x: 0, y: 0, label: 'T' }
+    };
+
+    // UI Elements
+    const ui = {
+        barA: document.getElementById('bar-a'),
+        barB: document.getElementById('bar-b'),
+        isoCheck: document.getElementById('showIsoLines'),
+        resetBtn: document.getElementById('resetBtn')
+    };
+
+    function init() {
+        resize();
+        resetPositions();
+        window.addEventListener('resize', resize);
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        canvas.addEventListener('touchstart', (e) => onPointerDown(e.touches[0]));
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) e.preventDefault();
+            onPointerMove(e.touches[0]);
+        }, { passive: false });
+        window.addEventListener('touchend', onPointerUp);
+
+        ui.resetBtn.addEventListener('click', resetPositions);
+        ui.isoCheck.addEventListener('change', draw);
+
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+          input:checked ~ .dot { transform: translateX(100%); }
+          input:checked ~ div:first-of-type { background-color: #475569; border-color: #334155; }
+        `;
+        document.head.appendChild(styleSheet);
+
+        requestAnimationFrame(loop);
+    }
+
+    function resize() {
+        // High DPI scaling logic
+        const dpr = window.devicePixelRatio || 1;
+        width = window.innerWidth;
+        height = window.innerHeight;
+
+        // Set display size (css pixels)
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+
+        // Set actual size in memory (scaled to account for extra pixel density)
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+
+        // Normalize coordinate system to use css pixels
+        ctx.scale(dpr, dpr);
+
+        if (points.H.x === 0 && points.H.y === 0) resetPositions();
+        draw();
+    }
+
+    function resetPositions() {
+        const cx = width / 2;
+        const cy = height / 2;
+        const spacing = Math.min(width, height) * 0.25;
+
+        points.H.x = cx + spacing;
+        points.H.y = cy;
+
+        points.D.x = cx - spacing;
+        points.D.y = cy;
+
+        points.T.x = cx;
+        points.T.y = cy - spacing;
+
+        draw();
+    }
+
+    function dist(p1, p2) {
+        return Math.sqrt((p1.x - p2.x)**2 + (p1.y - p2.y)**2);
+    }
+
+    function lerp(v0, v1, t) {
+        return v0 * (1 - t) + v1 * t;
+    }
+
+    function getMousePos(evt) {
+        const rect = canvas.getBoundingClientRect();
+        return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+    }
+
+    function onPointerDown(e) {
+        const m = getMousePos(e);
+        const radius = 35;
+        if (dist(m, points.T) < radius) { isDragging = 'T'; return; }
+        if (dist(m, points.H) < radius) { isDragging = 'H'; return; }
+        if (dist(m, points.D) < radius) { isDragging = 'D'; return; }
+    }
+
+    function onPointerMove(e) {
+        if (!isDragging) {
+            const m = getMousePos(e);
+            const radius = 25;
+            const hovering = dist(m, points.T) < radius || dist(m, points.H) < radius || dist(m, points.D) < radius;
+            canvas.style.cursor = hovering ? 'grab' : 'default';
+            return;
+        }
+        canvas.style.cursor = 'grabbing';
+
+        const m = getMousePos(e);
+        const padding = 30;
+        points[isDragging].x = Math.max(padding, Math.min(width - padding, m.x));
+        points[isDragging].y = Math.max(padding, Math.min(height - padding, m.y));
+    }
+
+    function onPointerUp() {
+        isDragging = null;
+        canvas.style.cursor = 'default';
+    }
+
+    function loop() {
+        if (isDragging) draw();
+        requestAnimationFrame(loop);
+    }
+
+    function draw() {
+        const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        const pal = {
+            h: isDark ? colors.H_dark : colors.H,
+            d: isDark ? colors.D_dark : colors.D,
+            t: '#000000',
+            axisStart: isDark ? colors.D_dark : colors.D,
+            axisEnd: isDark ? colors.H_dark : colors.H,
+            labelBg: isDark ? '#1f2937' : '#ffffff'
+        };
+
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Calculations
+        const distHD = dist(points.H, points.D);
+        const unitScale = 2.0 / (distHD > 0 ? distHD : 1);
+        const aRaw = dist(points.H, points.T);
+        const bRaw = dist(points.D, points.T);
+        const a = aRaw * unitScale;
+        const b = bRaw * unitScale;
+        const total = a + b;
+        let val = total > 0.001 ? (b - a) / (a + b) : 0;
+        val = Math.max(-1, Math.min(1, val));
+
+        // Update UI Progress Bars
+        const maxVal = 2.0;
+        ui.barA.style.width = Math.min(100, (a / maxVal) * 100) + '%';
+        ui.barB.style.width = Math.min(100, (b / maxVal) * 100) + '%';
+
+        // 2. Connection Lines
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(points.T.x, points.T.y);
+        ctx.lineTo(points.H.x, points.H.y);
+        ctx.strokeStyle = pal.h;
+        ctx.globalAlpha = 0.8;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(points.T.x, points.T.y);
+        ctx.lineTo(points.D.x, points.D.y);
+        ctx.strokeStyle = pal.d;
+        ctx.stroke();
+
+        ctx.globalAlpha = 1.0;
+        ctx.restore();
+
+        // 3. Axis
+        const grad = ctx.createLinearGradient(points.D.x, points.D.y, points.H.x, points.H.y);
+        grad.addColorStop(0, pal.axisStart);
+        grad.addColorStop(0.5, isDark ? '#6b7280' : '#94a3b8');
+        grad.addColorStop(1, pal.axisEnd);
+
+        ctx.beginPath();
+        ctx.moveTo(points.D.x, points.D.y);
+        ctx.lineTo(points.H.x, points.H.y);
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = grad;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // 4. Projection
+        const k = (val + 1) / 2;
+        const projX = lerp(points.D.x, points.H.x, k);
+        const projY = lerp(points.D.y, points.H.y, k);
+
+        ctx.beginPath();
+        ctx.moveTo(points.T.x, points.T.y);
+        ctx.lineTo(projX, projY);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(projX, projY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#334155';
+        ctx.stroke();
+
+        // 5. Curve
+        if (ui.isoCheck.checked) drawIsoCurve(a, b, projX, projY, val, isDark);
+
+        // 6. Plot Value
+        drawValueOnPlot(val, projX, projY, isDark, pal);
+
+        // 7. Points
+        drawFancyPoint(points.D, pal.d);
+        drawFancyPoint(points.H, pal.h);
+        drawFancyPoint(points.T, '#000000', true);
+
+        // 8. Labels
+        drawLabel('a', (points.T.x + points.H.x)/2, (points.T.y + points.H.y)/2, pal.h, pal.labelBg);
+        drawLabel('b', (points.T.x + points.D.x)/2, (points.T.y + points.D.y)/2, pal.d, pal.labelBg);
+    }
+
+    function drawIsoCurve(a, b, projX, projY, val, isDark) {
+        const curveColor = isDark ? 'rgba(148, 163, 184, 0.4)' : 'rgba(51, 65, 85, 0.25)';
+        if (Math.abs(val) > 0.01 && Math.abs(val) < 0.99) {
+            const ratio = b / a;
+            if (Math.abs(ratio - 1) > 0.01) {
+                const pExtX = points.D.x + (points.H.x - points.D.x) * (ratio / (ratio - 1));
+                const pExtY = points.D.y + (points.H.y - points.D.y) * (ratio / (ratio - 1));
+                const centerX = (projX + pExtX) / 2;
+                const centerY = (projY + pExtY) / 2;
+                const radius = Math.sqrt((projX - pExtX)**2 + (projY - pExtY)**2) / 2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = curveColor;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        } else if (Math.abs(val) <= 0.01) {
+            const dx = points.H.x - points.D.x;
+            const dy = points.H.y - points.D.y;
+            const mx = (points.H.x + points.D.x) / 2;
+            const my = (points.H.y + points.D.y) / 2;
+            ctx.beginPath();
+            ctx.moveTo(mx - dy * 10, my + dx * 10);
+            ctx.lineTo(mx + dy * 10, my - dx * 10);
+            ctx.strokeStyle = curveColor;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+    }
+
+    function drawValueOnPlot(val, x, y, isDark, pal) {
+        const text = (val >= 0 ? '+' : '') + val.toFixed(2);
+        const yOffset = -38;
+        ctx.save();
+        ctx.font = 'bold 15px JetBrains Mono';
+        const metrics = ctx.measureText(text);
+        const padding = { x: 12, y: 8 };
+        const width = metrics.width + padding.x * 2;
+        const height = 30;
+        const boxX = x - width / 2;
+        const boxY = y + yOffset - height / 2;
+        ctx.shadowColor = 'rgba(0,0,0,0.15)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, width, height, 6);
+        ctx.fillStyle = isDark ? '#1f2937' : '#ffffff';
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = isDark ? '#374151' : '#e2e8f0';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y - 8);
+        ctx.lineTo(x, y + yOffset + height/2);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.3)';
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        let textColor = isDark ? '#f3f4f6' : '#1e293b';
+        if(val > 0.05) textColor = pal.h;
+        if(val < -0.05) textColor = pal.d;
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x, y + yOffset + 1);
+        ctx.restore();
+    }
+
+    function drawFancyPoint(p, borderColor, isDraggable = false) {
+        if (isDraggable) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+            ctx.fillStyle = borderColor + (borderColor === '#000000' ? '12' : '20');
+            ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 13, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = borderColor;
+        ctx.stroke();
+        ctx.fillStyle = '#000000';
+        ctx.font = '700 13px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(p.label, p.x, p.y + 1);
+    }
+
+    function drawLabel(text, x, y, color, bgCol) {
+        ctx.save();
+        const width = 24;
+        const height = 18;
+        ctx.beginPath();
+        ctx.roundRect(x - width/2, y - height/2, width, height, 4);
+        ctx.fillStyle = bgCol;
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = color + '40';
+        ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.font = '700 12px Inter';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, x, y);
+        ctx.restore();
+    }
+
+    init();
+</script>
+</body>
+</html>

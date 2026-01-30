@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histogram Builder - Interaktive Visualisierung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-transform {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-transform:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-reset {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .visualization-area {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .section {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section:first-child {
+            min-width: 350px;
+        }
+
+        .section:last-child {
+            min-width: 500px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        /* Individuals Area */
+        .individuals-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            min-height: 120px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            align-content: flex-start;
+        }
+
+        .individual {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .individual:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .individual.moving {
+            animation: moveToHistogram 0.6s ease-in-out forwards;
+        }
+
+        @keyframes moveToHistogram {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(0.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Grade colors */
+        .grade-1 {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+        }
+
+        .grade-2 {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+        }
+
+        .grade-3 {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+        }
+
+        .grade-4 {
+            background: linear-gradient(135deg, #e67e22, #f39c12);
+        }
+
+        .grade-5 {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+        }
+
+        .grade-6 {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+        }
+
+        /* Histogram Area */
+        .histogram-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 10px;
+            height: 400px;
+            padding: 20px 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .histogram-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-width: 100px;
+        }
+
+        .histogram-bar {
+            width: 50px;
+            background: linear-gradient(180deg, #3498db, #2980b9);
+            border-radius: 8px 8px 0 0;
+            transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            min-height: 0;
+            display: flex;
+            justify-content: center;
+            overflow: hidden;
+            max-height: 300px;
+        }
+
+        .histogram-bar.filled {
+            background: linear-gradient(180deg, #27ae60, #2ecc71);
+        }
+
+        .bar-count {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 5;
+        }
+
+        .bar-label {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+
+        .bar-sublabel {
+            font-size: 0.75rem;
+            color: #7f8c8d;
+        }
+
+        /* Stacked dots in histogram */
+        .stacked-dots {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            padding: 5px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .stacked-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin: 2px 0;
+            animation: dropIn 0.4s ease-out;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes dropIn {
+            0% {
+                transform: translateY(-50px) scale(0.5);
+                opacity: 0;
+            }
+
+            60% {
+                transform: translateY(5px) scale(1.1);
+            }
+
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .y-axis {
+            position: absolute;
+            left: 15px;
+            top: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+        }
+
+        .info-box {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+        }
+
+        .info-box p {
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 900px) {
+            .visualization-area {
+                flex-direction: column;
+            }
+
+            .section:first-child,
+            .section:last-child {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .histogram-container {
+                gap: 10px;
+                padding: 20px 20px;
+            }
+
+            .histogram-bar {
+                width: 50px;
+            }
+
+            .bar-label {
+                font-size: 1rem;
+            }
+
+            .individual {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Histogram Builder</h1>
+            <p class="subtitle">Wie entsteht ein Histogramm aus Einzelwerten?</p>
+        </header>
+
+        <div class="controls">
+            <button class="btn btn-transform" id="transformAllBtn">Alle transformieren</button>
+            <button class="btn btn-reset" id="resetBtn">Zurücksetzen</button>
+        </div>
+
+        <div class="visualization-area">
+            <!-- Individuals Section -->
+            <div class="section">
+                <h2 class="section-title">👥 Einzelne Werte (Schulnoten)</h2>
+                <div class="individuals-container" id="individualsContainer">
+                    <!-- Individuals will be generated here -->
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">Gesamtzahl</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="remainingCount">0</div>
+                        <div class="stat-label">Noch nicht einsortiert</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="meanValue">-</div>
+                        <div class="stat-label">Durchschnitt</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histogram Section -->
+            <div class="section">
+                <h2 class="section-title">📈 Histogramm (Häufigkeitsverteilung)</h2>
+                <div class="histogram-container" id="histogramContainer">
+                    <div class="y-axis">
+                        <span id="maxY">10</span>
+                        <span>0</span>
+                    </div>
+                    <!-- Histogram bars will be generated here -->
+                </div>
+                <div class="info-box">
+                    <p><strong>Erklärung:</strong> Ein Histogramm zeigt, wie häufig bestimmte Werte (hier: Schulnoten)
+                        vorkommen.
+                        Jeder Balken repräsentiert eine "Klasse" (Note) und die Höhe zeigt die Häufigkeit.
+                        Klicke auf die einzelnen Punkte, um zu sehen, wie sie in die entsprechenden Balken einsortiert
+                        werden!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 30px; color: #95a5a6; font-size: 0.85rem;">
+        Created with Minimax M2.1 using Antigravity. Manuel Hopp
+    </footer>
+
+    <script>
+        // Configuration
+        const GRADES = [1, 2, 3, 4, 5, 6];
+        const GRADE_LABELS = {
+            1: 'Sehr gut',
+            2: 'Gut',
+            3: 'Befriedigend',
+            4: 'Ausreichend',
+            5: 'Mangelhaft',
+            6: 'Ungenügend'
+        };
+
+        // Sample data - German school grades (including grades 5 and 6)
+        const SAMPLE_DATA = [
+            2, 3, 1, 4, 2, 3, 2, 1, 3, 4,
+            2, 3, 1, 2, 4, 3, 2, 1, 3, 2,
+            4, 3, 2, 3, 1, 2, 4, 3, 2, 1,
+            3, 2, 4, 3, 2, 1, 3, 2, 4, 3,
+            5, 6, 5, 4, 3, 2, 5, 6, 4, 3
+        ];
+
+        // State
+        let individuals = [];
+        let histogramData = {};
+        let maxCount = 0;
+
+        // DOM Elements
+        const individualsContainer = document.getElementById('individualsContainer');
+        const histogramContainer = document.getElementById('histogramContainer');
+        const transformAllBtn = document.getElementById('transformAllBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const totalCountEl = document.getElementById('totalCount');
+        const remainingCountEl = document.getElementById('remainingCount');
+        const meanValueEl = document.getElementById('meanValue');
+        const maxYEl = document.getElementById('maxY');
+
+        // Initialize
+        function init() {
+            // Reset state
+            individuals = [...SAMPLE_DATA];
+            histogramData = {};
+            GRADES.forEach(grade => histogramData[grade] = 0);
+            maxCount = 0;
+
+            // Render
+            renderIndividuals();
+            renderHistogram();
+            updateStats();
+            updateButtons();
+        }
+
+        // Render individuals
+        function renderIndividuals() {
+            individualsContainer.innerHTML = '';
+
+            individuals.forEach((grade, index) => {
+                const div = document.createElement('div');
+                div.className = `individual grade-${grade}`;
+                div.textContent = grade;
+                div.dataset.index = index;
+                div.dataset.grade = grade;
+                div.addEventListener('click', () => moveIndividual(index));
+                individualsContainer.appendChild(div);
+            });
+        }
+
+        // Render histogram
+        function renderHistogram() {
+            // Remove existing bars (keep y-axis)
+            const existingBars = histogramContainer.querySelectorAll('.histogram-bar-wrapper');
+            existingBars.forEach(bar => bar.remove());
+
+            // Calculate max count for scaling
+            maxCount = Math.max(...Object.values(histogramData), 1);
+            maxYEl.textContent = Math.ceil(maxCount * 1.2);
+
+            GRADES.forEach(grade => {
+                const count = histogramData[grade];
+                const wrapper = document.createElement('div');
+                wrapper.className = 'histogram-bar-wrapper';
+
+                const bar = document.createElement('div');
+                bar.className = `histogram-bar ${count > 0 ? 'filled' : ''}`;
+                bar.id = `bar-${grade}`;
+
+                // Calculate height (max height 300px)
+                const height = count > 0 ? (count / Math.ceil(maxCount * 1.2)) * 300 : 0;
+                bar.style.height = `${height}px`;
+
+                // Bar content
+                const countLabel = document.createElement('span');
+                countLabel.className = 'bar-count';
+                countLabel.textContent = count;
+                bar.appendChild(countLabel);
+
+                // Stacked dots container
+                const stackedDots = document.createElement('div');
+                stackedDots.className = 'stacked-dots';
+                stackedDots.id = `stacked-${grade}`;
+
+                // Add stacked dots
+                for (let i = 0; i < count; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = `stacked-dot grade-${grade}`;
+                    stackedDots.appendChild(dot);
+                }
+
+                bar.appendChild(stackedDots);
+
+                // Labels
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = grade;
+
+                const sublabel = document.createElement('div');
+                sublabel.className = 'bar-sublabel';
+                sublabel.textContent = GRADE_LABELS[grade];
+
+                wrapper.appendChild(bar);
+                wrapper.appendChild(label);
+                wrapper.appendChild(sublabel);
+                histogramContainer.appendChild(wrapper);
+            });
+        }
+
+        // Move individual to histogram
+        function moveIndividual(index) {
+            const grade = individuals[index];
+            if (grade === null) return;
+
+            // Get the individual element
+            const individualEl = individualsContainer.children[index];
+            if (!individualEl) return;
+
+            // Animate out
+            individualEl.classList.add('moving');
+
+            // Update data after animation
+            setTimeout(() => {
+                individuals[index] = null;
+                histogramData[grade]++;
+
+                // Re-render
+                renderIndividuals();
+                renderHistogram();
+                updateStats();
+                updateButtons();
+            }, 400);
+        }
+
+        // Transform all remaining individuals
+        function transformAll() {
+            // Get all remaining indices first (to avoid indexOf always returning first occurrence)
+            const remainingIndices = [];
+            for (let i = 0; i < individuals.length; i++) {
+                if (individuals[i] !== null) {
+                    remainingIndices.push(i);
+                }
+            }
+
+            if (remainingIndices.length === 0) return;
+
+            remainingIndices.forEach((index, idx) => {
+                setTimeout(() => {
+                    if (individuals[index] !== null) {
+                        moveIndividual(index);
+                    }
+                }, idx * 100);
+            });
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = SAMPLE_DATA.length;
+            const remaining = individuals.filter(g => g !== null).length;
+            const placed = total - remaining;
+
+            totalCountEl.textContent = total;
+            remainingCountEl.textContent = remaining;
+
+            // Calculate mean of placed values
+            if (placed > 0) {
+                let sum = 0;
+                let count = 0;
+                for (let i = 0; i < individuals.length; i++) {
+                    if (individuals[i] === null) {
+                        // Find original value from SAMPLE_DATA
+                        sum += SAMPLE_DATA[i];
+                        count++;
+                    }
+                }
+                const mean = count > 0 ? (sum / count).toFixed(2) : '-';
+                meanValueEl.textContent = mean;
+            } else {
+                meanValueEl.textContent = '-';
+            }
+        }
+
+        // Update button states
+        function updateButtons() {
+            const remaining = individuals.filter(g => g !== null).length;
+            transformAllBtn.disabled = remaining === 0;
+        }
+
+        // Event listeners
+        transformAllBtn.addEventListener('click', transformAll);
+        resetBtn.addEventListener('click', init);
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>

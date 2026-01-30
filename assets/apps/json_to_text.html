@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON to Markdown Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap');
+
+        /* --- Theme Variables --- */
+        :root {
+            /* Light Theme (Default) */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-body: #f3f4f6;
+            --bg-surface: #ffffff;
+            --bg-paper: #ffffff;
+            --text-main: #1f2937;
+            --text-heading: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --code-bg: #1e293b;
+            --code-text: #e2e8f0;
+            --highlight-bg: #f9fafb; /* for em/citations in paper */
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --bg-body: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-paper: #1e293b; /* Paper becomes dark too */
+            --text-main: #e2e8f0;
+            --text-heading: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --code-bg: #020617;
+            --code-text: #f1f5f9;
+            --highlight-bg: #334155;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- Header & Layout --- */
+        header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            text-align: center;
+            flex-grow: 1;
+            padding-left: 40px; /* offset for toggle button balance */
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Dark Mode Toggle */
+        .theme-toggle {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* --- Drop Zone --- */
+        .drop-zone {
+            background: var(--bg-surface);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--primary);
+            background-color: var(--highlight-bg); /* subtle change */
+            transform: translateY(-2px);
+        }
+
+        .drop-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .drop-text {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .drop-subtext {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* --- Control Bar --- */
+        .control-bar {
+            display: none; /* Hidden until file loaded */
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-surface);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-body);
+            padding: 4px;
+            border-radius: 6px;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-surface);
+            color: var(--primary);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-body);
+            border-color: var(--text-muted);
+        }
+
+        /* --- Output Container --- */
+        .output-container {
+            display: none; /* Hidden until file loaded */
+        }
+
+        /* Paper View (Preview) */
+        .paper-view {
+            background: var(--bg-paper);
+            color: var(--text-main);
+            padding: 4rem;
+            border-radius: 2px;
+            box-shadow: var(--shadow);
+            min-height: 500px;
+            font-family: 'Merriweather', serif;
+            line-height: 1.8;
+            border: 1px solid var(--border);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .paper-view h1 {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+            color: var(--text-heading);
+        }
+
+        .paper-view h2 {
+            font-size: 1.5rem;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-heading);
+        }
+
+        .paper-view p { margin-bottom: 1.5rem; }
+
+        .paper-view em {
+            color: var(--text-muted);
+            background: var(--highlight-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-style: italic;
+        }
+
+        .paper-view ul { padding-left: 1.5rem; }
+        .paper-view li { margin-bottom: 0.5rem; }
+        .paper-view strong { color: var(--text-heading); }
+
+        /* Raw Markdown View */
+        .raw-view {
+            display: none;
+            width: 100%;
+        }
+
+        textarea {
+            width: 100%;
+            height: 600px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--code-bg);
+            color: var(--code-text);
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        /* --- Status --- */
+        #status { margin-top: 1rem; font-weight: 500; font-size: 0.9rem; min-height: 20px; text-align: center; }
+        .success { color: #059669; }
+        [data-theme="dark"] .success { color: #34d399; }
+        .error { color: #dc2626; }
+        [data-theme="dark"] .error { color: #f87171; }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="width: 40px;"></div>
+
+    <div class="header-content">
+        <h1>JSON to Markdown Report</h1>
+        <div class="subtitle">Convert your JSON data into a beautifully formatted document</div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+        🌙
+    </button>
+</header>
+
+<div class="main-container">
+
+    <div class="drop-zone" id="dropZone">
+        <span class="drop-icon">📄</span>
+        <div class="drop-text">Drag & Drop your JSON file</div>
+        <div class="drop-subtext">or click to browse</div>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+    </div>
+
+    <div id="status"></div>
+
+    <div class="control-bar" id="controlBar">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('preview')">Preview</button>
+            <button class="tab-btn" onclick="switchTab('raw')">Raw Markdown</button>
+        </div>
+        <div class="actions">
+            <button class="btn btn-secondary" onclick="copyToClipboard()">
+                <span>📋</span> Copy
+            </button>
+            <button class="btn btn-primary" onclick="downloadMarkdown()">
+                <span>⬇️</span> Download .md
+            </button>
+        </div>
+    </div>
+
+    <div class="output-container" id="outputContainer">
+
+        <div id="previewView" class="paper-view"></div>
+
+        <div id="rawView" class="raw-view">
+            <textarea id="mdOutput" readonly></textarea>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- DOM Elements ---
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const controlBar = document.getElementById('controlBar');
+    const outputContainer = document.getElementById('outputContainer');
+    const previewView = document.getElementById('previewView');
+    const rawView = document.getElementById('rawView');
+    const mdOutput = document.getElementById('mdOutput');
+    const statusDiv = document.getElementById('status');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const themeToggle = document.getElementById('themeToggle');
+
+    // --- State ---
+    let currentMarkdown = '';
+
+    // --- Event Listeners ---
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) processFile(fileInput.files[0]);
+    });
+
+    // --- Core Logic ---
+    function processFile(file) {
+        if (!file.name.endsWith('.json')) {
+            showStatus('Please upload a valid JSON file.', 'error');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const json = JSON.parse(e.target.result);
+
+                // 1. Generate Raw Markdown
+                currentMarkdown = generateMarkdown(json);
+                mdOutput.value = currentMarkdown;
+
+                // 2. Generate HTML Preview
+                const htmlContent = generateHTML(json);
+                previewView.innerHTML = htmlContent;
+
+                // 3. Show UI
+                controlBar.style.display = 'flex';
+                outputContainer.style.display = 'block';
+                showStatus('Successfully converted!', 'success');
+            } catch (err) {
+                console.error(err);
+                showStatus('Invalid JSON format.', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // Helper to clean tags: <Paper ... paperTitle="(Name, 2020)"> -> (Name, 2020)
+    function processText(text) {
+        if (!text) return '';
+        return text.replace(/<Paper[^>]*paperTitle="([^"]*)"[^>]*>.*?<\/Paper>/g, '$1');
+    }
+
+    function collectCitations(sections) {
+        const uniqueCitations = new Map();
+        if (Array.isArray(sections)) {
+            sections.forEach(section => {
+                if (Array.isArray(section.citations)) {
+                    section.citations.forEach(cite => {
+                        const key = cite.corpusId || cite.id;
+                        if (!uniqueCitations.has(key)) uniqueCitations.set(key, cite);
+                    });
+                }
+            });
+        }
+        return uniqueCitations;
+    }
+
+    // --- Markdown Generator (Text) ---
+    function generateMarkdown(data) {
+        let md = '';
+        if (data.reportTitle) md += `# ${data.reportTitle}\n\n`;
+
+        if (Array.isArray(data.sections)) {
+            data.sections.forEach(section => {
+                if (section.title) md += `## ${section.title}\n\n`;
+                if (section.tldr) md += `_${section.tldr}_\n\n`;
+                if (section.text) md += `${processText(section.text)}\n\n`;
+            });
+        }
+
+        const citations = collectCitations(data.sections);
+        if (citations.size > 0) {
+            md += `## References\n\n`;
+            citations.forEach(c => {
+                const p = c.paper || {};
+                const authors = p.authors ? p.authors.map(a => a.name).join(', ') : 'Unknown';
+                const title = p.title || 'Untitled';
+                const year = p.year ? `(${p.year})` : '';
+                const venue = p.venue ? `${p.venue}.` : '';
+                md += `* [${c.id || 'Ref'}] **${title}** ${year}. ${authors}. ${venue}\n`;
+            });
+        }
+        return md;
+    }
+
+    // --- HTML Generator (Visual Preview) ---
+    function generateHTML(data) {
+        let html = '';
+
+        // Title
+        if (data.reportTitle) html += `<h1>${data.reportTitle}</h1>`;
+
+        // Sections
+        if (Array.isArray(data.sections)) {
+            data.sections.forEach(section => {
+                if (section.title) html += `<h2>${section.title}</h2>`;
+
+                // TLDR: Italic paragraph
+                if (section.tldr) {
+                    html += `<p><em>${section.tldr}</em></p>`;
+                }
+
+                // Main Text: Handle newlines as paragraphs
+                if (section.text) {
+                    let cleanText = processText(section.text);
+                    // Split double newlines into paragraphs
+                    const paragraphs = cleanText.split(/\n\s*\n/);
+                    paragraphs.forEach(p => {
+                        if(p.trim()) html += `<p>${p.trim()}</p>`;
+                    });
+                }
+            });
+        }
+
+        // Bibliography
+        const citations = collectCitations(data.sections);
+        if (citations.size > 0) {
+            html += `<h2>References</h2><ul>`;
+            citations.forEach(c => {
+                const p = c.paper || {};
+                const authors = p.authors ? p.authors.map(a => a.name).join(', ') : 'Unknown';
+                const title = p.title || 'Untitled';
+                const year = p.year ? `(${p.year})` : '';
+                const venue = p.venue ? `${p.venue}.` : '';
+
+                html += `<li><strong>${title}</strong> ${year}. <br><span style="color:var(--text-muted)">${authors}</span>. <span style="font-style:italic">${venue}</span></li>`;
+            });
+            html += `</ul>`;
+        }
+        return html;
+    }
+
+    // --- UI Utilities ---
+    function switchTab(mode) {
+        if (mode === 'preview') {
+            previewView.style.display = 'block';
+            rawView.style.display = 'none';
+            tabBtns[0].classList.add('active');
+            tabBtns[1].classList.remove('active');
+        } else {
+            previewView.style.display = 'none';
+            rawView.style.display = 'block';
+            tabBtns[0].classList.remove('active');
+            tabBtns[1].classList.add('active');
+        }
+    }
+
+    function showStatus(msg, type) {
+        statusDiv.textContent = msg;
+        statusDiv.className = type;
+        setTimeout(() => { statusDiv.textContent = ''; }, 3000);
+    }
+
+    function copyToClipboard() {
+        if (previewView.style.display !== 'none') {
+            // Copy Formatted Text
+            const range = document.createRange();
+            range.selectNode(previewView);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                showStatus('Formatted text copied!', 'success');
+            } catch (err) {
+                showStatus('Failed to copy text.', 'error');
+            }
+            selection.removeAllRanges();
+        } else {
+            // Copy Raw Markdown
+            mdOutput.select();
+            document.execCommand('copy');
+            showStatus('Raw Markdown copied!', 'success');
+            window.getSelection().removeAllRanges();
+        }
+    }
+
+    function downloadMarkdown() {
+        if(!currentMarkdown) return;
+        const blob = new Blob([currentMarkdown], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'report.md';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // --- Dark Mode Logic ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        if (html.getAttribute('data-theme') === 'light') {
+            html.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = '☀️';
+            themeToggle.title = 'Switch to Light Mode';
+        } else {
+            html.setAttribute('data-theme', 'light');
+            themeToggle.textContent = '🌙';
+            themeToggle.title = 'Switch to Dark Mode';
+        }
+    }
+</script>
+
+</body>
+</html>

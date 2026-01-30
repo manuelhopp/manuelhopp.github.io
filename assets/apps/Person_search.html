@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScholarCite - Multi-Source Edition</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* APA Specific Styling */
+        .apa-citation em { font-style: italic; }
+
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Icons ---
+        const Icons = {
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
+            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            ExternalLink: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
+            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+            Globe: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>,
+            Layers: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        };
+
+        // --- API Config ---
+        const PROXY_URL = "https://corsproxy.io/?";
+        const S2_BASE = "https://api.semanticscholar.org/graph/v1";
+        const OA_BASE = "https://api.openalex.org";
+
+        // --- Data Normalizers ---
+
+        const normalizeAuthor = (data, source) => {
+            if (source === 'openalex') {
+                return {
+                    id: data.id,
+                    uniqueId: `oa_${data.id}`,
+                    name: data.display_name,
+                    affiliation: data.last_known_institution?.display_name || 'Independent',
+                    citationCount: data.cited_by_count,
+                    worksCount: data.works_count,
+                    hIndex: data.summary_stats?.h_index || 'N/A',
+                    source: 'openalex',
+                    original: data
+                };
+            } else if (source === 's2') {
+                return {
+                    id: data.authorId,
+                    uniqueId: `s2_${data.authorId}`,
+                    name: data.name,
+                    affiliation: data.affiliations?.[0] || 'Independent',
+                    citationCount: data.citationCount,
+                    worksCount: data.paperCount || 'N/A',
+                    hIndex: data.hIndex || 'N/A',
+                    source: 's2',
+                    original: data
+                };
+            }
+        };
+
+        const normalizeWork = (data, source) => {
+            let work = {
+                title: '',
+                year: 0,
+                authors: [],
+                journal: '',
+                volume: '',
+                issue: '',
+                pages: '',
+                doi: '',
+                url: '',
+                source: source // Track origin
+            };
+
+            if (source === 'openalex') {
+                work.title = data.title;
+                work.year = data.publication_year;
+                work.authors = data.authorships.map(ship => ship.author.display_name);
+                work.journal = data.primary_location?.source?.display_name;
+                work.volume = data.biblio?.volume;
+                work.issue = data.biblio?.issue;
+                work.pages = (data.biblio?.first_page && data.biblio?.last_page)
+                    ? `${data.biblio.first_page}-${data.biblio.last_page}`
+                    : data.biblio?.first_page;
+                work.doi = data.doi;
+                work.url = data.doi || data.primary_location?.landing_page_url;
+            } else if (source === 's2') {
+                work.title = data.title;
+                work.year = data.year;
+                work.authors = data.authors.map(a => a.name);
+                work.journal = data.venue;
+                work.doi = data.externalIds?.DOI || data.doi;  // FIX: Extract DOI from S2 response
+                work.url = data.url || data.openAccessPdf?.url;
+            }
+            return work;
+        };
+
+        // --- Deduplication Logic ---
+        const deduplicateWorks = (allWorks) => {
+            const uniqueMap = new Map();
+
+            allWorks.forEach(work => {
+                if (!work.title) return;
+
+                // Create a "fingerprint" for the work: lowercase, alphanumeric only + year
+                // Example: "deep learning 2023" -> "deeplearning2023"
+                const titleKey = work.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+                const key = `${titleKey}_${work.year || 'nd'}`;
+
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, work);
+                } else {
+                    // Merge Strategy: Keep the record with more metadata
+                    const existing = uniqueMap.get(key);
+
+                    // Prefer DOI if existing doesn't have it
+                    if (!existing.doi && work.doi) {
+                        uniqueMap.set(key, work);
+                    }
+                    // Prefer Journal name if existing doesn't have it
+                    else if (!existing.journal && work.journal && existing.doi === work.doi) {
+                        uniqueMap.set(key, work);
+                    }
+                    // Otherwise keep existing (usually first fetched is fine)
+                }
+            });
+
+            // Return sorted by date descending
+            return Array.from(uniqueMap.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
+        };
+
+        // --- APA 7th Generation Logic ---
+        const formatAuthorsAPA = (authorNames) => {
+            if (!authorNames || authorNames.length === 0) return "Unknown Author";
+
+            const formatName = (name) => {
+                const parts = name.trim().split(/\s+/);
+                const last = parts[parts.length - 1];
+                const initials = parts.slice(0, parts.length - 1).map(p => p[0].toUpperCase() + '.').join(' ');
+                return `${last}, ${initials}`;
+            };
+
+            const formattedList = authorNames.map(formatName);
+
+            if (formattedList.length === 1) return formattedList[0];
+            if (formattedList.length === 2) return `${formattedList[0]} & ${formattedList[1]}`;
+            if (formattedList.length > 20) {
+                return `${formattedList.slice(0, 19).join(', ')}, ... ${formattedList[formattedList.length - 1]}`;
+            }
+            return `${formattedList.slice(0, -1).join(', ')}, & ${formattedList[formattedList.length - 1]}`;
+        };
+
+        const getAPA = (work) => {
+            const authors = formatAuthorsAPA(work.authors);
+            const year = `(${work.year || 'n.d.'})`;
+            const title = work.title;
+            const journal = work.journal || '';
+            const volume = work.volume || '';
+            const issue = work.issue ? `(${work.issue})` : '';
+            const pages = work.pages ? `, ${work.pages}` : '';
+            const doi = work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : '';
+            const url = (!work.doi && work.url) ? work.url : '';
+
+            let plainText = `${authors} ${year}. ${title}.`;
+            if (journal) {
+                plainText += ` ${journal}`;
+                if (volume) plainText += `, ${volume}`;
+                if (issue) plainText += `${issue}`;
+                if (pages) plainText += `${pages}`;
+                plainText += `.`;
+            }
+            if (doi) plainText += ` ${doi}`;
+            else if (url) plainText += ` ${url}`;
+
+            const jsx = (
+                <span className="apa-citation text-gray-800 leading-relaxed">
+                    <span className="font-semibold text-gray-900">{authors}</span> {year}. {title}.{' '}
+                    {journal && (
+                        <span>
+                            <em>{journal}</em>
+                            {volume && <span>, <em>{volume}</em></span>}
+                            {issue}{pages}.
+                        </span>
+                    )}
+                    {doi && <a href={doi} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all ml-1">{doi}</a>}
+                    {!doi && url && <a href={url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all ml-1">{url}</a>}
+                </span>
+            );
+
+            return { plainText, jsx };
+        };
+
+        // --- Components ---
+
+        const Header = ({ resetApp }) => (
+            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <div
+                        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity group"
+                        onClick={resetApp}
+                    >
+                        <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                            <Icons.BookOpen />
+                        </div>
+                        <div>
+                            <span className="text-xl font-bold text-gray-900 tracking-tight block leading-none">ScholarCite</span>
+                            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Multi-Source Engine</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+        );
+
+        const SearchScreen = ({ onProfilesSelect }) => {
+            const [query, setQuery] = useState('');
+            const [results, setResults] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [hasSearched, setHasSearched] = useState(false);
+            const [status, setStatus] = useState('');
+            const [selectedIds, setSelectedIds] = useState(new Set()); // Track checked items
+
+            const searchAuthors = async (e) => {
+                e.preventDefault();
+                if (!query.trim()) return;
+
+                setLoading(true);
+                setHasSearched(true);
+                setStatus('Connecting to databases...');
+                setResults([]);
+                setSelectedIds(new Set()); // Reset selections on new search
+
+                const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=5`)
+                    .then(res => res.json())
+                    .then(data => data.results.map(r => normalizeAuthor(r, 'openalex')))
+                    .catch(() => []);
+
+                const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=5`)}`)
+                    .then(res => res.json())
+                    .then(data => (data.data || []).map(r => normalizeAuthor(r, 's2')))
+                    .catch(() => []);
+
+                try {
+                    const [oaResults, s2Results] = await Promise.all([p1, p2]);
+                    const combined = [...oaResults, ...s2Results].sort((a, b) => b.citationCount - a.citationCount);
+                    setResults(combined);
+                } catch (err) {
+                    setStatus('Error fetching data.');
+                } finally {
+                    setLoading(false);
+                    setStatus('');
+                }
+            };
+
+            const toggleSelection = (uniqueId) => {
+                const newSet = new Set(selectedIds);
+                if (newSet.has(uniqueId)) {
+                    newSet.delete(uniqueId);
+                } else {
+                    newSet.add(uniqueId);
+                }
+                setSelectedIds(newSet);
+            };
+
+            const handleCombine = () => {
+                const selectedProfiles = results.filter(r => selectedIds.has(r.uniqueId));
+                onProfilesSelect(selectedProfiles);
+            };
+
+            return (
+                <div className="min-h-[calc(100vh-64px)] flex flex-col items-center py-24 px-4 fade-in pb-32">
+                    <div className="text-center max-w-2xl w-full mb-10">
+                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                            Find a Researcher
+                        </h1>
+                        <p className="text-lg text-slate-600 leading-relaxed">
+                            Search across databases. Select multiple profiles to <strong className="text-blue-600">merge and deduplicate</strong> results.
+                        </p>
+                    </div>
+
+                    <div className="w-full max-w-xl mb-12 relative z-10">
+                        <form onSubmit={searchAuthors} className="relative flex shadow-xl rounded-2xl overflow-hidden bg-white ring-1 ring-gray-900/5 transition-all focus-within:ring-2 focus-within:ring-blue-500">
+                            <div className="relative flex-grow">
+                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400">
+                                    <Icons.Search />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400 border-none outline-none text-lg bg-transparent"
+                                    placeholder="Search researcher name (e.g. 'Demis Hassabis')"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="px-8 bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
+                            >
+                                {loading ? 'Scanning...' : 'Search'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="w-full max-w-2xl space-y-4">
+                        {status && <div className="text-center text-sm text-gray-500 animate-pulse">{status}</div>}
+
+                        {hasSearched && results.length === 0 && !loading && !status && (
+                            <div className="text-center text-gray-500 py-8 bg-white rounded-xl border border-gray-100 shadow-sm">
+                                No researchers found.
+                            </div>
+                        )}
+
+                        {results.map((author) => {
+                            const isSelected = selectedIds.has(author.uniqueId);
+                            return (
+                                <div
+                                    key={author.uniqueId}
+                                    onClick={() => toggleSelection(author.uniqueId)}
+                                    className={`bg-white p-5 rounded-xl shadow-sm border transition-all flex flex-col sm:flex-row sm:items-center justify-between group gap-4 cursor-pointer select-none ${
+                                        isSelected ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/10' : 'border-gray-100 hover:border-blue-300'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-4 w-full">
+                                        {/* Checkbox */}
+                                        <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
+                                            isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'
+                                        }`}>
+                                            {isSelected && <span className="text-white"><Icons.Check /></span>}
+                                        </div>
+
+                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 ${
+                                            author.source === 'openalex' ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'
+                                        }`}>
+                                            {author.name.charAt(0)}
+                                        </div>
+                                        <div className="flex-grow">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="text-lg font-bold text-gray-900 leading-tight">{author.name}</h3>
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                                    author.source === 'openalex' ? 'bg-blue-50 text-blue-600' : 'bg-indigo-50 text-indigo-600'
+                                                }`}>
+                                                    {author.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+                                                </span>
+                                            </div>
+                                            <p className="text-gray-600 text-sm mb-1.5">
+                                                {author.affiliation}
+                                            </p>
+                                            <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
+                                                <span className="flex items-center gap-1"><Icons.FileText /> {author.citationCount.toLocaleString()} Citations</span>
+                                                {author.hIndex !== 'N/A' && <span>• h-index: {author.hIndex}</span>}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Floating Combine Bar */}
+                    {selectedIds.size > 0 && (
+                        <div className="fixed bottom-8 z-50 animate-[slideUp_0.3s_ease-out]">
+                            <button
+                                onClick={handleCombine}
+                                className="bg-slate-900 text-white pl-6 pr-8 py-3 rounded-full shadow-2xl flex items-center gap-3 hover:bg-slate-800 hover:scale-105 transition-all"
+                            >
+                                <span className="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                                    {selectedIds.size}
+                                </span>
+                                <span className="font-semibold text-lg">
+                                    {selectedIds.size > 1 ? 'Combine & View Profiles' : 'View Profile'}
+                                </span>
+                                <Icons.Layers />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const CitationCard = ({ work }) => {
+            const [copied, setCopied] = useState(false);
+            const { plainText, jsx } = getAPA(work);
+
+            const handleCopy = () => {
+                const textArea = document.createElement("textarea");
+                textArea.value = plainText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            };
+
+            return (
+                <div className="bg-white p-6 rounded-xl border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
+                    {/* Source Indicator Line */}
+                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${work.source === 'openalex' ? 'bg-blue-400' : 'bg-indigo-400'}`}></div>
+
+                    <div className="flex items-start gap-4 pl-2">
+                        <div className="flex-grow">
+                            <div className="mb-4 text-gray-800 text-[15px]">
+                                {jsx}
+                            </div>
+
+                            <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                                <div className="flex items-center gap-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                    <span className={`px-1.5 py-0.5 rounded ${work.source === 'openalex' ? 'bg-blue-50 text-blue-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                                        {work.source === 'openalex' ? 'OA' : 'S2'}
+                                    </span>
+                                    <span>{work.year}</span>
+                                    {work.journal && <span className="max-w-[150px] truncate hidden sm:inline" title={work.journal}>{work.journal}</span>}
+                                </div>
+                                <button
+                                    onClick={handleCopy}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+                                        copied
+                                        ? 'bg-emerald-50 text-emerald-600'
+                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    {copied ? <Icons.Check /> : <Icons.Copy />}
+                                    {copied ? 'Copied' : 'Copy'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ProfileScreen = ({ profiles, onBack }) => {
+            const [works, setWorks] = useState([]);
+            const [loading, setLoading] = useState(true);
+
+            // Use the primary profile (highest citations or first selected) for display info
+            const primaryProfile = useMemo(() => {
+                return profiles.sort((a,b) => b.citationCount - a.citationCount)[0];
+            }, [profiles]);
+
+            useEffect(() => {
+                const fetchAllWorks = async () => {
+                    setLoading(true);
+                    let allFetches = [];
+
+                    profiles.forEach(p => {
+                        if (p.source === 'openalex') {
+                            // CHANGED: Increased limit from 20 to 100
+                            // FIX: URL-encode the author ID to handle special characters in OpenAlex URLs
+                            const promise = fetch(`${OA_BASE}/works?filter=author.id:${encodeURIComponent(p.id)}&sort=publication_date:desc&per-page=100`)
+                                .then(res => res.json())
+                                .then(data => data.results.map(r => normalizeWork(r, 'openalex')))
+                                .catch(e => { console.error('OA fetch err', e); return []; });
+                            allFetches.push(promise);
+                        } else {
+                            // Semantic Scholar
+                            // CHANGED: Increased limit from 20 to 100
+                            // FIX: Added externalIds to fields to get DOI
+                            const url = `${S2_BASE}/author/${p.id}/papers?fields=title,year,venue,authors,url,publicationDate,externalIds,openAccessPdf&limit=100`;
+                            const promise = fetch(`${PROXY_URL}${encodeURIComponent(url)}`)
+                                .then(res => res.json())
+                                .then(data => (data.data || []).map(r => normalizeWork(r, 's2')))
+                                .catch(e => { console.error('S2 fetch err', e); return []; });
+                            allFetches.push(promise);
+                        }
+                    });
+
+                    try {
+                        const resultsArray = await Promise.all(allFetches);
+                        const flattened = resultsArray.flat();
+                        const uniqueSorted = deduplicateWorks(flattened);
+                        setWorks(uniqueSorted);
+                    } catch (error) {
+                        console.error("Failed to fetch works", error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                fetchAllWorks();
+            }, [profiles]);
+
+            return (
+                <div className="min-h-[calc(100vh-64px)] bg-slate-50 pb-20 fade-in">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200">
+                        <div className="max-w-5xl mx-auto px-4 py-8">
+                            <button
+                                onClick={onBack}
+                                className="text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 flex items-center gap-1 transition-colors"
+                            >
+                                <span className="transform rotate-180 inline-block"><Icons.ChevronRight /></span> Back to Search
+                            </button>
+
+                            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
+                                <div className="w-24 h-24 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-3xl text-white font-bold shadow-xl flex-shrink-0">
+                                    {primaryProfile.name.charAt(0)}
+                                </div>
+
+                                <div className="flex-grow text-center md:text-left">
+                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{primaryProfile.name}</h1>
+                                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                                        {profiles.map(p => (
+                                            <span key={p.uniqueId} className={`text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wider flex items-center gap-1 ${
+                                                p.source === 'openalex' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-indigo-50 text-indigo-700 border-indigo-100'
+                                            }`}>
+                                                {p.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+                                                <Icons.Check />
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <p className="text-lg text-gray-600 max-w-2xl font-medium">
+                                        {primaryProfile.affiliation}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Stats & Content */}
+                    <div className="max-w-5xl mx-auto px-4 py-10">
+                        {/* Render stats for each selected profile */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                            {profiles.map(p => (
+                                <div key={p.uniqueId} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden">
+                                    <div className={`absolute top-0 left-0 w-1 h-full ${p.source === 'openalex' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
+                                    <div className="flex justify-between items-start mb-4 pl-3">
+                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{p.source === 'openalex' ? 'OpenAlex Stats' : 'SemScholar Stats'}</div>
+                                    </div>
+                                    <div className="flex gap-6 pl-3">
+                                        <div>
+                                            <div className="text-2xl font-extrabold text-gray-900">{p.citationCount.toLocaleString()}</div>
+                                            <div className="text-xs text-gray-500">Citations</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-2xl font-extrabold text-gray-900">{p.hIndex}</div>
+                                            <div className="text-xs text-gray-500">h-index</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-8">
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                    Combined Publications
+                                    <span className="ml-3 text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{works.length} items</span>
+                                </h2>
+                                <span className="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">APA 7th</span>
+                            </div>
+
+                            <div className="space-y-4">
+                                {loading ? (
+                                    <div className="space-y-4">
+                                        {[1,2,3,4].map(i => (
+                                            <div key={i} className="bg-white h-32 rounded-xl animate-pulse border border-gray-100"></div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    works.map((work, i) => (
+                                        <CitationCard key={`${work.title}_${i}`} work={work} />
+                                    ))
+                                )}
+                                {!loading && works.length === 0 && (
+                                    <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 border-dashed">
+                                        No publications found for the selected profiles.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [selectedProfiles, setSelectedProfiles] = useState([]);
+
+            return (
+                <div className="antialiased text-gray-900 min-h-screen">
+                    <Header resetApp={() => setSelectedProfiles([])} />
+                    {selectedProfiles.length > 0 ? (
+                        <ProfileScreen
+                            profiles={selectedProfiles}
+                            onBack={() => setSelectedProfiles([])}
+                        />
+                    ) : (
+                        <SearchScreen onProfilesSelect={setSelectedProfiles} />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
