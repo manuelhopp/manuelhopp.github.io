@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p-Wert verstehen: Das Münzwurf-Experiment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card-bg: #fff;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        h1 {
+            font-weight: 600;
+            font-size: 2.2rem;
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Stepper */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+            padding: 0 10px;
+        }
+
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+            transform: scale(1.2);
+        }
+
+        .step-dot.completed {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        /* Card System */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .step-content.active {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .content-body {
+            flex-grow: 1;
+            font-size: 1.05rem;
+        }
+
+        .content-body p {
+            margin-bottom: 1rem;
+        }
+
+        .actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .action-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button.btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        button.btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button.btn-secondary {
+            background: #f1f5f9;
+            color: var(--text-muted);
+        }
+
+        button.btn-secondary:hover:not(:disabled) {
+            background: #e2e8f0;
+        }
+
+        button.btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        button.btn-accent:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Experiment Elements */
+        .coin-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .coin {
+            width: 90px;
+            height: 90px;
+            background: #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #92400e;
+            border: 4px solid #f59e0b;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .flipping {
+            animation: flip 0.3s infinite linear;
+        }
+
+        @keyframes flip {
+            from {
+                transform: rotateY(0);
+            }
+
+            to {
+                transform: rotateY(180deg);
+            }
+        }
+
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chart-container {
+            height: 260px;
+            width: 100%;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .formula {
+            background: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .interpretation-box {
+            padding: 1.25rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+
+        .significant {
+            background: #fef2f2;
+            border-color: #fee2e2;
+            color: var(--danger);
+        }
+
+        .not-significant {
+            background: #f0fdf4;
+            border-color: #dcfce7;
+            color: var(--success);
+        }
+
+        /* Meaning vs Misconception Section */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .compare-box {
+            padding: 1.25rem;
+            border-radius: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .meaning {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+        }
+
+        .misconception {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+        }
+
+        .compare-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .highlight-text {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .note {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Der p-Wert</h1>
+            <p class="subtitle">Schritt für Schritt zur statistischen Signifikanz</p>
+        </header>
+
+        <div class="stepper" id="stepper">
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+            <div class="step-dot"></div>
+        </div>
+
+        <div class="card">
+            <!-- Step 1: Intuition -->
+            <div class="step-content active" id="step1">
+                <h2>1. Die Intuition</h2>
+                <div class="content-body">
+                    <p>Wann wird aus einem Zufall ein begründeter Verdacht?</p>
+                    <p>Stell dir vor, du spielst ein Spiel. Dein Gegner wirft eine Münze und es kommt 5-mal
+                        hintereinander <strong>Kopf</strong>.</p>
+                    <p>Noch glaubst du an Zufall. Aber was, wenn es 15-mal hintereinander Kopf ist? Ab einem gewissen
+                        Punkt sagst du: <span class="highlight-text">"Das kann kein Zufall mehr sein!"</span></p>
+                    <p>Der p-Wert hilft uns dabei, diese Grenze mathematisch sauber zu ziehen.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" disabled>Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Hypothesen -->
+            <div class="step-content" id="step2">
+                <h2>2. Die Hypothesen (H₀ & H₁)</h2>
+                <div class="content-body">
+                    <p>In der Forschung stellen wir immer zwei gegensätzliche Behauptungen auf:</p>
+                    <div class="formula">
+                        <strong>H₀ (Nullhypothese):</strong> Die Münze ist fair. Es gibt keinen Effekt (p = 0.5).<br>
+                        <strong>H₁ (Alternativhypothese):</strong> Die Münze ist manipuliert. Es gibt einen Effekt (p ≠
+                        0.5).
+                    </div>
+                    <p>Wissenschaft funktioniert wie ein Gerichtsprozess: Wir nehmen erst einmal an, dass die H₀
+                        ("Unschuld") wahr ist. Wir brauchen sehr starke Beweise (Daten), um sie zu verwerfen.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Experiment 1 -->
+            <div class="step-content" id="step3">
+                <h2>3. Experiment 1: Die faire Münze</h2>
+                <div class="content-body">
+                    <p>Lass uns testen! Wir werfen eine <strong>garantiert faire</strong> Münze 20-mal.</p>
+                    <div class="coin-area">
+                        <div class="coin" id="coin1">?</div>
+                        <div class="action-group">
+                            <button class="btn-secondary" id="oneBtn1" onclick="tossOne(false)">1x werfen</button>
+                            <button class="btn-accent" id="allBtn1" onclick="tossAll(false)">Gerade 20x werfen</button>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="heads1">0</div>
+                            <div class="stat-label">Kopf</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total1">0</div>
+                            <div class="stat-label">Gesamt</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" id="btn3" disabled onclick="nextStep()">Auswerten</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Die Verteilung & vertikale Linie -->
+            <div class="step-content" id="step4">
+                <h2>4. Wo stehe ich in der Verteilung?</h2>
+                <div class="content-body">
+                    <p>Dein Ergebnis: <span class="highlight-text"><span id="resHeads1"></span>-mal Kopf</span>.</p>
+                    <p>Die rote Linie zeigt dein Ergebnis im Vergleich zu allen theoretisch möglichen Ausgängen einer
+                        fairen Münze:</p>
+                    <div class="chart-container"><canvas id="chart1"></canvas></div>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 5: p-Wert Definition -->
+            <div class="step-content" id="step5">
+                <h2>5. Berechnung des p-Werts</h2>
+                <div class="content-body">
+                    <p>Der p-Wert ist die Summe der Wahrscheinlichkeiten am Rand (markiert in rot). Er zeigt, wie oft
+                        man ein so extremes (oder noch extremeres) Ergebnis allein durch Zufall erhalten würde.</p>
+                    <div class="chart-container"><canvas id="chart2"></canvas></div>
+                    <div class="formula">
+                        <strong>Berechneter p-Wert:</strong> <span id="pVal1"
+                            style="font-weight: 700; color:var(--danger)">0.0000</span>
+                    </div>
+                    <div id="pValInterpret1" class="note" style="display:none"></div>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Statistische Entscheidung -->
+            <div class="step-content" id="step6">
+                <h2>6. Urteil 1: H₀ behalten oder verwerfen?</h2>
+                <div class="content-body">
+                    <p>Wir nutzen die 5%-Grenze (α = 0.05).</p>
+                    <div id="interp1" class="interpretation-box"></div>
+                    <p style="margin-top: 1.5rem;">War der p-Wert groß, haben wir keinen Grund an der Fairness der Münze
+                        zu zweifeln. Der Zufall erklärt dein Ergebnis gut genug.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Zweites Experiment</button>
+                </div>
+            </div>
+
+            <!-- Step 7: Experiment 2 (Biased) -->
+            <div class="step-content" id="step7">
+                <h2>7. Experiment 2: Die manipulative Münze</h2>
+                <div class="content-body">
+                    <p>Nun werfen wir eine Münze, die heimlich manipuliert wurde. Wir testen sie jedoch wie zuvor gegen
+                        die H₀ ("Sie ist fair").</p>
+                    <div class="coin-area">
+                        <div class="coin" id="coin2" style="background:#e2e8f0; border-color:#cbd5e1; color:#475569">?
+                        </div>
+                        <div class="action-group">
+                            <button class="btn-secondary" id="oneBtn2" onclick="tossOne(true)">1x werfen</button>
+                            <button class="btn-accent" id="allBtn2" onclick="tossAll(true)">Gerade 20x werfen</button>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="heads2">0</div>
+                            <div class="stat-label">Kopf</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="total2">0</div>
+                            <div class="stat-label">Gesamt</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" id="btn7" disabled onclick="nextStep()">Auswerten</button>
+                </div>
+            </div>
+
+            <!-- Step 8: Vergleich Manipuliert -->
+            <div class="step-content" id="step8">
+                <h2>8. Der "Schrei" der Daten</h2>
+                <div class="content-body">
+                    <p>Hier zeigt sich oft ein deutliches Bild. Dein Ergebnis liegt weit im Randbereich der fairen
+                        Verteilung.</p>
+                    <div class="chart-container"><canvas id="chart3"></canvas></div>
+                    <div class="formula">
+                        <strong>Berechneter p-Wert:</strong> <span id="pVal2"
+                            style="font-weight: 700; color:var(--danger)">0.0000</span>
+                    </div>
+                    <div id="pValInterpret2" class="note" style="display:none"></div>
+                </div>
+                <div class="actions">
+                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                    <button class="btn-primary" onclick="nextStep()">Zum Urteil</button>
+                </div>
+            </div>
+
+            <!-- Step 9: Was bedeutet das nun? -->
+            <div class="step-content" id="step9">
+                <h2>9. Was der p-Wert wirklich bedeutet</h2>
+                <div class="content-body">
+                    <p>Wir nutzen die 5%-Grenze (α = 0.05).</p>
+                    <div id="interp2" class="interpretation-box" style="margin-bottom: 1.5rem;"></div>
+
+                    <div class="comparison-grid">
+                        <div class="compare-box meaning">
+                            <span class="compare-title">RICHTIG:</span>
+                            Der p-Wert zeigt, wie gut die <strong>Daten</strong> zur Hypothese (H₀)
+                            passen. Ein kleiner p-Wert heißt: Die Daten sind extrem unwahrscheinlich unter der H₀.
+                        </div>
+                        <div class="compare-box misconception">
+                            <span class="compare-title">FALSCH:</span>
+                            Der p-Wert ist <strong>nicht</strong> die Wahrscheinlichkeit, dass die
+                            H₀ wahr ist oder dass die H₁ korrekt ist. Er sagt nichts direkt über Hypothesen aus.
+                        </div>
+                    </div>
+
+                    <div class="note">
+                        <strong>Wichtig:</strong> "Statistisch signifikant" (p < 0.05) bedeutet nicht
+                            automatisch "wichtig" oder "groß" . Es bedeutet nur: Wahrscheinlich kein reiner Zufall.
+                            </div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                        <button class="btn-primary" onclick="nextStep()">Fazit</button>
+                    </div>
+                </div>
+
+                <!-- Step 10: Fazit -->
+                <div class="step-content" id="step10">
+                    <h2>10. Zusammenfassung</h2>
+                    <div class="content-body">
+                        <p>Herzlichen Glückwunsch! Du hast nun verstanden:</p>
+                        <p>1. <strong>Statistik ist skeptisch</strong>: Wir fangen immer mit der H₀ an.<br>
+                            2. <strong>Daten entscheiden</strong>: Wir sammeln Fakten im Experiment.<br>
+                            3. <strong>Der p-Wert ist das Maß</strong>: Er sagt uns, ob unsere Beobachtung nur
+                            "Rauschen"
+                            (Zufall) oder ein echtes "Signal" (Effekt) ist.</p>
+                        <p style="margin-top: 1.5rem;">Damit bist du bereit für die Welt der empirischen
+                            Bildungsforschung.
+                        </p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-secondary" onclick="prevStep()">Zurück</button>
+                        <button class="btn-primary" onclick="location.reload()">Experiment neustarten</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            let currentStep = 1;
+            let heads1 = 0, total1 = 0;
+            let heads2 = 0, total2 = 0;
+            let charts = {};
+
+            // Custom Plugin for vertical line
+            const verticalLinePlugin = {
+                id: 'verticalLine',
+                afterDraw: (chart, args, opts) => {
+                    if (opts.lineValue !== undefined) {
+                        const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+                        ctx.save();
+                        ctx.strokeStyle = '#ef4444';
+                        ctx.lineWidth = 2;
+                        ctx.setLineDash([5, 5]);
+                        const xPos = x.getPixelForValue(opts.lineValue);
+                        ctx.beginPath();
+                        ctx.moveTo(xPos, top);
+                        ctx.lineTo(xPos, bottom);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            };
+            Chart.register(verticalLinePlugin);
+
+            function showStep(s) {
+                document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('step' + s).classList.add('active');
+                currentStep = s;
+                updateStepper();
+
+                if (s === 4) renderDist('chart1', heads1, false);
+                if (s === 5) renderDist('chart2', heads1, true);
+                if (s === 6) interpret(heads1, 'interp1');
+                if (s === 8) renderDist('chart3', heads2, true);
+                if (s === 9) interpret(heads2, 'interp2');
+
+                if (window.MathJax) MathJax.typeset();
+            }
+
+            function updateStepper() {
+                document.querySelectorAll('.step-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i + 1 === currentStep);
+                    dot.classList.toggle('completed', i + 1 < currentStep);
+                });
+            }
+
+            function nextStep() { if (currentStep < 10) showStep(currentStep + 1); }
+            function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+
+            function tossOne(manip) {
+                let t = manip ? total2 : total1;
+                if (t >= 20) return;
+                doToss(manip);
+            }
+
+            function tossAll(manip) {
+                let t = manip ? total2 : total1;
+                if (t >= 20) return;
+                const coin = document.getElementById(manip ? 'coin2' : 'coin1');
+                coin.classList.add('flipping');
+                const interval = setInterval(() => {
+                    if ((manip ? total2 : total1) < 20) {
+                        doToss(manip, true);
+                    } else {
+                        clearInterval(interval);
+                        coin.classList.remove('flipping');
+                    }
+                }, 50);
+            }
+
+            function doToss(manip, silent) {
+                const h = manip ? heads2 : heads1;
+                const t = manip ? total2 : total1;
+                const coin = document.getElementById(manip ? 'coin2' : 'coin1');
+
+                const isHeads = Math.random() < (manip ? 0.85 : 0.5);
+
+                if (!silent) {
+                    coin.classList.add('flipping');
+                    setTimeout(() => {
+                        coin.classList.remove('flipping');
+                        updateStore(manip, isHeads);
+                    }, 200);
+                } else {
+                    updateStore(manip, isHeads);
+                }
+            }
+
+            function updateStore(manip, isHeads) {
+                if (manip) {
+                    if (isHeads) heads2++;
+                    total2++;
+                } else {
+                    if (isHeads) heads1++;
+                    total1++;
+                }
+                const h = manip ? heads2 : heads1;
+                const t = manip ? total2 : total1;
+                document.getElementById(manip ? 'heads2' : 'heads1').innerText = h;
+                document.getElementById(manip ? 'total2' : 'total1').innerText = t;
+                document.getElementById(manip ? 'coin2' : 'coin1').innerText = isHeads ? 'KOPF' : 'ZAHL';
+
+                if (t === 20) {
+                    document.getElementById(manip ? 'oneBtn2' : 'oneBtn1').disabled = true;
+                    document.getElementById(manip ? 'allBtn2' : 'allBtn1').disabled = true;
+                    document.getElementById(manip ? 'btn7' : 'btn3').disabled = false;
+                    if (!manip) document.getElementById('resHeads1').innerText = heads1;
+                }
+            }
+
+            function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }
+            function combination(n, k) {
+                let res = 1;
+                for (let i = 1; i <= Math.min(k, n - k); i++) res = res * (n - i + 1) / i;
+                return res;
+            }
+            function binomial(k, n, p) { return combination(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k); }
+
+            function calculateP(k) {
+                let p = 0;
+                const diff = Math.abs(k - 10);
+                for (let i = 0; i <= 20; i++) {
+                    if (Math.abs(i - 10) >= diff) p += binomial(i, 20, 0.5);
+                }
+                return p;
+            }
+
+            function renderDist(id, h, highlight) {
+                const ctx = document.getElementById(id).getContext('2d');
+                const labels = Array.from({ length: 21 }, (_, i) => i);
+                const data = labels.map(k => binomial(k, 20, 0.5));
+                const diff = Math.abs(h - 10);
+
+                const colors = labels.map(i => {
+                    if (highlight && Math.abs(i - 10) >= diff) return 'rgba(239, 68, 68, 0.8)';
+                    return highlight ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.4)';
+                });
+
+                if (charts[id]) charts[id].destroy();
+                charts[id] = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ data, backgroundColor: colors, barPercentage: highlight ? 1.0 : 0.8, categoryPercentage: highlight ? 1.0 : 0.8 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: false, verticalLine: { lineValue: h } },
+                        scales: { y: { display: false, min: 0, max: 0.2 }, x: { grid: { display: false }, title: { display: true, text: 'Anzahl Kopf' } } }
+                    }
+                });
+
+                if (id === 'chart2') {
+                    const p = calculateP(h);
+                    document.getElementById('pVal1').innerText = p.toFixed(4);
+                    const interp = document.getElementById('pValInterpret1');
+                    interp.style.display = 'block';
+                    interp.innerHTML = `Das heißt also, dass bei einer fairen Münze in ca. <strong>${(p * 100).toFixed(1)}%</strong> der Fälle ein so extremes Ergebnis auftreten würde.`;
+                }
+                if (id === 'chart3') {
+                    const p = calculateP(h);
+                    document.getElementById('pVal2').innerText = p.toFixed(4);
+                    const interp = document.getElementById('pValInterpret2');
+                    interp.style.display = 'block';
+                    interp.innerHTML = `Das heißt also, dass bei einer fairen Münze in ca. <strong>${(p * 100).toFixed(1)}%</strong> der Fälle ein so extremes Ergebnis auftreten würde.`;
+                }
+            }
+
+            function interpret(h, id) {
+                const p = calculateP(h);
+                const sig = p < 0.05;
+                const box = document.getElementById(id);
+                box.className = 'interpretation-box ' + (sig ? 'significant' : 'not-significant');
+                box.innerHTML = `Ergebnis: p = ${p.toFixed(4)}${sig ? ' < 0.05' : ' ≥ 0.05'}<br>${sig ? '<strong>Signifikant!</strong> H₀ wird abgelehnt. Die Münze ist vermutlich nicht fair.' : '<strong>Nicht signifikant.</strong> H₀ bleibt bestehen. Der Zufall reicht als Erklärung.'}`;
+            }
+        </script>
+</body>
+
+</html>
