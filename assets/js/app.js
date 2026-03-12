@@ -6,15 +6,21 @@ tailwind.config = {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'sans-serif'],
+                sans: ['DM Sans', 'sans-serif'],
                 serif: ['Merriweather', 'serif'],
             },
             colors: {
                 academic: {
-                    50: '#f0f9ff',
-                    100: '#e0f2fe',
-                    500: '#0ea5e9',
-                    900: '#0f172a',
+                    50:  '#fdf6f0',
+                    100: '#f5e3d0',
+                    200: '#eac7a6',
+                    300: '#d9a07a',
+                    400: '#d4784d',
+                    500: '#c4622d',
+                    600: '#a34e20',
+                    700: '#823c17',
+                    900: '#1c1714',
+                    950: '#110d0a',
                 }
             }
         }
@@ -65,38 +71,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- D. Render Interests (Badges) ---
     if (el('interests-list')) {
-        el('interests-list').innerHTML = profileData.interests.map(interest => `
-            <span class="px-3 py-1 bg-academic-50 dark:bg-academic-900/30 text-academic-700 dark:text-academic-300 rounded-full text-xs font-medium hover-lift cursor-default">
-                ${interest}
-            </span>
-        `).join('');
+        el('interests-list').innerHTML = profileData.interests.map(interest =>
+            `<span class="keyword-tag hover-lift cursor-default">${interest}</span>`
+        ).join('');
     }
 
     // --- D2. Render Skills (Badges) ---
     if (el('skills-list')) {
-        el('skills-list').innerHTML = profileData.skills.map(skill => `
-            <span class="px-3 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium hover-lift cursor-default">
-                ${skill}
-            </span>
-        `).join('');
+        el('skills-list').innerHTML = profileData.skills.map(skill =>
+            `<span class="skill-tag cursor-default">${skill}</span>`
+        ).join('');
     }
 
     // --- E. Render Publications ---
     if (el('publications-list')) {
-        el('publications-list').innerHTML = profileData.publications.map(pub => `
-            <div class="relative">
-                <div class="absolute -left-6 top-1.5 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 bg-academic-500"></div>
-                <div class="text-sm text-academic-600 dark:text-academic-400 font-bold mb-1">${pub.year}</div>
-                <h3 class="text-lg font-semibold text-slate-900 dark:text-gray-100 leading-tight">${pub.title}</h3>
-                <p class="text-gray-600 dark:text-gray-400 italic text-sm mt-1">${pub.venue}</p>
-                <p class="text-gray-700 dark:text-gray-300 mt-2 text-sm">${pub.authors}</p>
+        el('publications-list').innerHTML = profileData.publications.map(pub =>
+            `<div class="relative">
+                <div class="absolute -left-6 top-2 h-3 w-3 rounded-full border-2 border-white dark:border-stone-900 bg-academic-500"></div>
+                <div class="keyword-tag mb-2" style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;">${pub.year}</div>
+                <h3 class="font-serif text-base font-bold text-slate-900 dark:text-gray-100 leading-snug mb-1">${pub.title}</h3>
+                <p class="text-stone-500 dark:text-stone-400 italic text-sm">${pub.venue}</p>
+                <p class="text-stone-600 dark:text-stone-300 mt-1.5 text-sm">${pub.authors}</p>
                 ${pub.link ? `
-                    <a href="${pub.link}" target="_blank" class="text-academic-500 hover:underline text-xs inline-flex items-center gap-1 mt-1">
-                        ${pub.linkText || 'View'} <i class="ph ph-arrow-right"></i>
+                    <a href="${pub.link}" target="_blank" rel="noopener" class="text-academic-500 hover:text-academic-600 text-xs inline-flex items-center gap-1 mt-2 font-medium">
+                        ${pub.linkText || 'View'} <i class="ph ph-arrow-right" aria-hidden="true"></i>
                     </a>
                 ` : ''}
-            </div>
-        `).join('');
+            </div>`
+        ).join('');
     }
 
     // --- F. Render Teaching ---
