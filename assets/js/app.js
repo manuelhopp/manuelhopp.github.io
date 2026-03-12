@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el('highlights-list')) {
         el('highlights-list').innerHTML = profileData.highlights.map(item => `
             <li class="flex items-start">
-                <i class="ph ph-check-circle text-blue-500 mt-1 mr-3 flex-shrink-0"></i>
+                <i class="ph ph-check-circle text-academic-500 mt-1 mr-3 flex-shrink-0"></i>
                 <span class="text-gray-700 dark:text-gray-300">${item}</span>
             </li>
         `).join('');
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- D. Render Interests (Badges) ---
     if (el('interests-list')) {
         el('interests-list').innerHTML = profileData.interests.map(interest => `
-            <span class="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs font-medium">
+            <span class="px-3 py-1 bg-academic-50 dark:bg-academic-900/30 text-academic-700 dark:text-academic-300 rounded-full text-xs font-medium hover-lift cursor-default">
                 ${interest}
             </span>
         `).join('');
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- D2. Render Skills (Badges) ---
     if (el('skills-list')) {
         el('skills-list').innerHTML = profileData.skills.map(skill => `
-            <span class="px-3 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium">
+            <span class="px-3 py-1 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 rounded-full text-xs font-medium hover-lift cursor-default">
                 ${skill}
             </span>
         `).join('');
@@ -85,13 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el('publications-list')) {
         el('publications-list').innerHTML = profileData.publications.map(pub => `
             <div class="relative">
-                <div class="absolute -left-6 top-1.5 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 bg-blue-500"></div>
-                <div class="text-sm text-blue-600 dark:text-blue-400 font-bold mb-1">${pub.year}</div>
+                <div class="absolute -left-6 top-1.5 h-4 w-4 rounded-full border-2 border-white dark:border-slate-900 bg-academic-500"></div>
+                <div class="text-sm text-academic-600 dark:text-academic-400 font-bold mb-1">${pub.year}</div>
                 <h3 class="text-lg font-semibold text-slate-900 dark:text-gray-100 leading-tight">${pub.title}</h3>
                 <p class="text-gray-600 dark:text-gray-400 italic text-sm mt-1">${pub.venue}</p>
                 <p class="text-gray-700 dark:text-gray-300 mt-2 text-sm">${pub.authors}</p>
                 ${pub.link ? `
-                    <a href="${pub.link}" target="_blank" class="text-blue-500 hover:underline text-xs inline-flex items-center gap-1 mt-1">
+                    <a href="${pub.link}" target="_blank" class="text-academic-500 hover:underline text-xs inline-flex items-center gap-1 mt-1">
                         ${pub.linkText || 'View'} <i class="ph ph-arrow-right"></i>
                     </a>
                 ` : ''}
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el('teaching-list')) {
         el('teaching-list').innerHTML = profileData.teaching.map(item => `
             <li class="flex gap-3">
-                <i class="ph ${item.icon} text-blue-500 text-lg mt-0.5"></i>
+                <i class="ph ${item.icon} text-academic-500 text-lg mt-0.5"></i>
                 <div>
                     <p class="text-sm font-semibold text-slate-900 dark:text-gray-200">${item.title}</p>
                     <p class="text-xs text-gray-500 dark:text-gray-400">${item.subtitle}</p>
@@ -161,81 +161,36 @@ menuBtn?.addEventListener('click', () => {
 
 
 /* =========================================
-   4. CANVAS NETWORK ANIMATION
+   4. ADVANCED EFFECTS (Scroll & Reveal)
    ========================================= */
-const canvas = document.getElementById('network-canvas');
-if (canvas) {
-    const ctx = canvas.getContext('2d');
-    let width, height, particles = [];
+document.addEventListener('DOMContentLoaded', () => {
+    // A. Scroll Progress Bar
+    const progressBar = document.getElementById('scroll-progress');
+    if (progressBar) {
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + "%";
+        });
+    }
 
-    const config = {
-        count: 60,
-        distance: 150,
-        speed: 0.5,
-        lightNode: 'rgba(148, 163, 184, 0.5)',
-        lightLine: 'rgba(203, 213, 225, 0.4)',
-        darkNode: 'rgba(71, 85, 105, 0.5)',
-        darkLine: 'rgba(51, 65, 85, 0.3)'
+    // B. Staggered Reveal Animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
     };
 
-    function resize() {
-        width = canvas.width = canvas.parentElement.offsetWidth;
-        height = canvas.height = canvas.parentElement.offsetHeight;
-    }
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.vx = (Math.random() - 0.5) * config.speed;
-            this.vy = (Math.random() - 0.5) * config.speed;
-            this.size = Math.random() * 2 + 1;
-        }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            if (this.x < 0 || this.x > width) this.vx *= -1;
-            if (this.y < 0 || this.y > height) this.vy *= -1;
-        }
-        draw(isDark) {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = isDark ? config.darkNode : config.lightNode;
-            ctx.fill();
-        }
-    }
-
-    function init() {
-        particles = [];
-        for (let i = 0; i < config.count; i++) particles.push(new Particle());
-    }
-
-    function animate() {
-        ctx.clearRect(0, 0, width, height);
-        const isDark = document.documentElement.classList.contains('dark');
-
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist < config.distance) {
-                    ctx.beginPath();
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.strokeStyle = isDark ? config.darkLine : config.lightLine;
-                    ctx.lineWidth = 1 - dist / config.distance;
-                    ctx.stroke();
-                }
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                revealObserver.unobserve(entry.target); // Reveal once
             }
-        }
-        particles.forEach(p => { p.update(); p.draw(isDark); });
-        requestAnimationFrame(animate);
-    }
+        });
+    }, observerOptions);
 
-    window.addEventListener('resize', resize);
-    resize();
-    init();
-    animate();
-}
+    document.querySelectorAll('.reveal').forEach(el => {
+        revealObserver.observe(el);
+    });
+});
