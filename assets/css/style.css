@@ -213,6 +213,35 @@ p, li {
     pointer-events: auto; /* re-enable interaction for content */
 }
 
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(90deg, var(--color-bg-hero) 35%, rgba(243, 237, 230, 0.45) 65%, transparent 100%);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    transition: background-color 0.4s ease;
+    /* Mask the blur and gradient overlay so the right side remains completely crisp and clear */
+    -webkit-mask-image: linear-gradient(90deg, black 40%, transparent 80%);
+    mask-image: linear-gradient(90deg, black 40%, transparent 80%);
+}
+
+.dark .hero-overlay {
+    background: linear-gradient(90deg, var(--color-bg-hero) 35%, rgba(30, 26, 24, 0.45) 65%, transparent 100%);
+}
+
+@media (max-width: 767px) {
+    .hero-overlay {
+        background: linear-gradient(180deg, var(--color-bg-hero) 55%, rgba(243, 237, 230, 0.6) 85%, transparent 100%);
+        -webkit-mask-image: linear-gradient(180deg, black 60%, transparent 95%);
+        mask-image: linear-gradient(180deg, black 60%, transparent 95%);
+    }
+    .dark .hero-overlay {
+        background: linear-gradient(180deg, var(--color-bg-hero) 55%, rgba(30, 26, 24, 0.6) 85%, transparent 100%);
+    }
+}
+
 /* Distinctive editorial accent bar next to name block (desktop only) */
 .hero-name-block {
     display: inline-block;
