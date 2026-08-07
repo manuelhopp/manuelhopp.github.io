@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forschungsdesign & Evaluierung | Hören wir einander wirklich zu?</title>
+  <meta name="description" content="Interaktives Dashboard für Forschungsfragen, empirische Methoden und methodisches Review auf Basis des Codebuchs 'Are We Really Listening to One Another?'.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Dark Theme Tokens (Harmonious Ocean/Slate/Teal - No Violet) */
+      --bg-main: #0b1320;
+      --bg-sidebar: #111a2e;
+      --bg-card: #152238;
+      --bg-card-hover: #1c2b47;
+      --bg-card-inner: #0e1726;
+      
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(59, 130, 246, 0.35);
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      /* Harmonious Domain Color Palette (No Violet/Purple) */
+      --domain-blue: #3b82f6;
+      --domain-blue-bg: rgba(59, 130, 246, 0.12);
+      
+      --domain-teal: #14b8a6;
+      --domain-teal-bg: rgba(20, 184, 166, 0.12);
+      
+      --domain-emerald: #10b981;
+      --domain-emerald-bg: rgba(16, 185, 129, 0.12);
+      
+      --domain-amber: #f59e0b;
+      --domain-amber-bg: rgba(245, 158, 11, 0.12);
+      
+      --domain-sky: #0284c7;
+      --domain-sky-bg: rgba(2, 132, 199, 0.12);
+
+      --domain-rose: #f43f5e;
+      --domain-rose-bg: rgba(244, 63, 94, 0.12);
+
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
+      --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.35);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      
+      --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="light"] {
+      /* Light Theme Tokens (Harmonious Slate/Navy/Ocean) */
+      --bg-main: #f8fafc;
+      --bg-sidebar: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-card-inner: #f8fafc;
+      
+      --border-color: rgba(15, 23, 42, 0.09);
+      --border-accent: rgba(37, 99, 235, 0.3);
+      
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --domain-blue: #2563eb;
+      --domain-blue-bg: rgba(37, 99, 235, 0.08);
+      
+      --domain-teal: #0d9488;
+      --domain-teal-bg: rgba(13, 148, 136, 0.08);
+      
+      --domain-emerald: #059669;
+      --domain-emerald-bg: rgba(5, 150, 105, 0.08);
+      
+      --domain-amber: #d97706;
+      --domain-amber-bg: rgba(217, 119, 6, 0.08);
+      
+      --domain-sky: #0369a1;
+      --domain-sky-bg: rgba(3, 105, 161, 0.08);
+
+      --domain-rose: #e11d48;
+      --domain-rose-bg: rgba(225, 29, 72, 0.08);
+
+      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.05);
+      --shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+    }
+
+    /* Focus States for Accessibility */
+    :focus-visible {
+      outline: 2px solid var(--domain-blue);
+      outline-offset: 3px;
+      border-radius: inherit;
+    }
+
+    /* Motion Sensitivity Support */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    .app-wrapper {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Top Header */
+    header {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .header-main {
+      flex: 1;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--domain-blue-bg);
+      border: 1px solid var(--border-accent);
+      color: var(--domain-blue);
+      padding: 0.35rem 0.85rem;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .badge-top::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--domain-blue);
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 950px;
+      font-weight: 400;
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-card);
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--domain-blue);
+    }
+
+    /* Widescreen 2-Column Dashboard Layout */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 310px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Sticky Sidebar Filter Panel */
+    .sidebar-panel {
+      position: sticky;
+      top: 1.5rem;
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .sidebar-title {
+      font-size: 0.825rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Main View Navigation Tabs */
+    .view-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .view-nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-align: left;
+    }
+
+    .view-nav-btn:hover {
+      color: var(--text-primary);
+      background: var(--domain-blue-bg);
+    }
+
+    .view-nav-btn.active {
+      color: var(--text-primary);
+      background: var(--bg-card);
+      border-color: var(--border-accent);
+      box-shadow: var(--shadow-card);
+    }
+
+    .view-nav-btn.active .nav-icon {
+      color: var(--domain-blue);
+    }
+
+    /* Domain Filter List (Vertical Chips in Sidebar) */
+    .domain-filters-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .filter-chip-item {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.55rem 0.85rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .filter-chip-item:hover {
+      border-color: var(--domain-blue);
+      color: var(--text-primary);
+    }
+
+    .filter-chip-item.active {
+      background: var(--domain-blue);
+      color: #ffffff;
+      border-color: var(--domain-blue);
+    }
+
+    .filter-chip-item.active .chip-count {
+      background: rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }
+
+    .chip-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.15rem 0.45rem;
+      border-radius: 99px;
+      color: var(--text-muted);
+    }
+
+    /* Search Box in Sidebar */
+    .sidebar-search-box {
+      position: relative;
+      width: 100%;
+    }
+
+    .sidebar-search-box input {
+      width: 100%;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.55rem 1rem 0.55rem 2.4rem;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      transition: var(--transition-fast);
+    }
+
+    .sidebar-search-box input:focus {
+      outline: none;
+      border-color: var(--domain-blue);
+    }
+
+    .sidebar-search-icon {
+      position: absolute;
+      left: 0.8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .sidebar-controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .action-btn-small {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .action-btn-small:hover {
+      border-color: var(--domain-blue);
+      color: var(--text-primary);
+    }
+
+    /* Main Content Area */
+    .main-content-area {
+      min-width: 0;
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Research Questions 2-Column Widescreen Grid */
+    .questions-grid-horizontal {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .question-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition-normal);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .question-card:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    /* Specific Harmonious Domain Color Themes (No Violet) */
+    .question-card[data-domain="Entwicklungspsychologie"] { border-top: 2px solid var(--domain-blue); }
+    .question-card[data-domain="Metakognition"] { border-top: 2px solid var(--domain-teal); }
+    .question-card[data-domain="Mindset"] { border-top: 2px solid var(--domain-emerald); }
+    .question-card[data-domain="Ergonomie"] { border-top: 2px solid var(--domain-amber); }
+    .question-card[data-domain="Soziologie"] { border-top: 2px solid var(--domain-sky); }
+
+    .card-header {
+      padding: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      user-select: none;
+    }
+
+    .card-header-main {
+      flex: 1;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .fq-badge {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+
+    .question-card[data-domain="Entwicklungspsychologie"] .fq-badge { background: var(--domain-blue); }
+    .question-card[data-domain="Metakognition"] .fq-badge { background: var(--domain-teal); }
+    .question-card[data-domain="Mindset"] .fq-badge { background: var(--domain-emerald); }
+    .question-card[data-domain="Ergonomie"] .fq-badge { background: var(--domain-amber); }
+    .question-card[data-domain="Soziologie"] .fq-badge { background: var(--domain-sky); }
+
+    .domain-tag {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .question-card[data-domain="Entwicklungspsychologie"] .domain-tag { color: var(--domain-blue); }
+    .question-card[data-domain="Metakognition"] .domain-tag { color: var(--domain-teal); }
+    .question-card[data-domain="Mindset"] .domain-tag { color: var(--domain-emerald); }
+    .question-card[data-domain="Ergonomie"] .domain-tag { color: var(--domain-amber); }
+    .question-card[data-domain="Soziologie"] .domain-tag { color: var(--domain-sky); }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-summary {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .toggle-btn {
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+      flex-shrink: 0;
+      margin-top: 0.25rem;
+      pointer-events: none;
+    }
+
+    .question-card.open .toggle-btn {
+      transform: rotate(180deg);
+      background: var(--domain-blue);
+      color: #ffffff;
+      border-color: var(--domain-blue);
+    }
+
+    /* Horizontal Multi-Column Drawer Body */
+    .card-body {
+      display: none;
+      background: var(--bg-card-inner);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .question-card.open .card-body {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .body-inner-horizontal {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .drawer-col {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .section-block {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .block-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .relevance-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 0.9rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .sub-questions-list {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .sub-questions-list li {
+      position: relative;
+      padding-left: 1.4rem;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .sub-questions-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--domain-blue);
+      font-weight: 700;
+    }
+
+    .var-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .var-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+    }
+
+    .var-badge.index-var {
+      background: var(--domain-emerald-bg);
+      border-color: var(--domain-emerald);
+      color: var(--domain-emerald);
+      font-weight: 600;
+    }
+
+    .methods-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .method-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+
+    .method-type {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.3rem;
+    }
+
+    .method-type.quant { color: var(--domain-teal); }
+    .method-type.qual { color: var(--domain-amber); }
+
+    .method-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .method-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+
+    .empty-state.active {
+      display: block;
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+
+    .empty-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-desc {
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Questionnaire Evaluation Section (Horizontal Grid Layout) */
+    .eval-tabs-nav {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .eval-tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-card);
+    }
+
+    .eval-tab-btn:hover {
+      border-color: var(--domain-blue);
+      color: var(--text-primary);
+    }
+
+    .eval-tab-btn.active {
+      background: var(--domain-blue-bg);
+      border-color: var(--domain-blue);
+      color: var(--text-primary);
+    }
+
+    .eval-panel {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .eval-panel.active {
+      display: grid;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 0.68rem;
+    }
+
+    .review-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .warning .review-icon { background: var(--domain-amber-bg); color: var(--domain-amber); }
+    .danger .review-icon { background: var(--domain-rose-bg); color: var(--domain-rose); }
+    .success .review-icon { background: var(--domain-emerald-bg); color: var(--domain-emerald); }
+    .info .review-icon { background: var(--domain-teal-bg); color: var(--domain-teal); }
+
+    .review-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .review-text {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .code-inline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: var(--text-primary);
+    }
+
+    .action-box {
+      margin-top: auto;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      font-size: 0.85rem;
+    }
+
+    .action-title {
+      font-weight: 700;
+      color: var(--domain-blue);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    footer p {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Responsive Breakdown & Touch Target Optimization */
+    @media (max-width: 1024px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar-panel {
+        position: static;
+      }
+
+      .questions-grid-horizontal {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .app-wrapper { padding: 1.25rem 0.85rem 3rem; }
+      .body-inner-horizontal { grid-template-columns: 1fr; }
+      
+      /* WCAG Touch Target Sizing on Mobile */
+      .theme-toggle-btn,
+      .action-btn-small,
+      .filter-chip-item,
+      .view-nav-btn {
+        min-height: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-wrapper">
+    
+    <!-- Top Header -->
+    <header>
+      <div class="header-main">
+        <div class="badge-top">Wissenschaftliches Forschungsdesign & Evaluierung</div>
+        <h1>„Hören wir einander wirklich zu?“</h1>
+        <p class="subtitle">Interaktives Dashboard für 5 hypothesengeleitete Forschungsfragen, empirische Analysemethoden und kritische Fragebogen-Evaluierung auf Basis des Studien-Codebuchs v2.0.</p>
+      </div>
+
+      <!-- Theme Switcher Button -->
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Farbschema wechseln">
+        <span id="themeIcon" aria-hidden="true">☀️</span>
+        <span id="themeLabel">Light Mode</span>
+      </button>
+    </header>
+
+    <!-- Widescreen 2-Column Dashboard Layout -->
+    <div class="dashboard-layout">
+      
+      <!-- Left Sidebar: Filter Panel & Navigation -->
+      <aside class="sidebar-panel">
+        
+        <div>
+          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Hauptansicht</div>
+          <nav class="view-nav" role="tablist" aria-label="Hauptnavigation">
+            <button class="view-nav-btn active" role="tab" aria-selected="true" aria-controls="questions-view" onclick="switchView('questions-view', this)">
+              <span class="nav-icon" aria-hidden="true">💡</span>
+              Forschungsfragen & Methoden
+            </button>
+            <button class="view-nav-btn" role="tab" aria-selected="false" aria-controls="eval-view" onclick="switchView('eval-view', this)">
+              <span class="nav-icon" aria-hidden="true">📊</span>
+              Fragebogen-Evaluation
+            </button>
+          </nav>
+        </div>
+
+        <div>
+          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Themen-Filter</div>
+          <div class="domain-filters-list" role="toolbar" aria-label="Themen-Filter">
+            <button class="filter-chip-item active" onclick="filterDomain('all', this)">
+              <span>Alle Themen</span>
+              <span class="chip-count">5</span>
+            </button>
+            <button class="filter-chip-item" onclick="filterDomain('Entwicklungspsychologie', this)">
+              <span>Entwicklungspsychologie</span>
+              <span class="chip-count">1</span>
+            </button>
+            <button class="filter-chip-item" onclick="filterDomain('Metakognition', this)">
+              <span>Metakognition</span>
+              <span class="chip-count">1</span>
+            </button>
+            <button class="filter-chip-item" onclick="filterDomain('Mindset', this)">
+              <span>Mindset-Psychologie</span>
+              <span class="chip-count">1</span>
+            </button>
+            <button class="filter-chip-item" onclick="filterDomain('Ergonomie', this)">
+              <span>Ergonomie & Umwelt</span>
+              <span class="chip-count">1</span>
+            </button>
+            <button class="filter-chip-item" onclick="filterDomain('Soziologie', this)">
+              <span>Soziologie & Wandel</span>
+              <span class="chip-count">1</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Suche & Steuerung</div>
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div class="sidebar-search-box">
+              <svg class="sidebar-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="searchInput" placeholder="Variablen, Methoden..." onkeyup="handleSearch()" aria-label="Forschungsfragen durchsuchen">
+            </div>
+            <div class="sidebar-controls-row">
+              <button class="action-btn-small" id="expandToggleBtn" onclick="toggleExpandAll()" style="width: 100%;">Alle aufklappen</button>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- Right Main Content Area -->
+      <main class="main-content-area">
+
+        <!-- VIEW 1: Forschungsfragen & Methoden -->
+        <div id="questions-view" class="view-panel active" role="tabpanel">
+          
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">Keine Forschungsfragen gefunden</div>
+            <div class="empty-desc">Es gibt keine Treffer für Ihre aktuelle Filter- oder Sucheinstellung.</div>
+            <button class="action-btn-small" onclick="resetFilters()">Filter & Suche zurücksetzen</button>
+          </div>
+
+          <!-- Widescreen 2-Column Cards Grid -->
+          <div class="questions-grid-horizontal" id="questionsGrid">
+
+            <!-- Card 1 -->
+            <article class="question-card" data-domain="Entwicklungspsychologie">
+              <div class="card-header" onclick="toggleCard(this)" tabindex="0" role="button" aria-expanded="false" onkeydown="handleCardKeydown(event, this)">
+                <div class="card-header-main">
+                  <div class="card-meta">
+                    <span class="fq-badge">FF 1</span>
+                    <span class="domain-tag">Entwicklungspsychologie & Bindung</span>
+                  </div>
+                  <h2 class="card-title">Transgenerationale Transmission von Zuhör- und Validierungsmustern</h2>
+                  <p class="card-summary">Inwiefern prädiziert der retrospektive Erziehungs-Validierungsscore im Erwachsenenalter das eigene Empfinden des Gehörtwerdens sowie die eigene Zuhörpräsenz?</p>
+                </div>
+                <div class="toggle-btn" aria-hidden="true">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="body-inner-horizontal">
+                  
+                  <!-- Left Column: Relevanz + Subfragen -->
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Relevanz & Forschungslücke
+                      </div>
+                      <div class="relevance-box">
+                        Schließt die Lücke zwischen kindlicher emotionaler Validierung und der späteren Fähigkeit zur Präsenz in Erwachsenengesprächen. Bisherige Bindungsforschung untersucht selten die spezifische Übertragung von Zuhörgewohnheiten auf die eigene Aufmerksamkeitsregulation.
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <ul class="sub-questions-list">
+                        <li>Welches spezifische Erziehungsmuster weist die stärkste negative Prädiktionskraft für emotionale Erschöpfung beim Zuhören auf?</li>
+                        <li>Moderiert das Geschlecht den Zusammenhang zwischen emotionaler Vermeidung im Elternhaus und der Tendenz zum Schweigen?</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- Right Column: Variablen + Methoden -->
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Verwendete Codebuch-Variablen</div>
+                      <div class="var-tags">
+                        <span class="var-badge index-var">INDEX_DEV_VALIDATION</span>
+                        <span class="var-badge index-var">INDEX_PRESENCE</span>
+                        <span class="var-badge">HEARD_OVERALL_FEEL</span>
+                        <span class="var-badge">UP_PARENTS_UNAVAILABLE</span>
+                        <span class="var-badge">UP_FEELINGS_VALID_DISAGREED</span>
+                        <span class="var-badge">UP_STAY_QUIET_KEEP_PEACE</span>
+                        <span class="var-badge">HABIT_HARD_WORK</span>
+                        <span class="var-badge">DEMO_SEX</span>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Empirische Analysemethoden</div>
+                      <div class="methods-list">
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Multivariate Regression & SEM</div>
+                          <div class="method-desc">Strukturgleichungsmodellierung des Effekts von <span class="code-inline">INDEX_DEV_VALIDATION</span> auf <span class="code-inline">INDEX_PRESENCE</span>.</div>
+                        </div>
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Moderationsanalyse (PROCESS)</div>
+                          <div class="method-desc">Prüfung von <span class="code-inline">UP_FEELINGS_NOT_DISCUSSED × DEMO_SEX</span> auf <span class="code-inline">UP_STAY_QUIET_KEEP_PEACE</span>.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 2 -->
+            <article class="question-card" data-domain="Metakognition">
+              <div class="card-header" onclick="toggleCard(this)" tabindex="0" role="button" aria-expanded="false" onkeydown="handleCardKeydown(event, this)">
+                <div class="card-header-main">
+                  <div class="card-meta">
+                    <span class="fq-badge">FF 2</span>
+                    <span class="domain-tag">Metakognition & Interpersonelle Dynamik</span>
+                  </div>
+                  <h2 class="card-title">Reziprozitäts-Divergenz und die Illusion eigenen guten Zuhörens</h2>
+                  <p class="card-summary">Besteht eine signifikante Asymmetrie zwischen dem wahrgenommenen eigenen Gehörtwerden und der Annahme, dass nahestehende Personen sich von einem selbst gehört fühlen?</p>
+                </div>
+                <div class="toggle-btn" aria-hidden="true">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="body-inner-horizontal">
+                  
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Relevanz & Forschungslücke</div>
+                      <div class="relevance-box">
+                        Deckt die metakognitive Selbstwert-Täuschung (Self-Serving Bias in der Kommunikation) auf. Bisherige Studien untersuchen meist nur eine Perspektive (Sender oder Empfänger), aber selten den intra-personellen Abgleich im selben Befragten.
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <ul class="sub-questions-list">
+                        <li>Unterscheidet sich die Reziprozitäts-Divergenz je nachdem, wer am wenigsten zuhört (Partner vs. Autoritäten)?</li>
+                        <li>Welche verhaltensnahen Indikatoren unterscheiden Personen mit hoher Reziprozitäts-Übereinstimmung von Ego-Zentrierten?</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Verwendete Codebuch-Variablen</div>
+                      <div class="var-tags">
+                        <span class="var-badge index-var">INDEX_FEEL_HEARD</span>
+                        <span class="var-badge">HEARD_OVERALL_FEEL</span>
+                        <span class="var-badge">HEARD_OTHERS_FEEL_HEARD_BY_YOU</span>
+                        <span class="var-badge">HABIT_AWARE_OTHER_LISTENING</span>
+                        <span class="var-badge">HEARD_LISTENS_LEAST</span>
+                        <span class="var-badge">QUAL_TELL_OTHER_LISTENING</span>
+                        <span class="var-badge">QUAL_WHAT_THEY_DO_DIFFERENTLY</span>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Empirische Analysemethoden</div>
+                      <div class="methods-list">
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Paarweiser t-Test / Wilcoxon</div>
+                          <div class="method-desc">Test verbundener Stichproben zur Quantifizierung der Differenz zwischen eigenen & fremden Zuhörberichten.</div>
+                        </div>
+                        <div class="method-card">
+                          <div class="method-type qual">Qualitativ</div>
+                          <div class="method-title">Thematische Kodierung (Braun & Clarke)</div>
+                          <div class="method-desc">Anwendung der Codes 201–205 (non-verbale Signale, Spiegeln) zur Identifikation von Differenzierungsmerkmalen.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 3 -->
+            <article class="question-card" data-domain="Mindset">
+              <div class="card-header" onclick="toggleCard(this)" tabindex="0" role="button" aria-expanded="false" onkeydown="handleCardKeydown(event, this)">
+                <div class="card-header-main">
+                  <div class="card-meta">
+                    <span class="fq-badge">FF 3</span>
+                    <span class="domain-tag">Persönlichkeits- & Mindset-Psychologie</span>
+                  </div>
+                  <h2 class="card-title">Übertragung der Dweck'schen Implicit Theories auf Zuhörkompetenzen</h2>
+                  <p class="card-summary">Wie beeinflusst das implizite Zuhör-Mindset (Growth vs. Fixed) die Motivation zur Weiterentwicklung von Zuhörfertigkeiten und das Empfinden von Zuhöranstrengung?</p>
+                </div>
+                <div class="toggle-btn" aria-hidden="true">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="body-inner-horizontal">
+                  
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Relevanz & Forschungslücke</div>
+                      <div class="relevance-box">
+                        Überträgt die etablierte Growth-Mindset-Theorie erstmals systematisch auf die Kommunikationspsychologie. Erforscht, ob Menschen Zuhören als veränderbare Fähigkeit oder unveränderliche Veranlagung betrachten.
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <ul class="sub-questions-list">
+                        <li>Haben Personen mit Growth Mindset eine höhere Selbst-Präsenzwahrnehmung und realistischere Verbesserungspotenziale?</li>
+                        <li>Weisen Personen mit Fixed Mindset eine stärkere Attribuierung von Zuhörproblemen auf äußere Störfaktoren auf?</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Verwendete Codebuch-Variablen</div>
+                      <div class="var-tags">
+                        <span class="var-badge index-var">INDEX_READINESS</span>
+                        <span class="var-badge">QUAL_MINDSET_LISTENING_SKILL</span>
+                        <span class="var-badge">JOURNEY_COULD_LISTEN_BETTER</span>
+                        <span class="var-badge">JOURNEY_WANT_LEARN_BETTER</span>
+                        <span class="var-badge">HABIT_HARD_WORK</span>
+                        <span class="var-badge">HABIT_PRESENCE_AWARENESS</span>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Empirische Analysemethoden</div>
+                      <div class="methods-list">
+                        <div class="method-card">
+                          <div class="method-type qual">Qualitativ → Quantitativ</div>
+                          <div class="method-title">Mindset-Klassifikation</div>
+                          <div class="method-desc">Transformierung der Freitexte aus <span class="code-inline">QUAL_MINDSET_LISTENING_SKILL</span> (Fixed = 502, Growth = 501, Hybrid = 503).</div>
+                        </div>
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Einfaktorielle ANOVA & Chi-Quadrat</div>
+                          <div class="method-desc">Gruppenvergleiche zur Erfassung von Unterschieden im Bereitschaftsindex <span class="code-inline">INDEX_READINESS</span>.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 4 -->
+            <article class="question-card" data-domain="Ergonomie">
+              <div class="card-header" onclick="toggleCard(this)" tabindex="0" role="button" aria-expanded="false" onkeydown="handleCardKeydown(event, this)">
+                <div class="card-header-main">
+                  <div class="card-meta">
+                    <span class="fq-badge">FF 4</span>
+                    <span class="domain-tag">Kontextuelle Ergonomie & Umwelt-Psychologie</span>
+                  </div>
+                  <h2 class="card-title">Kontextuelle & Zirkadiane Fluktuation von Zuhör-Kapazitäten</h2>
+                  <p class="card-summary">Welche situationalen Konfigurationen (Zusammenspiel aus Ort und mentalem Zustand) erzeugen den stärksten Abfall der aktiven Zuhörpräsenz?</p>
+                </div>
+                <div class="toggle-btn" aria-hidden="true">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="body-inner-horizontal">
+                  
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Relevanz & Forschungslücke</div>
+                      <div class="relevance-box">
+                        Analysiert Zuhören nicht als statische Persönlichkeitseigenschaft, sondern als situativ schwankenden Zustand (State). Erforscht die Wechselwirkung von körperlichem Stress, Tageszeit und räumlicher Umgebung.
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <ul class="sub-questions-list">
+                        <li>Gibt es systematische Altersunterschiede hinsichtlich präferierter Orte und Zeiten für qualitativ hochwertiges Zuhören?</li>
+                        <li>Welche konkreten Interventionen und Umgebungsfaktoren werden genannt, um kognitive Überlastung zu kompensieren?</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Verwendete Codebuch-Variablen</div>
+                      <div class="var-tags">
+                        <span class="var-badge">LOC_BEST_*</span>
+                        <span class="var-badge">LOC_WORST_*</span>
+                        <span class="var-badge">TIME_BEST_*</span>
+                        <span class="var-badge">TIME_WORST_*</span>
+                        <span class="var-badge">HABIT_PRESENCE_AWARENESS</span>
+                        <span class="var-badge">QUAL_HELPS_LISTEN_BETTER</span>
+                        <span class="var-badge">DEMO_AGE</span>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Empirische Analysemethoden</div>
+                      <div class="methods-list">
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Messwiederholungs-ANOVA / GEE</div>
+                          <div class="method-desc">Modellierung des Interaktionseffekts von Ort × Stresszustand auf <span class="code-inline">HABIT_PRESENCE_AWARENESS</span>.</div>
+                        </div>
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Clusteranalyse (k-Means)</div>
+                          <div class="method-desc">Identifizierung typischer Zuhör-Profile basierend auf den binären Ort- und Zeit-Dummys aus Sektion 3.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </article>
+
+            <!-- Card 5 -->
+            <article class="question-card" data-domain="Soziologie">
+              <div class="card-header" onclick="toggleCard(this)" tabindex="0" role="button" aria-expanded="false" onkeydown="handleCardKeydown(event, this)">
+                <div class="card-header-main">
+                  <div class="card-meta">
+                    <span class="fq-badge">FF 5</span>
+                    <span class="domain-tag">Soziologie & Politische Kommunikation</span>
+                  </div>
+                  <h2 class="card-title">Marginalisierung und der „Societal Listening Gap“</h2>
+                  <p class="card-summary">Inwiefern prädiziert das eigene Gefühl des Ungehörtwerdens und die Zuordnung zu marginalisierten Gruppen die Wahrnehmung eines negativen gesellschaftlichen Zuhör-Trends?</p>
+                </div>
+                <div class="toggle-btn" aria-hidden="true">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="body-inner-horizontal">
+                  
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Relevanz & Forschungslücke</div>
+                      <div class="relevance-box">
+                        Verknüpft individuelle Entfremdungserfahrungen mit makrosoziologischen Trend-Perzeptionen. Erforscht den Zusammenhang zwischen gefühlter Machtlosigkeit und der Zuschreibung von Zuhörproblemen auf gesellschaftliche Eliten oder Technologie.
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <ul class="sub-questions-list">
+                        <li>Welche Gruppen werden am häufigsten als laut wahrgenommen und wie korreliert dies mit den Zielgruppen für mehr Zuhören?</li>
+                        <li>Verändert sich die wahrgenommene Hauptursache für den Trend (z. B. Technologie vs. Polarisierung) in Abhängigkeit vom Alter?</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div class="drawer-col">
+                    <div class="section-block">
+                      <div class="block-title">Verwendete Codebuch-Variablen</div>
+                      <div class="var-tags">
+                        <span class="var-badge">SOC_BETTER_WORSE</span>
+                        <span class="var-badge">NOT_HEARD_*</span>
+                        <span class="var-badge">LISTEN_MORE_*</span>
+                        <span class="var-badge">QUAL_EXPLAIN_SOCIETY_TREND</span>
+                        <span class="var-badge">QUAL_WHO_HEARD_MOST</span>
+                        <span class="var-badge">DEMO_AGE</span>
+                        <span class="var-badge">DEMO_RESIDENCE</span>
+                      </div>
+                    </div>
+
+                    <div class="section-block">
+                      <div class="block-title">Empirische Analysemethoden</div>
+                      <div class="methods-list">
+                        <div class="method-card">
+                          <div class="method-type quant">Quantitativ</div>
+                          <div class="method-title">Ordinale Logistische Regression</div>
+                          <div class="method-desc">Prüfung des Beitrags von unberücksichtigten Gruppen (<span class="code-inline">NOT_HEARD_*</span>) auf die Einschätzung <span class="code-inline">SOC_BETTER_WORSE</span>.</div>
+                        </div>
+                        <div class="method-card">
+                          <div class="method-type qual">Qualitativ</div>
+                          <div class="method-title">Reflexive Thematische Analyse</div>
+                          <div class="method-desc">Qualitative Diskursanalyse der Freitexte anhand der vordefinierten Codes 401 (Technologie), 402 (Polarisierung) und 403 (Eliten).</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- VIEW 2: Fragebogen-Evaluation & Bereinigung -->
+        <div id="eval-view" class="view-panel" role="tabpanel">
+          
+          <!-- Internal Tab Bar for Review Categories -->
+          <div class="eval-tabs-nav" role="tablist" aria-label="Evaluierungs-Bereiche">
+            <button class="eval-tab-btn active" role="tab" aria-selected="true" aria-controls="scales-panel" onclick="switchEvalTab('scales-panel', this)">⚖️ Skalen & Messniveau</button>
+            <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="cleaning-panel" onclick="switchEvalTab('cleaning-panel', this)">🧹 Datenbereinigung & Ingestion</button>
+            <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="psych-panel" onclick="switchEvalTab('psych-panel', this)">🧠 Psychometrie & Biases</button>
+            <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="strengths-panel" onclick="switchEvalTab('strengths-panel', this)">✨ Methodische Stärken</button>
+          </div>
+
+          <!-- Tab 1: Skalen & Messniveau -->
+          <div id="scales-panel" class="eval-panel active">
+            
+            <div class="review-card danger">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">!</div>
+                <h3 class="review-title">Die Nominal-Falle bei SOC_BETTER_WORSE</h3>
+              </div>
+              <p class="review-text">
+                Das Item <span class="code-inline">SOC_BETTER_WORSE</span> enthält die Kategorien <span class="code-inline">1=Wird schlechter</span>, <span class="code-inline">2=Bleibt gleich</span>, <span class="code-inline">3=Wird besser</span> und <span class="code-inline">4=Es kommt darauf an</span>. Kategorie 4 stellt keine lineare Steigerung dar.
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Kategorie <span class="code-inline">4</span> muss vor ordinalen Analysen als System-Fehlwert (<span class="code-inline">NA</span>) umkodiert oder separat in multinomialen Logit-Modellen ausgewertet werden.
+              </div>
+            </div>
+
+            <div class="review-card warning">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">⚠</div>
+                <h3 class="review-title">Heterogene Likert-Skalenlängen</h3>
+              </div>
+              <p class="review-text">
+                Im Fragebogen werden 4-stufige Skalen (z. B. <span class="code-inline">HABIT_HARD_WORK</span>, 1–4) und 5-stufige Skalen (z. B. <span class="code-inline">HEARD_OVERALL_FEEL</span>, 1–5) gemischt.
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Vor korrelativen Analysen oder Faktorenanalysen müssen alle Items via z-Transformation ($\frac{x-\mu}{\sigma}$) oder Prozentwert-Transformation standardisiert werden.
+              </div>
+            </div>
+
+            <div class="review-card warning">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">🔄</div>
+                <h3 class="review-title">Inkonsistente Polungsrichtungen</h3>
+              </div>
+              <p class="review-text">
+                Bei <span class="code-inline">HEARD_OVERALL_FEEL</span> bedeutet <span class="code-inline">5</span> das Maximum. Bei <span class="code-inline">JOURNEY_COULD_LISTEN_BETTER</span> entspricht <span class="code-inline">4</span> dem höchsten Verbesserungsbedarf, während <span class="code-inline">1</span> bedeutet: „Ich höre bereits gut zu“.
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Sorgfältige Rekodierung/Umpolung vor der Erstellung zusammengesetzter Indizes durchführen.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab 2: Datenbereinigung & Ingestion -->
+          <div id="cleaning-panel" class="eval-panel">
+            
+            <div class="review-card danger">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">99</div>
+                <h3 class="review-title">Handling von Spezial- & Fehlwerten</h3>
+              </div>
+              <p class="review-text">
+                Das Codebuch definiert Werte wie <span class="code-inline">-99</span> (Übersprungen), <span class="code-inline">-98</span> (Keine Angabe), <span class="code-inline">-97</span> (Unleserlich) und <span class="code-inline">999</span> (Systemfehler).
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Diese Zahlenwerte müssen in R/Python zwingend als echte Nullwerte (<span class="code-inline">NA</span> / <span class="code-inline">NaN</span>) zugewiesen werden, um verzerrte Mittelwerte zu vermeiden.
+              </div>
+            </div>
+
+            <div class="review-card info">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">⚙️</div>
+                <h3 class="review-title">Regex-Parsing für Checkbox-Strings</h3>
+              </div>
+              <p class="review-text">
+                Google Forms exportiert Mehrfachauswahlen als durch Semikolons getrennte Textketten (z. B. <span class="code-inline">"Zu Hause; Bei Freunden"</span>).
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Aufspaltung in binäre Dummys (<span class="code-inline">LOC_BEST_HOME=1</span> etc.) mittels robuster String-Matching-Skripte durchführen.
+              </div>
+            </div>
+
+            <div class="review-card info">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">🧹</div>
+                <h3 class="review-title">Freitext-Parsing bei DEMO_AGE</h3>
+              </div>
+              <p class="review-text">
+                Freitextfelder beim Alter enthalten häufig Kombinationen wie <span class="code-inline">"25 Jahre"</span> oder Tippfehler.
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Bereinigungsschritt
+                </div>
+                Nutzung von Regex zur Extraktion rein numerischer Ganzzahlen und Plausibilitätsfilterung (<span class="code-inline">14 &le; Age &le; 100</span>).
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab 3: Psychometrie & Biases -->
+          <div id="psych-panel" class="eval-panel">
+            
+            <div class="review-card warning">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">📉</div>
+                <h3 class="review-title">Validität von INDEX_DEV_VALIDATION</h3>
+              </div>
+              <p class="review-text">
+                Der synthetische Score berechnet eine ungewichtete Summe (Positive minus Negative Items). Er setzt fälschlicherweise voraus, dass Internatsunterbringung (<span class="code-inline">UP_SENT_AWAY_BOARDING</span>) und einfaches Ausredenlassen (<span class="code-inline">UP_EXPECTED_QUIET</span>) dasselbe Gewicht besitzen.
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Methodische Empfehlung
+                </div>
+                Vorab Durchführung einer Explorativen Faktorenanalyse (EFA) zur Überprüfung der Eindimensionalität.
+              </div>
+            </div>
+
+            <div class="review-card warning">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">🎭</div>
+                <h3 class="review-title">Social Desirability & Response Bias</h3>
+              </div>
+              <p class="review-text">
+                Selbsteinschätzungen zum eigenen Zuhörverhalten unterliegen starker Selbstwert-Protektion (Selbstüberschätzung eigenen Zuhörens).
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Methodische Empfehlung
+                </div>
+                Triangulation von Selbstberichten mit verhaltensnahen Qualitativ-Texten (<span class="code-inline">QUAL_TELL_OTHER_LISTENING</span>).
+              </div>
+            </div>
+
+            <div class="review-card warning">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">⏳</div>
+                <h3 class="review-title">Recall Bias & Stichproben-Selektion</h3>
+              </div>
+              <p class="review-text">
+                Retrospektive Erziehungsangaben (<span class="code-inline">UP_*</span>) hängen vom aktuellen Gemütszustand ab. Zudem führt die Online-Umfrage zu einem *Self-Selection Bias* (überdurchschnittlich kommunikationsinteressierte Teilnehmende).
+              </p>
+              <div class="action-box">
+                <div class="action-title">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  Methodische Empfehlung
+                </div>
+                Adressierung der Selektionseffekte in den Limitations der wissenschaftlichen Publikation.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab 4: Methodische Stärken -->
+          <div id="strengths-panel" class="eval-panel">
+            
+            <div class="review-card success">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">✓</div>
+                <h3 class="review-title">Holistische Interdisziplinariatät</h3>
+              </div>
+              <p class="review-text">
+                Das Instrument verknüpft Entwicklungspsychologie, Kommunikationswissenschaft und Makrosoziologie in einer einzigen kohärenten Erhebung.
+              </p>
+            </div>
+
+            <div class="review-card success">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">✓</div>
+                <h3 class="review-title">Methodische Triangulation</h3>
+              </div>
+              <p class="review-text">
+                Erlaubt die gegenseitige Validierung quantitativer Likert-Ergebnisse durch reichhaltige narrative Freitext-Qualitätsdaten.
+              </p>
+            </div>
+
+            <div class="review-card success">
+              <div class="review-header">
+                <div class="review-icon" aria-hidden="true">✓</div>
+                <h3 class="review-title">Vordefiniertes Kodierschema</h3>
+              </div>
+              <p class="review-text">
+                Das integrierte Braun & Clarke Themenschema (Codes 101–503) sichert hohe Inter-Rater-Reliabilität bei der Auswertung.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p><strong>Studie: Are We Really Listening to One Another?</strong> | Codebuch-Version 2.0</p>
+      <p>Interaktives Dashboard zur wissenschaftlichen Forschungsplanung und methodischen Qualitätssicherung.</p>
+    </footer>
+
+  </div>
+
+  <!-- Interactive Logic -->
+  <script>
+    let currentFilterDomain = 'all';
+
+    // Theme Management Logic
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark ? 'dark' : 'light');
+      }
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      const iconEl = document.getElementById('themeIcon');
+      const labelEl = document.getElementById('themeLabel');
+      if (theme === 'light') {
+        iconEl.innerText = '🌙';
+        labelEl.innerText = 'Dark Mode';
+      } else {
+        iconEl.innerText = '☀️';
+        labelEl.innerText = 'Light Mode';
+      }
+    }
+
+    // View Switcher (Main Nav)
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.view-nav-btn').forEach(el => {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      });
+      
+      document.getElementById(viewId).classList.add('active');
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    // Evaluation Internal Tabs
+    function switchEvalTab(panelId, btn) {
+      document.querySelectorAll('.eval-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.eval-tab-btn').forEach(el => {
+        el.classList.remove('active');
+        el.setAttribute('aria-selected', 'false');
+      });
+      
+      document.getElementById(panelId).classList.add('active');
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+    }
+
+    // Toggle Expandable Card
+    function toggleCard(headerEl) {
+      const card = headerEl.closest('.question-card');
+      const isOpen = card.classList.toggle('open');
+      headerEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    // Keyboard support for Card Header
+    function handleCardKeydown(event, headerEl) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleCard(headerEl);
+      }
+    }
+
+    // Filter Chips for Research Questions
+    function filterDomain(domain, chipBtn) {
+      currentFilterDomain = domain;
+      document.querySelectorAll('.filter-chip-item').forEach(c => c.classList.remove('active'));
+      chipBtn.classList.add('active');
+
+      applyFilterAndSearch();
+    }
+
+    // Search Input Logic
+    function handleSearch() {
+      applyFilterAndSearch();
+    }
+
+    // Combined Filter + Search Execution
+    function applyFilterAndSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const cards = document.querySelectorAll('.question-card');
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const matchesDomain = (currentFilterDomain === 'all' || card.dataset.domain === currentFilterDomain);
+        const matchesSearch = !query || card.innerText.toLowerCase().includes(query);
+
+        if (matchesDomain && matchesSearch) {
+          card.style.display = 'flex';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      const emptyState = document.getElementById('emptyState');
+      if (visibleCount === 0) {
+        emptyState.classList.add('active');
+      } else {
+        emptyState.classList.remove('active');
+      }
+    }
+
+    // Reset Filters
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      const allChip = document.querySelector('.filter-chip-item');
+      filterDomain('all', allChip);
+    }
+
+    // Global Expand/Collapse All
+    function toggleExpandAll() {
+      const btn = document.getElementById('expandToggleBtn');
+      const cards = document.querySelectorAll('.question-card');
+      const isExpanding = (btn.innerText === 'Alle aufklappen');
+
+      cards.forEach(card => {
+        if (card.style.display !== 'none') {
+          const header = card.querySelector('.card-header');
+          if (isExpanding) {
+            card.classList.add('open');
+            header.setAttribute('aria-expanded', 'true');
+          } else {
+            card.classList.remove('open');
+            header.setAttribute('aria-expanded', 'false');
+          }
+        }
+      });
+
+      btn.innerText = isExpanding ? 'Alle zuklappen' : 'Alle aufklappen';
+    }
+
+    // Run theme initialization on load
+    initTheme();
+  </script>
+</body>
+</html>
