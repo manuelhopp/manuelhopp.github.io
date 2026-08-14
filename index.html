@@ -30,9 +30,11 @@
 
     <link rel="canonical" href="https://manuelhopp.github.io/">
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 
-    <script src="assets/js/tailwind-3.4.js"></script>
+    <link rel="stylesheet" href="assets/css/compiled.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <link rel="stylesheet" href="assets/css/phosphor.css">
 
@@ -58,6 +60,7 @@
 </head>
 
 <body class="text-slate-800 dark:text-gray-200 flex flex-col min-h-screen">
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <div id="scroll-progress"></div>
 
     <nav
@@ -78,32 +81,32 @@
                         class="text-sm font-bold hover:text-academic-600 dark:hover:text-academic-400 transition-colors hover-lift">Publications</a>
                     <a href="#talks"
                         class="text-sm font-bold hover:text-academic-600 dark:hover:text-academic-400 transition-colors hover-lift">Talks</a>
-                    <button id="theme-toggle"
-                        class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 hover-lift">
+                    <button id="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false"
+                        class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 hover-lift">
                         <i class="ph ph-sun text-xl hidden dark:block" aria-hidden="true"></i>
                         <i class="ph ph-moon text-xl block dark:hidden" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="md:hidden flex items-center">
-                    <button id="mobile-menu-btn"
-                        class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500">
+                    <button id="mobile-menu-btn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu"
+                        class="p-2 rounded-md hover:bg-stone-100 dark:hover:bg-stone-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500">
                         <i class="ph ph-list text-2xl" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
         </div>
         <div id="mobile-menu"
-            class="hidden md:hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800">
+            class="hidden md:hidden bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <a href="#about"
-                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-800">About</a>
+                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-stone-50 dark:hover:bg-stone-800">About</a>
                 <a href="#research"
-                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-800">Research</a>
+                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-stone-50 dark:hover:bg-stone-800">Research</a>
                 <a href="#publications"
-                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-800">Publications</a>
-                <button id="mobile-theme-toggle"
-                    class="w-full text-left px-3 py-2 rounded-md text-base font-bold hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center gap-2">
-                    <span>Toggle Theme</span>
+                    class="block px-3 py-2 rounded-md text-base font-bold hover:bg-stone-50 dark:hover:bg-stone-800">Publications</a>
+                <button id="mobile-theme-toggle" aria-pressed="false"
+                    class="w-full text-left px-3 py-2 rounded-md text-base font-bold hover:bg-stone-50 dark:hover:bg-stone-800 flex items-center gap-2">
+                    <span id="mobile-theme-label">Toggle Theme</span>
                     <i class="ph ph-moon dark:hidden" aria-hidden="true"></i>
                     <i class="ph ph-sun hidden dark:block" aria-hidden="true"></i>
                 </button>
@@ -120,7 +123,7 @@
                     <div
                         class="w-40 h-40 md:w-44 md:h-44 rounded-full overflow-hidden border-2 border-stone-200 dark:border-stone-700 shadow-md">
                         <img id="profile-img" src="" alt="Portrait of Dr. Manuel D. S. Hopp"
-                            class="w-full h-full object-cover" width="176" height="176" loading="lazy">
+                            class="w-full h-full object-cover" width="176" height="176" fetchpriority="high">
                     </div>
                 </div>
                 <div class="text-center md:text-left flex-1">
@@ -132,40 +135,58 @@
                     </div>
                     <p id="profile-inst" class="text-stone-600 dark:text-stone-300 text-sm mb-6 leading-relaxed"></p>
 
-                    <div class="flex justify-center md:justify-start items-center gap-5">
-                        <div class="flex items-center gap-1.5">
+                    <div class="flex justify-center md:justify-start items-start gap-2">
+                        <div class="flex items-start gap-1.5" role="group" aria-label="Contact options">
                             <a href="#"
-                                class="email-link text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift"
+                                class="email-link flex flex-col items-center gap-1 p-1.5 text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 rounded"
                                 title="Email" aria-label="Send an email">
                                 <i class="ph ph-envelope text-2xl" aria-hidden="true"></i>
+                                <span class="hero-icon-label" aria-hidden="true">Email</span>
                             </a>
-                            <button class="email-copy-btn text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift copy-btn" title="Copy Email" aria-label="Copy email address">
+                            <button class="email-copy-btn flex flex-col items-center gap-1 p-1.5 text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift copy-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 rounded" title="Copy Email" aria-label="Copy email address">
                                 <i class="ph ph-copy text-lg" aria-hidden="true"></i>
-                                <span class="copy-tooltip">Copy Email</span>
+                                <span class="hero-icon-label" aria-hidden="true">Copy</span>
+                                <span class="copy-tooltip" role="status" aria-live="polite">Copy Email</span>
                             </button>
                         </div>
-                        <a href="https://scholar.google.com/citations?user=JC6qJIUlGJMC" target="_blank" rel="noopener"
-                            class="text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift"
+                        <a href="https://scholar.google.com/citations?user=JC6qJIUlGJMC" target="_blank" rel="noopener noreferrer"
+                            class="flex flex-col items-center gap-1 p-1.5 text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 rounded"
                             title="Google Scholar" aria-label="Google Scholar Profile">
                             <i class="ph ph-graduation-cap text-2xl" aria-hidden="true"></i>
+                            <span class="hero-icon-label" aria-hidden="true">Scholar</span>
                         </a>
-                        <a href="https://www.researchgate.net/profile/Manuel-Hopp" target="_blank" rel="noopener"
-                            class="text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift"
+                        <a href="https://www.researchgate.net/profile/Manuel-Hopp" target="_blank" rel="noopener noreferrer"
+                            class="flex flex-col items-center gap-1 p-1.5 text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 rounded"
                             title="ResearchGate" aria-label="ResearchGate Profile">
                             <i class="ph ph-flask text-2xl" aria-hidden="true"></i>
+                            <span class="hero-icon-label" aria-hidden="true">ResearchGate</span>
                         </a>
-                        <a href="https://www.linkedin.com/in/dr-manuel-d-s-hopp-20855b209/" target="_blank" rel="noopener"
-                            class="text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift"
+                        <a href="https://www.linkedin.com/in/dr-manuel-d-s-hopp-20855b209/" target="_blank" rel="noopener noreferrer"
+                            class="flex flex-col items-center gap-1 p-1.5 text-stone-400 hover:text-academic-500 dark:hover:text-academic-400 transition-colors hover-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 rounded"
                             title="LinkedIn" aria-label="LinkedIn Profile">
                             <i class="ph ph-linkedin-logo text-2xl" aria-hidden="true"></i>
+                            <span class="hero-icon-label" aria-hidden="true">LinkedIn</span>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
+        <p class="canvas-caption hidden md:block">Move your cursor left or right — ε, the connection threshold, grows as it goes; edges and triangles appear, and the glowing rings are H₁ holes.</p>
     </header>
 
-    <main class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <noscript>
+        <div class="noscript-fallback">
+            <div class="noscript-inner">
+                <p class="noscript-role">Postdoctoral Researcher</p>
+                <h1 class="noscript-name">Dr. Manuel D. S. Hopp</h1>
+                <p class="noscript-inst">Hector Research Institute of Education Sciences and Psychology<br>University of Tübingen</p>
+                <a class="noscript-mail" href="mailto:manuel.hopp&#64;uni-tuebingen.de">manuel.hopp&#64;uni-tuebingen.de</a>
+                <p class="noscript-note">This profile is rendered with JavaScript. Enable JavaScript for the full experience.</p>
+            </div>
+        </div>
+    </noscript>
+
+    <main id="main-content" tabindex="-1" class="flex-grow max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
             <div class="lg:col-span-8 space-y-12">
@@ -180,7 +201,7 @@
                 <section id="research" class="scroll-mt-24 reveal">
                     <h2 class="font-serif font-bold text-slate-900 dark:text-white section-heading">Research Highlights</h2>
                     <div
-                        class="pt-4 border-t border-gray-100 dark:border-gray-800 mt-2">
+                        class="pt-4 border-t border-stone-200 dark:border-stone-800 mt-2">
                         <ul id="highlights-list" class="space-y-3"></ul>
                     </div>
                 </section>
@@ -191,7 +212,7 @@
                         <div class="timeline-line"></div>
                         <div id="publications-list" class="space-y-8"></div>
                         <div class="mt-6 text-left">
-                            <a href="https://scholar.google.com/citations?user=JC6qJIUlGJMC" target="_blank"
+                            <a href="https://scholar.google.com/citations?user=JC6qJIUlGJMC" target="_blank" rel="noopener noreferrer"
                                 class="inline-flex items-center gap-2 text-academic-600 dark:text-academic-400 hover:text-academic-800 dark:hover:text-academic-300 font-medium transition-colors" aria-label="Google Scholar Profile">
                                 <i class="ph ph-graduation-cap text-xl" aria-hidden="true"></i>
                                 <span>Complete list of publications</span>
@@ -228,12 +249,12 @@
                     <p class="text-stone-400 text-sm mb-4">Interested in collaboration?</p>
                     <div class="flex gap-2">
                         <a href="#"
-                            class="email-link show-email-text flex-1 text-center bg-academic-500 hover:bg-academic-600 text-white font-semibold py-2 px-4 text-sm transition-colors" aria-label="Send an email">
+                            class="email-link show-email-text flex-1 text-center bg-academic-500 hover:bg-academic-600 text-white font-semibold py-2 px-4 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500 focus-visible:ring-offset-2" aria-label="Send an email">
                             Contact Me
                         </a>
-                        <button class="email-copy-btn bg-stone-800 hover:bg-stone-700 text-white w-9 h-9 rounded transition-colors hover-lift copy-btn flex items-center justify-center" title="Copy Email" aria-label="Copy email address">
+                        <button class="email-copy-btn bg-stone-800 hover:bg-stone-700 text-white w-9 h-9 rounded transition-colors hover-lift copy-btn flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-academic-500" title="Copy Email" aria-label="Copy email address">
                             <i class="ph ph-copy text-lg" aria-hidden="true"></i>
-                            <span class="copy-tooltip">Copy Email</span>
+                            <span class="copy-tooltip" role="status" aria-live="polite">Copy Email</span>
                         </button>
                     </div>
                 </div>
@@ -241,7 +262,7 @@
         </div>
     </main>
 
-    <footer class="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-800 mt-12">
+    <footer class="bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 mt-12">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-500 dark:text-gray-400">

@@ -6,18 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impressum | Dr. Manuel D. S. Hopp</title>
     <meta name="robots" content="noindex, follow">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
 
-    <script src="assets/js/tailwind-3.4.js"></script>
+    <script>
+        // Match the homepage theme preference so the dark classes on this page actually apply.
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
+    <link rel="stylesheet" href="assets/css/compiled.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <link rel="stylesheet" href="assets/css/phosphor.css">
 </head>
 
-<body class="bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-gray-200 flex flex-col min-h-screen">
+<body class="bg-[#faf7f4] text-slate-800 dark:bg-[#181514] dark:text-stone-200 flex flex-col min-h-screen">
 
-    <nav class="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 py-4">
+    <nav class="bg-white dark:bg-[#181514] border-b border-[#e6ddd5] dark:border-[#342e2a] py-4">
         <div class="max-w-4xl mx-auto px-4">
-            <a href="index.html" class="flex items-center text-academic-500 hover:text-academic-600 font-medium transition-colors gap-2 hover-lift">
+            <a href="index.html" class="legal-link flex items-center font-medium transition-colors gap-2 hover-lift">
                 <i class="ph ph-arrow-left"></i> Zurück zur Startseite
             </a>
         </div>
@@ -36,19 +45,10 @@
 
             <h2 class="text-xl font-bold mt-6 mb-2">Kontakt</h2>
             <p>
-                E-Mail: <span class="email-protect" data-user="bWFudWVsLmhvcHA="
-                    data-domain="dW5pLXR1ZWJpbmdlbi5kZQ=="></span><br>
+                E-Mail: <a href="mailto:manuel.hopp&#64;uni-tuebingen.de"
+                    class="legal-link">manuel.hopp&#64;uni-tuebingen.de</a><br>
                 Telefon: Auf Anfrage
             </p>
-
-            <script>
-                document.querySelectorAll('.email-protect').forEach(el => {
-                    const user = atob(el.dataset.user);
-                    const domain = atob(el.dataset.domain);
-                    const email = user + '@' + domain;
-                    el.innerHTML = `<a href="mailto:${email}" class="text-blue-600 dark:text-blue-400 hover:underline">${email}</a>`;
-                });
-            </script>
 
             <h2 class="text-xl font-bold mt-6 mb-2">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
             <p>
@@ -57,7 +57,7 @@
                 72072 Tübingen
             </p>
 
-            <hr class="my-8 border-gray-200 dark:border-gray-700">
+            <hr class="my-8 border-[#e6ddd5] dark:border-[#342e2a]">
 
             <h3 class="text-lg font-bold mb-2">Haftungsausschluss (Disclaimer)</h3>
 
@@ -99,8 +99,8 @@
     </main>
 
     <footer
-        class="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-800 py-6 text-center text-sm text-gray-500">
-        &copy; 2025 Dr. Manuel D. S. Hopp
+        class="bg-white dark:bg-[#181514] border-t border-[#e6ddd5] dark:border-[#342e2a] py-6 text-center text-sm text-gray-500">
+        &copy; 2026 Dr. Manuel D. S. Hopp
     </footer>
 </body>
 
