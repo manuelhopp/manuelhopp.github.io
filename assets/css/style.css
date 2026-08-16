@@ -378,6 +378,15 @@ p, li {
     background-color: var(--color-border);
 }
 
+#publications-list strong {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.dark #publications-list strong {
+    color: #f1f5f9;
+}
+
 /* =========================================
  *  SIDEBAR & CARDS (GLASSMORPHISM)
  *  Consistent inner spacing

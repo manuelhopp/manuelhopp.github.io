@@ -64,10 +64,34 @@ const profileData = {
     // 5. Selected Publications
     publications: [
         {
+            year: "2026",
+            title: "Predicting Scientific and Artistic Creative Achievements in Adolescence: A Comprehensive Approach Integrating Personality, Motivation, and Cognitive Ability",
+            venue: "European Journal of Personality",
+            authors: "Jaggy, A.-K., <strong>Hopp, M. D. S.</strong>, Trautwein, U., & Roberts, B. W.",
+            link: "https://doi.org/10.1177/08902070261458201",
+            linkText: "Read Paper"
+        },
+        {
+            year: "2026",
+            title: "Evaluating Large Language Model Feedback to Support Teacher Professional Vision: Prompting Strategies and Pre-service Teacher Engagement",
+            venue: "Proceedings of the 16th International Learning Analytics and Knowledge Conference (LAK '26), 786–792",
+            authors: "Ren, S., Nguyen, H., Stürmer, K., <strong>Hopp, M. D. S.</strong>, Göllner, R., & Fütterer, T.",
+            link: "https://doi.org/10.1145/3785022.3785055",
+            linkText: "Read Paper"
+        },
+        {
+            year: "2026",
+            title: "Curiosity in the Wild: Regularities in Naturalistic Information Seeking",
+            venue: "PsyArXiv (Preprint)",
+            authors: "Singh, A., <strong>Hopp, M. D. S.</strong>, Ten, A., Spitzer, M., Schumacher, A., Kasneci, E., & Bardach, L.",
+            link: "https://doi.org/10.31234/osf.io/xz4fc_v1",
+            linkText: "Read Preprint"
+        },
+        {
             year: "2025",
             title: "Persistent Homology of Topic Networks for the Prediction of Reader Curiosity",
             venue: "Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics (ACL)",
-            authors: "Hopp, M. D. S., Labatut, V., Amalvy, A., Dufour, R., Stone, H., Jach, H., & Murayama, K.",
+            authors: "<strong>Hopp, M. D. S.</strong>, Labatut, V., Amalvy, A., Dufour, R., Stone, H., Jach, H., & Murayama, K.",
             link: "https://doi.org/10.18653/v1/2025.acl-long.1364",
             linkText: "Read Paper"
         },
@@ -75,7 +99,7 @@ const profileData = {
             year: "2025",
             title: "Capturing the complex: An intraindividual temporal network analysis of learning resource regulation",
             venue: "Education Sciences, 15(6), 728",
-            authors: "Harder, B., Naujoks-Schober, N., & Hopp, M. D. S.",
+            authors: "Harder, B., Naujoks-Schober, N., & <strong>Hopp, M. D. S.</strong>",
             link: "https://doi.org/10.3390/educsci15060728",
             linkText: "Read Paper"
         },
@@ -83,7 +107,7 @@ const profileData = {
             year: "2023",
             title: "Connected – A multiscale study of social network functions",
             venue: "Doctoral Dissertation, Friedrich-Alexander-Universität Erlangen-Nürnberg",
-            authors: "Hopp, M. D. S.",
+            authors: "<strong>Hopp, M. D. S.</strong>",
             link: "https://open.fau.de/handle/openfau/23604",
             linkText: "Read Dissertation"
         },
@@ -91,7 +115,7 @@ const profileData = {
             year: "2022",
             title: "The structure of social networks and its link to higher education students’ socio-emotional loneliness during COVID-19",
             venue: "Frontiers in Psychology, 12, 733867",
-            authors: "Hopp, M. D. S., Händel, M., Bedenlier, S., et al.",
+            authors: "<strong>Hopp, M. D. S.</strong>, Händel, M., Bedenlier, S., et al.",
             link: "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2021.733867/full",
             linkText: "Read Paper"
         }

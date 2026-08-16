@@ -148,20 +148,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- E. Render Publications ---
     if (el('publications-list')) {
-        el('publications-list').innerHTML = profileData.publications.map(pub =>
-            `<div class="relative">
+        el('publications-list').innerHTML = profileData.publications.map(pub => {
+            let authorsFormatted = pub.authors || '';
+            // Ensure author name Hopp, M. D. S. is always bolded
+            if (!authorsFormatted.includes('<strong>') && !authorsFormatted.includes('<b>')) {
+                authorsFormatted = authorsFormatted.replace(/Hopp,\s*M\.\s*D\.\s*S\./g, '<strong>Hopp, M. D. S.</strong>');
+            }
+            return `<div class="relative">
                 <div class="absolute -left-6 top-2 h-3 w-3 rounded-full border-2 border-white dark:border-stone-900 bg-academic-500"></div>
                 <div class="keyword-tag mb-2" style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;">${pub.year}</div>
                 <h3 class="font-serif text-base font-bold text-slate-900 dark:text-gray-100 leading-snug mb-1">${pub.title}</h3>
                 <p class="text-stone-500 dark:text-stone-400 italic text-sm">${pub.venue}</p>
-                <p class="text-stone-600 dark:text-stone-300 mt-1.5 text-sm">${pub.authors}</p>
+                <p class="text-stone-600 dark:text-stone-300 mt-1.5 text-sm">${authorsFormatted}</p>
                 ${pub.link ? `
                     <a href="${pub.link}" target="_blank" rel="noopener" class="text-academic-500 hover:text-academic-600 text-xs inline-flex items-center gap-1 mt-2 font-medium">
                         ${pub.linkText || 'View'} <i class="ph ph-arrow-right" aria-hidden="true"></i>
                     </a>
                 ` : ''}
-            </div>`
-        ).join('');
+            </div>`;
+        }).join('');
     }
 
     // --- F. Render Teaching ---
