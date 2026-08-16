@@ -1,11 +1,51 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histogram Builder - Körpergröße (Kontinuierlich)</title>
+    <title>Histogram Builder (Kontinuierlich) | Dr. Manuel D. S. Hopp</title>
+    <meta name="description" content="Interaktive Visualisierung: Wie entsteht ein Histogramm aus kontinuierlichen Messdaten (Körpergröße) mit variablen Intervallbreiten?">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --color-accent: #c4622d;
+            --color-accent-light: #d4784d;
+            --color-accent-deep: #a34e20;
+            --color-bg: #faf7f4;
+            --color-bg-hero: #f3ede6;
+            --color-surface: #ffffff;
+            --color-surface-glass: rgba(255, 255, 255, 0.85);
+            --color-border: #e6ddd5;
+            --color-border-glass: rgba(230, 221, 213, 0.6);
+            --color-text-main: #1e293b;
+            --color-text-heading: #0f172a;
+            --color-text-muted: #64748b;
+            --color-ink-strong: #7a3a15;
+            --shadow-glass: 0 8px 32px 0 rgba(28, 24, 22, 0.04);
+            --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        .dark, [data-theme="dark"] {
+            --color-bg: #181514;
+            --color-bg-hero: #1e1a18;
+            --color-surface: #24201e;
+            --color-surface-glass: rgba(36, 32, 30, 0.85);
+            --color-border: #342e2a;
+            --color-border-glass: rgba(52, 46, 42, 0.6);
+            --color-text-main: #e2e8f0;
+            --color-text-heading: #ffffff;
+            --color-text-muted: #a8a29e;
+            --color-ink-strong: #e0956a;
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,265 +53,403 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
             min-height: 100vh;
-            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Header */
+        header.app-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border-glass);
+            padding: 0 1.5rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--color-accent);
+            color: #ffffff;
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-title {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--color-text-heading);
+            letter-spacing: -0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--color-text-main);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 0px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-header:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        /* Container */
         .container {
-            width: 100%;
-            max-width: 100%;
+            max-width: 1240px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 2rem 1.5rem 4rem;
+            width: 100%;
+            flex-grow: 1;
         }
 
-        header {
+        .page-intro {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 2rem;
+        }
+
+        .tag-badge {
+            display: inline-block;
+            border-left: 2px solid var(--color-accent);
+            background: rgba(196, 98, 45, 0.08);
+            color: var(--color-ink-strong);
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.75rem;
+        }
+
+        .dark .tag-badge {
+            background: rgba(196, 98, 45, 0.16);
         }
 
         h1 {
-            color: #2c3e50;
-            font-size: 2.2rem;
-            margin-bottom: 10px;
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+            font-weight: 700;
+            color: var(--color-text-heading);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
         }
 
         .subtitle {
-            color: #7f8c8d;
-            font-size: 1.1rem;
+            color: var(--color-text-muted);
+            font-size: 1rem;
+            max-width: 65ch;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
+        /* Controls */
         .controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
         }
 
-        .btn {
-            padding: 12px 28px;
-            font-size: 1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-transform {
-            background: #3498db;
-            color: white;
-        }
-
-        .btn-transform:hover {
-            background: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.4);
-        }
-
-        .btn-reset {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-reset:hover {
-            background: #c0392b;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.4);
-        }
-
-        .btn-interval {
-            background: #95a5a6;
-            color: white;
-            padding: 12px 20px;
-        }
-
-        .btn-interval:hover {
-            background: #7f8c8d;
-            transform: translateY(-2px);
-        }
-
-        .btn-interval.active {
-            background: #9b59b6;
-            box-shadow: 0 6px 12px rgba(155, 89, 182, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .interval-group {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            padding: 2px;
         }
 
         .interval-label {
-            display: flex;
-            align-items: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0 10px;
+        }
+
+        .btn-interval {
+            background: transparent;
+            border: none;
+            padding: 7px 14px;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: #2c3e50;
-            margin-right: 10px;
+            color: var(--color-text-main);
+            cursor: pointer;
+            border-radius: 0px;
+            transition: all 0.2s ease;
+            font-family: 'JetBrains Mono', monospace;
         }
 
+        .btn-interval:hover {
+            background: var(--color-bg-hero);
+            color: var(--color-accent);
+        }
+
+        .btn-interval.active {
+            background: var(--color-accent);
+            color: #ffffff;
+        }
+
+        .btn {
+            padding: 9px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            border: 1px solid transparent;
+            border-radius: 0px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(28, 24, 22, 0.04);
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-accent-deep);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lifted);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text-main);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Grid */
         .visualization-area {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 1.5rem;
+            align-items: stretch;
+        }
+
+        @media (max-width: 960px) {
+            .visualization-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--color-border-glass);
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-glass);
             display: flex;
-            flex-direction: row;
-            gap: 30px;
-            align-items: flex-start;
-        }
-
-        .section {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .section:first-child {
-            flex: 0 0 33.333%;
-            min-width: 300px;
-        }
-
-        .section:last-child {
-            flex: 0 0 66.667%;
-            min-width: 500px;
+            flex-direction: column;
         }
 
         .section-title {
-            font-size: 1.3rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ecf0f1;
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-text-heading);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         /* Individuals Area */
         .individuals-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-            min-height: 120px;
+            gap: 8px;
+            min-height: 220px;
             padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            background: var(--color-bg-hero);
+            border-radius: 8px;
             align-content: flex-start;
+            border: 1px dashed var(--color-border);
+            flex-grow: 1;
+            max-height: 380px;
+            overflow-y: auto;
         }
 
         .individual {
-            width: 55px;
-            height: 55px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-            color: white;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #ffffff;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            position: relative;
-            z-index: 10;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            user-select: none;
         }
 
         .individual:hover {
             transform: scale(1.15);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
         }
 
         .individual.moving {
-            animation: moveToHistogram 0.6s ease-in-out forwards;
+            animation: moveToHistogram 0.4s ease-in-out forwards;
         }
 
         @keyframes moveToHistogram {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(0.5);
-                opacity: 0.5;
-            }
-
-            100% {
-                transform: scale(0);
-                opacity: 0;
-            }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.5); opacity: 0.5; }
+            100% { transform: scale(0); opacity: 0; }
         }
 
         /* Histogram Area */
         .histogram-container {
             display: flex;
             align-items: flex-end;
-            justify-content: center;
-            gap: 5px;
-            height: 400px;
-            padding: 20px 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
+            justify-content: space-around;
+            gap: 4px;
+            height: 320px;
+            padding: 20px 15px 10px 40px;
+            background: var(--color-bg-hero);
+            border-radius: 8px;
+            border: 1px dashed var(--color-border);
             position: relative;
-            overflow: hidden;
+            overflow-x: auto;
         }
 
         .histogram-bar-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            flex-shrink: 0;
-            width: 35px;
+            flex: 1;
+            min-width: 32px;
+            max-width: 70px;
+            height: 100%;
+            justify-content: flex-end;
         }
 
         .histogram-bar {
-            width: 30px;
-            background: linear-gradient(180deg, #3498db, #2980b9);
-            border-radius: 6px 6px 0 0;
-            transition: height 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            background: var(--color-accent);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.4s cubic-bezier(0.25, 1, 0.5, 1);
             position: relative;
             min-height: 0;
             display: flex;
             justify-content: center;
             overflow: hidden;
-            max-height: 300px;
-            flex-shrink: 0;
+            max-height: 240px;
         }
 
         .histogram-bar.filled {
-            background: linear-gradient(180deg, #27ae60, #2ecc71);
+            opacity: 0.95;
         }
 
         .bar-count {
             position: absolute;
-            top: 5px;
+            top: 4px;
             left: 50%;
             transform: translateX(-50%);
-            font-weight: bold;
-            font-size: 1rem;
-            color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #ffffff;
             z-index: 5;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
         }
 
         .bar-label {
-            margin-top: 10px;
-            font-weight: bold;
-            font-size: 0.6rem;
-            color: #2c3e50;
+            margin-top: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 0.65rem;
+            color: var(--color-text-heading);
             text-align: center;
-            line-height: 1.2;
+            line-height: 1.1;
         }
 
         .bar-sublabel {
-            font-size: 0.65rem;
-            color: #7f8c8d;
+            font-size: 0.6rem;
+            color: var(--color-text-muted);
+            text-align: center;
         }
 
-        /* Stacked dots in histogram */
         .stacked-dots {
             display: flex;
             flex-direction: column-reverse;
             align-items: center;
-            padding: 5px;
+            padding: 2px;
             width: 100%;
             overflow: hidden;
         }
@@ -281,229 +459,208 @@
             height: 8px;
             border-radius: 50%;
             margin: 1px 0;
-            animation: dropIn 0.4s ease-out;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: dropIn 0.3s ease-out;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         @keyframes dropIn {
-            0% {
-                transform: translateY(-50px) scale(0.5);
-                opacity: 0;
-            }
-
-            60% {
-                transform: translateY(5px) scale(1.1);
-            }
-
-            100% {
-                transform: translateY(0) scale(1);
-                opacity: 1;
-            }
+            0% { transform: translateY(-30px) scale(0.5); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
         }
 
         .y-axis {
             position: absolute;
-            left: 15px;
+            left: 8px;
             top: 20px;
-            bottom: 20px;
+            bottom: 45px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            color: #7f8c8d;
-            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background: var(--color-bg-hero);
+            border: 1px solid var(--color-border);
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .stat-lbl {
+            font-size: 0.72rem;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
 
         .info-box {
-            background: #e8f4fd;
-            border-left: 4px solid #3498db;
-            padding: 15px 20px;
-            border-radius: 0 8px 8px 0;
-            margin-top: 20px;
+            background: var(--color-bg-hero);
+            border-left: 3px solid var(--color-accent);
+            padding: 12px 16px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--color-text-main);
         }
 
-        .info-box p {
-            color: #2c3e50;
-            line-height: 1.6;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .stat-item {
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 1.5rem;
+            border-top: 1px solid var(--color-border);
             text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-
-        @media (max-width: 900px) {
-            .visualization-area {
-                flex-direction: column;
-            }
-
-            .section:first-child,
-            .section:last-child {
-                min-width: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 1.6rem;
-            }
-
-            .histogram-container {
-                gap: 10px;
-                padding: 20px 20px;
-            }
-
-            .histogram-bar {
-                width: 50px;
-            }
-
-            .bar-label {
-                font-size: 0.9rem;
-            }
-
-            .individual {
-                width: 45px;
-                height: 45px;
-                font-size: 0.8rem;
-            }
-
-            .controls {
-                gap: 10px;
-            }
-
-            .btn {
-                padding: 10px 16px;
-                font-size: 0.9rem;
-            }
+            color: var(--text-muted);
+            font-size: 0.82rem;
         }
     </style>
 </head>
 
 <body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <a href="#" class="brand-group">
+            <div class="brand-icon">H</div>
+            <div>
+                <div class="brand-title">Histogram Builder (Kontinuierlich)</div>
+                <div class="brand-subtitle">Dr. Manuel D. S. Hopp &bull; Stetige Häufigkeitsverteilungen</div>
+            </div>
+        </a>
+
+        <div class="header-actions">
+            <a href="../index.html" class="btn-header" title="Zurück zur Homepage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Homepage</span>
+            </a>
+            <button class="btn-header" id="themeToggleBtn" aria-label="Farbschema wechseln">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>📊 Histogram Builder - Körpergröße</h1>
-            <p class="subtitle">Wie entsteht ein Histogramm aus kontinuierlichen Daten?</p>
-        </header>
+        <div class="page-intro">
+            <div class="tag-badge">Stetige Daten & Klasseneinteilung</div>
+            <h1>Kontinuierliche Häufigkeitsverteilung</h1>
+            <p class="subtitle">
+                Erleben Sie interaktiv, wie kontinuierliche Messwerte (Körpergröße in cm) in Klassen eingeteilt werden und wie die Wahl der Intervallbreite (Bin Width) die Form des Histogramms beeinflusst.
+            </p>
+        </div>
 
         <div class="controls">
-            <span class="interval-label">Intervallbreite:</span>
-            <button class="btn btn-interval" data-width="2">2 cm</button>
-            <button class="btn btn-interval active" data-width="5">5 cm</button>
-            <button class="btn btn-interval" data-width="10">10 cm</button>
-            <button class="btn btn-interval" data-width="20">20 cm</button>
-            <button class="btn btn-transform" id="transformAllBtn">Alle transformieren</button>
-            <button class="btn btn-reset" id="resetBtn">Zurücksetzen</button>
+            <div class="interval-group">
+                <span class="interval-label">Breite:</span>
+                <button class="btn-interval" data-width="2">2 cm</button>
+                <button class="btn-interval active" data-width="5">5 cm</button>
+                <button class="btn-interval" data-width="10">10 cm</button>
+                <button class="btn-interval" data-width="20">20 cm</button>
+            </div>
+            <button class="btn btn-primary" id="transformAllBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                <span>Alle einsortieren</span>
+            </button>
+            <button class="btn btn-secondary" id="resetBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                <span>Zurücksetzen</span>
+            </button>
         </div>
 
         <div class="visualization-area">
             <!-- Individuals Section -->
-            <div class="section">
-                <h2 class="section-title">👥 Einzelne Werte (Körpergröße in cm)</h2>
-                <div class="individuals-container" id="individualsContainer">
-                    <!-- Individuals will be generated here -->
-                </div>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-value" id="totalCount">0</div>
-                        <div class="stat-label">Gesamtzahl</div>
+            <div class="card">
+                <h2 class="section-title">
+                    <span>Einzelmessungen (Körpergröße)</span>
+                    <span style="font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--color-text-muted);">Klick zum Einsortieren</span>
+                </h2>
+                <div class="individuals-container" id="individualsContainer"></div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val" id="totalCount">0</div>
+                        <div class="stat-lbl">Gesamt (N)</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="remainingCount">0</div>
-                        <div class="stat-label">Noch nicht einsortiert</div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="remainingCount">0</div>
+                        <div class="stat-lbl">Im Pool</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-value" id="meanValue">-</div>
-                        <div class="stat-label">Durchschnitt</div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="meanValue">-</div>
+                        <div class="stat-lbl">Mittelwert (x̄ cm)</div>
                     </div>
                 </div>
             </div>
 
             <!-- Histogram Section -->
-            <div class="section">
-                <h2 class="section-title">📈 Histogramm (Häufigkeitsverteilung)</h2>
+            <div class="card">
+                <h2 class="section-title">
+                    <span>Histogramm (Klassierte Häufigkeit)</span>
+                </h2>
                 <div class="histogram-container" id="histogramContainer">
                     <div class="y-axis">
                         <span id="maxY">10</span>
                         <span>0</span>
                     </div>
-                    <!-- Histogram bars will be generated here -->
                 </div>
+
                 <div class="info-box">
-                    <p><strong>Erklärung:</strong> Ein Histogramm zeigt, wie häufig Werte in bestimmten Intervallen
-                        (hier: Körpergröße in cm)
-                        vorkommen.
-                        Jeder Balken repräsentiert ein Intervall und die Höhe zeigt die Häufigkeit.
-                        Klicke auf die einzelnen Punkte, um zu sehen, wie sie in die entsprechenden Balken einsortiert
-                        werden! Ändere die Intervallbreite, um zu sehen, wie sich die Darstellung verändert.</p>
+                    <strong>Erklärung:</strong> Kontinuierliche Daten erfordern eine Intervallbildung (Binning). Zu schmale Intervalle (z. B. 2 cm) führen zu zerklüfteten Verteilungen, während zu breite Intervalle (z. B. 20 cm) relevante Verteilungseigenschaften verdecken können.
                 </div>
             </div>
         </div>
     </div>
 
-    <footer style="text-align: center; margin-top: 30px; color: #95a5a6; font-size: 0.85rem;">
-        Created with GLM 4.7 and Minimax M2.1 using Antigravity. by Manuel Hopp.
+    <footer>
+        <p>Dr. Manuel D. S. Hopp &bull; Interaktive Lehr- und Forschungstools</p>
     </footer>
 
     <script>
-        // Configuration
         const MIN_HEIGHT = 150;
         const MAX_HEIGHT = 200;
         const DEFAULT_BIN_WIDTH = 5;
         const BIN_WIDTHS = [2, 5, 10, 20];
 
-        // Generate sample data - normal distribution around 170cm
         function generateSampleData(count = 100) {
             const data = [];
-            const mean = 170;
-            const stdDev = 10;
+            const mean = 172;
+            const stdDev = 9;
 
             for (let i = 0; i < count; i++) {
-                // Box-Muller transform for normal distribution
                 const u1 = Math.random();
                 const u2 = Math.random();
                 const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
                 let height = mean + z * stdDev;
 
-                // Clamp to range and round to integer
                 height = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, height));
                 height = Math.round(height);
-
                 data.push(height);
             }
-
             return data;
         }
 
-        // Sample data
         const SAMPLE_DATA = generateSampleData(100);
 
-        // State
         let individuals = [];
         let histogramData = {};
         let currentBinWidth = DEFAULT_BIN_WIDTH;
         let maxCount = 0;
 
-        // DOM Elements
         const individualsContainer = document.getElementById('individualsContainer');
         const histogramContainer = document.getElementById('histogramContainer');
         const transformAllBtn = document.getElementById('transformAllBtn');
@@ -513,16 +670,38 @@
         const meanValueEl = document.getElementById('meanValue');
         const maxYEl = document.getElementById('maxY');
         const intervalButtons = document.querySelectorAll('.btn-interval');
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('theme-icon');
 
-        // Get color based on height value (gradient from blue to red)
-        function getColorForHeight(height) {
-            const normalized = (height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
-            // HSL: blue (220) to red (0)
-            const hue = 220 - (normalized * 220);
-            return `hsl(${hue}, 70%, 50%)`;
+        // Theme Setup
+        let isDark = localStorage.getItem('hist_kontinuierlich_theme') === 'dark' ||
+                     (!localStorage.getItem('hist_kontinuierlich_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        function updateTheme() {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('hist_kontinuierlich_theme', 'dark');
+                themeIcon.textContent = '☀️';
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('hist_kontinuierlich_theme', 'light');
+                themeIcon.textContent = '🌙';
+            }
         }
 
-        // Get bin key for a given height value
+        themeBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            updateTheme();
+        });
+
+        function getColorForHeight(height) {
+            const normalized = (height - MIN_HEIGHT) / (MAX_HEIGHT - MIN_HEIGHT);
+            // Harmonious gradient from slate to terracotta
+            if (normalized < 0.4) return '#64748b';
+            if (normalized < 0.7) return '#d4784d';
+            return '#c4622d';
+        }
+
         function getBinKey(height, binWidth) {
             const binIndex = Math.floor((height - MIN_HEIGHT) / binWidth);
             const start = MIN_HEIGHT + binIndex * binWidth;
@@ -530,7 +709,6 @@
             return `${start}-${end}`;
         }
 
-        // Get all bins for current bin width
         function getAllBins(binWidth) {
             const bins = [];
             const numBins = Math.ceil((MAX_HEIGHT - MIN_HEIGHT) / binWidth);
@@ -544,11 +722,9 @@
                     end: end
                 });
             }
-
             return bins;
         }
 
-        // Initialize histogram data structure
         function initHistogramData(binWidth) {
             const bins = getAllBins(binWidth);
             const data = {};
@@ -558,11 +734,9 @@
             return data;
         }
 
-        // Re-bin all placed values when interval changes
         function rebinPlacedValues(newBinWidth) {
             const newHistogramData = initHistogramData(newBinWidth);
 
-            // Find all placed values and re-assign to new bins
             for (let i = 0; i < individuals.length; i++) {
                 if (individuals[i] === null) {
                     const originalValue = SAMPLE_DATA[i];
@@ -572,29 +746,23 @@
                     }
                 }
             }
-
             return newHistogramData;
         }
 
-        // Initialize
         function init() {
-            // Reset state
+            updateTheme();
             individuals = [...SAMPLE_DATA];
             currentBinWidth = DEFAULT_BIN_WIDTH;
             histogramData = initHistogramData(currentBinWidth);
             maxCount = 0;
 
-            // Update interval button states
             updateIntervalButtons();
-
-            // Render
             renderIndividuals();
             renderHistogram();
             updateStats();
             updateButtons();
         }
 
-        // Render individuals
         function renderIndividuals() {
             individualsContainer.innerHTML = '';
 
@@ -612,15 +780,13 @@
             });
         }
 
-        // Render histogram
         function renderHistogram() {
-            // Remove existing bars (keep y-axis)
             const existingBars = histogramContainer.querySelectorAll('.histogram-bar-wrapper');
             existingBars.forEach(bar => bar.remove());
 
-            // Calculate max count for scaling
             maxCount = Math.max(...Object.values(histogramData), 1);
-            maxYEl.textContent = Math.ceil(maxCount * 1.2);
+            const scaleMax = Math.ceil(maxCount * 1.2);
+            maxYEl.textContent = scaleMax;
 
             const bins = getAllBins(currentBinWidth);
 
@@ -630,40 +796,35 @@
                 wrapper.className = 'histogram-bar-wrapper';
 
                 const bar = document.createElement('div');
+                const avgHeight = (bin.start + bin.end) / 2;
                 bar.className = `histogram-bar ${count > 0 ? 'filled' : ''}`;
+                bar.style.backgroundColor = getColorForHeight(avgHeight);
                 bar.id = `bar-${bin.key}`;
 
-                // Calculate height (max height 300px)
-                const height = count > 0 ? (count / Math.ceil(maxCount * 1.2)) * 300 : 0;
+                const height = count > 0 ? (count / scaleMax) * 240 : 0;
                 bar.style.height = `${height}px`;
 
-                // Bar content
                 const countLabel = document.createElement('span');
                 countLabel.className = 'bar-count';
                 countLabel.textContent = count;
                 bar.appendChild(countLabel);
 
-                // Stacked dots container
                 const stackedDots = document.createElement('div');
                 stackedDots.className = 'stacked-dots';
                 stackedDots.id = `stacked-${bin.key}`;
 
-                // Add stacked dots
                 for (let i = 0; i < count; i++) {
                     const dot = document.createElement('div');
                     dot.className = 'stacked-dot';
-                    // Use average color of the bin
-                    const avgHeight = (bin.start + bin.end) / 2;
                     dot.style.background = getColorForHeight(avgHeight);
                     stackedDots.appendChild(dot);
                 }
 
                 bar.appendChild(stackedDots);
 
-                // Labels
                 const label = document.createElement('div');
                 label.className = 'bar-label';
-                label.textContent = `${bin.start}-${bin.end}`;
+                label.textContent = `${bin.start}–${bin.end}`;
 
                 const sublabel = document.createElement('div');
                 sublabel.className = 'bar-sublabel';
@@ -676,19 +837,15 @@
             });
         }
 
-        // Move individual to histogram
         function moveIndividual(index) {
             const height = individuals[index];
             if (height === null) return;
 
-            // Get the individual element
             const individualEl = individualsContainer.querySelector(`[data-index="${index}"]`);
             if (!individualEl) return;
 
-            // Animate out
             individualEl.classList.add('moving');
 
-            // Update data after animation
             setTimeout(() => {
                 individuals[index] = null;
                 const binKey = getBinKey(height, currentBinWidth);
@@ -696,17 +853,14 @@
                     histogramData[binKey]++;
                 }
 
-                // Re-render
                 renderIndividuals();
                 renderHistogram();
                 updateStats();
                 updateButtons();
-            }, 400);
+            }, 300);
         }
 
-        // Transform all remaining individuals
         function transformAll() {
-            // Get all remaining indices first
             const remainingIndices = [];
             for (let i = 0; i < individuals.length; i++) {
                 if (individuals[i] !== null) {
@@ -721,11 +875,10 @@
                     if (individuals[index] !== null) {
                         moveIndividual(index);
                     }
-                }, idx * 100);
+                }, idx * 45);
             });
         }
 
-        // Update statistics
         function updateStats() {
             const total = SAMPLE_DATA.length;
             const remaining = individuals.filter(h => h !== null).length;
@@ -734,7 +887,6 @@
             totalCountEl.textContent = total;
             remainingCountEl.textContent = remaining;
 
-            // Calculate mean of placed values
             if (placed > 0) {
                 let sum = 0;
                 let count = 0;
@@ -744,20 +896,18 @@
                         count++;
                     }
                 }
-                const mean = count > 0 ? Math.round(sum / count) : '-';
+                const mean = count > 0 ? (sum / count).toFixed(1) : '-';
                 meanValueEl.textContent = mean;
             } else {
                 meanValueEl.textContent = '-';
             }
         }
 
-        // Update button states
         function updateButtons() {
             const remaining = individuals.filter(h => h !== null).length;
             transformAllBtn.disabled = remaining === 0;
         }
 
-        // Update interval button states
         function updateIntervalButtons() {
             intervalButtons.forEach(btn => {
                 const width = parseInt(btn.dataset.width);
@@ -769,7 +919,6 @@
             });
         }
 
-        // Change bin width
         function changeBinWidth(newWidth) {
             if (newWidth === currentBinWidth) return;
 
@@ -780,7 +929,6 @@
             renderHistogram();
         }
 
-        // Event listeners
         transformAllBtn.addEventListener('click', transformAll);
         resetBtn.addEventListener('click', init);
 
@@ -791,7 +939,6 @@
             });
         });
 
-        // Start
         init();
     </script>
 </body>

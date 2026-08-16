@@ -1,28 +1,74 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="light" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>p-Wert verstehen: Das Münzwurf-Experiment</title>
+    <title>Der p-Wert: Interaktive Simulation | Dr. Manuel D. S. Hopp</title>
+    <meta name="description" content="Interaktive Schritt-für-Schritt-Simulation zum Verständnis des p-Werts, statistischer Signifikanz und Hypothesentests am Münzwurf-Experiment.">
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Chart.js & MathJax CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         :root {
-            --bg: #f8fafc;
-            --card-bg: #fff;
-            --primary: #3b82f6;
-            --primary-hover: #2563eb;
-            --success: #10b981;
-            --danger: #ef4444;
+            /* Light Theme (Terracotta & Warm Paper) */
+            --color-accent: #c4622d;
+            --color-accent-light: #d4784d;
+            --color-accent-deep: #a34e20;
+            --color-ink-strong: #7a3a15;
+
+            --bg-body: #faf7f4;
+            --bg-hero: #f3ede6;
+            --bg-surface: #ffffff;
+            --bg-surface-glass: rgba(255, 255, 255, 0.85);
+
             --text-main: #1e293b;
+            --text-heading: #0f172a;
             --text-muted: #64748b;
-            --border: #e2e8f0;
-            --accent: #f59e0b;
+            --border: #e6ddd5;
+            --border-glass: rgba(230, 221, 213, 0.6);
+
+            --danger: #e11d48;
+            --danger-bg: rgba(225, 29, 72, 0.08);
+            --success: #059669;
+            --success-bg: rgba(5, 150, 105, 0.08);
+
+            --shadow-glass: 0 8px 32px 0 rgba(28, 24, 22, 0.04);
+            --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme (Study Dark) */
+            --color-accent: #e0956a;
+            --color-accent-light: #d4784d;
+            --color-accent-deep: #c4622d;
+            --color-ink-strong: #e0956a;
+
+            --bg-body: #181514;
+            --bg-hero: #1e1a18;
+            --bg-surface: #24201e;
+            --bg-surface-glass: rgba(36, 32, 30, 0.85);
+
+            --text-main: #e2e8f0;
+            --text-heading: #ffffff;
+            --text-muted: #a8a29e;
+            --border: #342e2a;
+            --border-glass: rgba(52, 46, 42, 0.6);
+
+            --danger: #f43f5e;
+            --danger-bg: rgba(244, 63, 94, 0.15);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+
+            --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.4);
         }
 
         * {
@@ -32,228 +78,324 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
             color: var(--text-main);
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
             min-height: 100vh;
-            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Header */
+        header.app-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--bg-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 0 1.5rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--color-accent);
+            color: #ffffff;
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-title {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-heading);
+            letter-spacing: -0.01em;
+        }
+
+        .brand-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            cursor: pointer;
+            border-radius: 0px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-header:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        /* Container */
         .container {
-            max-width: 800px;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
             width: 100%;
+            flex-grow: 1;
         }
 
-        header {
+        .page-intro {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag-badge {
+            display: inline-block;
+            border-left: 2px solid var(--color-accent);
+            background: rgba(196, 98, 45, 0.08);
+            color: var(--color-ink-strong);
+            padding: 3px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.75rem;
         }
 
         h1 {
-            font-weight: 600;
-            font-size: 2.2rem;
-            letter-spacing: -0.025em;
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+            font-weight: 700;
+            color: var(--text-heading);
             margin-bottom: 0.5rem;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
         }
 
-        p.subtitle {
+        .subtitle {
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
+            max-width: 65ch;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
         /* Stepper */
         .stepper {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
             margin-bottom: 2rem;
-            position: relative;
-            padding: 0 10px;
-        }
-
-        .stepper::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--border);
-            z-index: 1;
+            flex-wrap: wrap;
         }
 
         .step-dot {
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            z-index: 2;
+            width: 24px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 2px;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .step-dot.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-            transform: scale(1.2);
+            background: var(--color-accent);
+            width: 40px;
         }
 
         .step-dot.completed {
-            background: var(--success);
-            border-color: var(--success);
+            background: var(--color-accent-light);
+            opacity: 0.7;
         }
 
-        /* Card System */
+        /* Main Card */
         .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 1.5rem;
+            background: var(--bg-surface-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
             padding: 2.5rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            min-height: 550px;
+            box-shadow: var(--shadow-glass);
+            min-height: 480px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 640px) {
+            .card { padding: 1.5rem; }
         }
 
         .step-content {
             display: none;
-            animation: fadeIn 0.4s ease;
+            animation: fadeIn 0.35s ease-out;
         }
 
         .step-content.active {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+            display: block;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
+            font-family: 'Merriweather', Georgia, serif;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 1.25rem;
+            border-left: 3px solid var(--color-accent);
+            padding-left: 0.75rem;
         }
 
         .content-body {
-            flex-grow: 1;
-            font-size: 1.05rem;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-main);
+            margin-bottom: 2rem;
         }
 
         .content-body p {
             margin-bottom: 1rem;
         }
 
+        /* Buttons & Actions */
         .actions {
-            margin-top: 2rem;
             display: flex;
             justify-content: space-between;
-            gap: 1rem;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            margin-top: auto;
         }
 
-        .action-group {
-            display: flex;
-            gap: 1rem;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.75rem;
-            border: none;
-            font-family: inherit;
-            font-weight: 500;
+        .btn {
+            padding: 9px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            border-radius: 0px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid transparent;
         }
 
-        button.btn-primary {
-            background: var(--primary);
-            color: white;
+        .btn-primary {
+            background: var(--color-accent);
+            color: #ffffff;
         }
 
-        button.btn-primary:hover:not(:disabled) {
-            background: var(--primary-hover);
-            transform: translateY(-1px);
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-accent-deep);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lifted);
         }
 
-        button.btn-secondary {
-            background: #f1f5f9;
-            color: var(--text-muted);
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-main);
+            border-color: var(--border);
         }
 
-        button.btn-secondary:hover:not(:disabled) {
-            background: #e2e8f0;
+        .btn-secondary:hover:not(:disabled) {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            transform: translateY(-2px);
         }
 
-        button.btn-accent {
-            background: var(--accent);
-            color: white;
+        .btn-accent {
+            background: var(--bg-hero);
+            color: var(--color-ink-strong);
+            border-color: var(--border);
         }
 
-        button.btn-accent:hover:not(:disabled) {
-            filter: brightness(1.1);
-            transform: translateY(-1px);
+        .btn-accent:hover:not(:disabled) {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
         }
 
-        button:disabled {
+        .btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
+            transform: none !important;
         }
 
-        /* Experiment Elements */
+        /* Coin flip area */
         .coin-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.5rem;
-            margin: 1.5rem 0;
+            margin: 2rem 0 1.5rem;
         }
 
         .coin {
-            width: 90px;
-            height: 90px;
-            background: #fbbf24;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
+            background: var(--color-accent);
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-            color: #92400e;
-            border: 4px solid #f59e0b;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(196, 98, 45, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            margin-bottom: 1.25rem;
+            transition: transform 0.2s ease;
         }
 
-        .flipping {
-            animation: flip 0.3s infinite linear;
+        .coin.flipping {
+            animation: flip 0.25s infinite;
         }
 
         @keyframes flip {
-            from {
-                transform: rotateY(0);
-            }
-
-            to {
-                transform: rotateY(180deg);
-            }
+            0% { transform: rotateY(0) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.1); }
+            100% { transform: rotateY(360deg) scale(1); }
         }
 
         .stats-grid {
             display: flex;
             justify-content: center;
-            gap: 3rem;
+            gap: 2.5rem;
             margin-bottom: 1.5rem;
         }
 
@@ -262,8 +404,10 @@
         }
 
         .stat-value {
-            font-size: 2.2rem;
-            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-accent);
         }
 
         .stat-label {
@@ -273,6 +417,7 @@
             letter-spacing: 0.05em;
         }
 
+        /* Chart container */
         .chart-container {
             height: 260px;
             width: 100%;
@@ -281,133 +426,169 @@
         }
 
         .formula {
-            background: #f8fafc;
+            background: var(--bg-hero);
             padding: 1.25rem;
-            border-radius: 1rem;
+            border-radius: 8px;
             margin: 1.5rem 0;
-            border-left: 4px solid var(--primary);
+            border-left: 3px solid var(--color-accent);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
         }
 
         .interpretation-box {
             padding: 1.25rem;
-            border-radius: 1rem;
+            border-radius: 8px;
             margin-top: 1rem;
-            border: 1px solid transparent;
             font-weight: 500;
+            border: 1px solid transparent;
         }
 
         .significant {
-            background: #fef2f2;
-            border-color: #fee2e2;
+            background: var(--danger-bg);
+            border-color: var(--danger);
             color: var(--danger);
         }
 
         .not-significant {
-            background: #f0fdf4;
-            border-color: #dcfce7;
+            background: var(--success-bg);
+            border-color: var(--success);
             color: var(--success);
         }
 
-        /* Meaning vs Misconception Section */
         .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            gap: 1.25rem;
             margin-top: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .comparison-grid { grid-template-columns: 1fr; }
         }
 
         .compare-box {
             padding: 1.25rem;
-            border-radius: 1rem;
-            font-size: 0.95rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.55;
         }
 
         .meaning {
-            background: #f0f9ff;
-            border: 1px solid #bae6fd;
+            background: rgba(5, 150, 105, 0.08);
+            border: 1px solid rgba(5, 150, 105, 0.25);
         }
 
         .misconception {
-            background: #fff1f2;
-            border: 1px solid #fecdd3;
+            background: rgba(225, 29, 72, 0.08);
+            border: 1px solid rgba(225, 29, 72, 0.25);
         }
 
         .compare-title {
             font-weight: 700;
             margin-bottom: 0.5rem;
             display: block;
+            font-family: 'Merriweather', serif;
         }
 
         .highlight-text {
-            color: var(--primary);
+            color: var(--color-accent);
             font-weight: 600;
         }
 
         .note {
-            background: #fffbeb;
-            border-left: 4px solid #f59e0b;
+            background: var(--bg-hero);
+            border-left: 3px solid #d97706;
             padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
+            border-radius: 4px;
+            font-size: 0.88rem;
             margin-top: 1rem;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 1.5rem;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.82rem;
         }
     </style>
 </head>
 
 <body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <a href="#" class="brand-group">
+            <div class="brand-icon">P</div>
+            <div>
+                <div class="brand-title">Der p-Wert: Interaktive Simulation</div>
+                <div class="brand-subtitle">Dr. Manuel D. S. Hopp &bull; Statistische Signifikanz</div>
+            </div>
+        </a>
+
+        <div class="header-actions">
+            <a href="../index.html" class="btn-header" title="Zurück zur Homepage">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Homepage</span>
+            </a>
+            <button class="btn-header" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Farbschema wechseln">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+    </header>
+
     <div class="container">
-        <header>
-            <h1>Der p-Wert</h1>
-            <p class="subtitle">Schritt für Schritt zur statistischen Signifikanz</p>
-        </header>
+        <div class="page-intro">
+            <div class="tag-badge">Inferenzstatistik & Hypothesenprüfung</div>
+            <h1>Statistische Signifikanz & p-Wert</h1>
+            <p class="subtitle">
+                Schritt für Schritt von der wissenschaftlichen Intuition über den empirischen Münzwurf zur fundierten Testentscheidung.
+            </p>
+        </div>
 
         <div class="stepper" id="stepper">
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
+            <div class="step-dot active" onclick="showStep(1)"></div>
+            <div class="step-dot" onclick="showStep(2)"></div>
+            <div class="step-dot" onclick="showStep(3)"></div>
+            <div class="step-dot" onclick="showStep(4)"></div>
+            <div class="step-dot" onclick="showStep(5)"></div>
+            <div class="step-dot" onclick="showStep(6)"></div>
+            <div class="step-dot" onclick="showStep(7)"></div>
+            <div class="step-dot" onclick="showStep(8)"></div>
+            <div class="step-dot" onclick="showStep(9)"></div>
+            <div class="step-dot" onclick="showStep(10)"></div>
         </div>
 
         <div class="card">
             <!-- Step 1: Intuition -->
             <div class="step-content active" id="step1">
-                <h2>1. Die Intuition</h2>
+                <h2>1. Die wissenschaftliche Intuition</h2>
                 <div class="content-body">
-                    <p>Wann wird aus einem Zufall ein begründeter Verdacht?</p>
-                    <p>Stell dir vor, du spielst ein Spiel. Dein Gegner wirft eine Münze und es kommt 5-mal
-                        hintereinander <strong>Kopf</strong>.</p>
-                    <p>Noch glaubst du an Zufall. Aber was, wenn es 15-mal hintereinander Kopf ist? Ab einem gewissen
-                        Punkt sagst du: <span class="highlight-text">"Das kann kein Zufall mehr sein!"</span></p>
-                    <p>Der p-Wert hilft uns dabei, diese Grenze mathematisch sauber zu ziehen.</p>
+                    <p>Wann wird aus reinem Zufall ein begründeter wissenschaftlicher Verdacht?</p>
+                    <p>Stell dir vor, du spielst ein Spiel. Dein Gegenüber wirft eine Münze und es fällt 5-mal hintereinander <strong>Kopf</strong>.</p>
+                    <p>Noch glaubst du an Zufall. Aber was passiert bei 15-mal Kopf hintereinander? Ab einem gewissen Schwellenwert sagst du: <span class="highlight-text">„Das kann kein Zufall mehr sein!“</span></p>
+                    <p>Der p-Wert hilft uns in der Forschung dabei, genau diese Grenze objektiv und mathematisch sauber zu ziehen.</p>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" disabled>Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                    <button class="btn btn-secondary" disabled>Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Weiter &rarr;</button>
                 </div>
             </div>
 
             <!-- Step 2: Hypothesen -->
             <div class="step-content" id="step2">
-                <h2>2. Die Hypothesen (H₀ & H₁)</h2>
+                <h2>2. Die Hypothesen (H₀ &amp; H₁)</h2>
                 <div class="content-body">
-                    <p>In der Forschung stellen wir immer zwei gegensätzliche Behauptungen auf:</p>
+                    <p>In der Inferenzstatistik formulieren wir zwei komplementäre Hypothesen:</p>
                     <div class="formula">
-                        <strong>H₀ (Nullhypothese):</strong> Die Münze ist fair. Es gibt keinen Effekt (p = 0.5).<br>
-                        <strong>H₁ (Alternativhypothese):</strong> Die Münze ist manipuliert. Es gibt einen Effekt (p ≠
-                        0.5).
+                        <strong>H₀ (Nullhypothese):</strong> Die Münze ist fair. Es liegt kein systematischer Effekt vor (p = 0.5).<br>
+                        <strong>H₁ (Alternativhypothese):</strong> Die Münze ist manipuliert / gebiast. Es liegt ein echter Effekt vor (p &ne; 0.5).
                     </div>
-                    <p>Wissenschaft funktioniert wie ein Gerichtsprozess: Wir nehmen erst einmal an, dass die H₀
-                        ("Unschuld") wahr ist. Wir brauchen sehr starke Beweise (Daten), um sie zu verwerfen.</p>
+                    <p>Wissenschaft funktioniert analog zum Gerichtsprinzip (In dubio pro reo): Wir nehmen vorab an, dass die Nullhypothese wahr ist. Wir benötigen starke empirische Evidenz in unseren Daten, um sie abzulehnen.</p>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Weiter &rarr;</button>
                 </div>
             </div>
 
@@ -415,12 +596,12 @@
             <div class="step-content" id="step3">
                 <h2>3. Experiment 1: Die faire Münze</h2>
                 <div class="content-body">
-                    <p>Lass uns testen! Wir werfen eine <strong>garantiert faire</strong> Münze 20-mal.</p>
+                    <p>Lass uns empirische Daten sammeln! Wir werfen eine <strong>garantiert faire</strong> Münze genau 20-mal.</p>
                     <div class="coin-area">
                         <div class="coin" id="coin1">?</div>
-                        <div class="action-group">
-                            <button class="btn-secondary" id="oneBtn1" onclick="tossOne(false)">1x werfen</button>
-                            <button class="btn-accent" id="allBtn1" onclick="tossAll(false)">Gerade 20x werfen</button>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                            <button class="btn btn-secondary" id="oneBtn1" onclick="tossOne(false)">1x werfen</button>
+                            <button class="btn btn-accent" id="allBtn1" onclick="tossAll(false)">Direkt 20x werfen</button>
                         </div>
                     </div>
                     <div class="stats-grid">
@@ -430,77 +611,71 @@
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="total1">0</div>
-                            <div class="stat-label">Gesamt</div>
+                            <div class="stat-label">Gesamtwürfe (N)</div>
                         </div>
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" id="btn3" disabled onclick="nextStep()">Auswerten</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" id="btn3" disabled onclick="nextStep()">Auswerten &rarr;</button>
                 </div>
             </div>
 
-            <!-- Step 4: Die Verteilung & vertikale Linie -->
+            <!-- Step 4: Die Verteilung -->
             <div class="step-content" id="step4">
-                <h2>4. Wo stehe ich in der Verteilung?</h2>
+                <h2>4. Positionierung in der theoretischen Verteilung</h2>
                 <div class="content-body">
-                    <p>Dein Ergebnis: <span class="highlight-text"><span id="resHeads1"></span>-mal Kopf</span>.</p>
-                    <p>Die rote Linie zeigt dein Ergebnis im Vergleich zu allen theoretisch möglichen Ausgängen einer
-                        fairen Münze:</p>
+                    <p>Dein Ergebnis: <span class="highlight-text"><span id="resHeads1"></span>-mal Kopf</span> bei 20 Würfen.</p>
+                    <p>Die gestrichelte Markierungslinie verortet deine Stichprobe in der theoretischen Binomialverteilung einer absolut fairen Münze:</p>
                     <div class="chart-container"><canvas id="chart1"></canvas></div>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Weiter &rarr;</button>
                 </div>
             </div>
 
             <!-- Step 5: p-Wert Definition -->
             <div class="step-content" id="step5">
-                <h2>5. Berechnung des p-Werts</h2>
+                <h2>5. Exakte Berechnung des p-Werts</h2>
                 <div class="content-body">
-                    <p>Der p-Wert ist die Summe der Wahrscheinlichkeiten am Rand (markiert in rot). Er zeigt, wie oft
-                        man ein so extremes (oder noch extremeres) Ergebnis allein durch Zufall erhalten würde.</p>
+                    <p>Der p-Wert ist die aufsummierte Wahrscheinlichkeit aller Ergebnisse, die unter der Nullhypothese mindestens genauso extrem (oder noch extremer) sind wie deine Beobachtung:</p>
                     <div class="chart-container"><canvas id="chart2"></canvas></div>
                     <div class="formula">
-                        <strong>Berechneter p-Wert:</strong> <span id="pVal1"
-                            style="font-weight: 700; color:var(--danger)">0.0000</span>
+                        <strong>Berechneter p-Wert:</strong> <span id="pVal1" style="font-weight: 700; color: var(--danger);">0.0000</span>
                     </div>
                     <div id="pValInterpret1" class="note" style="display:none"></div>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Weiter</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Weiter &rarr;</button>
                 </div>
             </div>
 
             <!-- Step 6: Statistische Entscheidung -->
             <div class="step-content" id="step6">
-                <h2>6. Urteil 1: H₀ behalten oder verwerfen?</h2>
+                <h2>6. Testentscheidung 1: H₀ beibehalten oder ablehnen?</h2>
                 <div class="content-body">
-                    <p>Wir nutzen die 5%-Grenze (α = 0.05).</p>
+                    <p>Als Konvention in den Sozial- und Bildungswissenschaften setzen wir das Signifikanzniveau auf &alpha; = 0.05 (5%).</p>
                     <div id="interp1" class="interpretation-box"></div>
-                    <p style="margin-top: 1.5rem;">War der p-Wert groß, haben wir keinen Grund an der Fairness der Münze
-                        zu zweifeln. Der Zufall erklärt dein Ergebnis gut genug.</p>
+                    <p style="margin-top: 1.5rem;">Ist der p-Wert &ge; 0.05, reicht der reine Zufall völlig aus, um die beobachtete Abweichung zu erklären.</p>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Zweites Experiment</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Zweites Experiment &rarr;</button>
                 </div>
             </div>
 
             <!-- Step 7: Experiment 2 (Biased) -->
             <div class="step-content" id="step7">
-                <h2>7. Experiment 2: Die manipulative Münze</h2>
+                <h2>7. Experiment 2: Die manipulierte Münze</h2>
                 <div class="content-body">
-                    <p>Nun werfen wir eine Münze, die heimlich manipuliert wurde. Wir testen sie jedoch wie zuvor gegen
-                        die H₀ ("Sie ist fair").</p>
+                    <p>Nun werfen wir eine gezinkte Münze (85% Kopf-Wahrscheinlichkeit). Wir testen sie methodisch identisch gegen die H₀ („Münze ist fair“).</p>
                     <div class="coin-area">
-                        <div class="coin" id="coin2" style="background:#e2e8f0; border-color:#cbd5e1; color:#475569">?
-                        </div>
-                        <div class="action-group">
-                            <button class="btn-secondary" id="oneBtn2" onclick="tossOne(true)">1x werfen</button>
-                            <button class="btn-accent" id="allBtn2" onclick="tossAll(true)">Gerade 20x werfen</button>
+                        <div class="coin" id="coin2" style="background: var(--bg-hero); color: var(--color-ink-strong); border-color: var(--border);">?</div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                            <button class="btn btn-secondary" id="oneBtn2" onclick="tossOne(true)">1x werfen</button>
+                            <button class="btn btn-accent" id="allBtn2" onclick="tossAll(true)">Direkt 20x werfen</button>
                         </div>
                     </div>
                     <div class="stats-grid">
@@ -510,265 +685,283 @@
                         </div>
                         <div class="stat-item">
                             <div class="stat-value" id="total2">0</div>
-                            <div class="stat-label">Gesamt</div>
+                            <div class="stat-label">Gesamtwürfe (N)</div>
                         </div>
                     </div>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" id="btn7" disabled onclick="nextStep()">Auswerten</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" id="btn7" disabled onclick="nextStep()">Auswerten &rarr;</button>
                 </div>
             </div>
 
             <!-- Step 8: Vergleich Manipuliert -->
             <div class="step-content" id="step8">
-                <h2>8. Der "Schrei" der Daten</h2>
+                <h2>8. Die Evidenz der Daten</h2>
                 <div class="content-body">
-                    <p>Hier zeigt sich oft ein deutliches Bild. Dein Ergebnis liegt weit im Randbereich der fairen
-                        Verteilung.</p>
+                    <p>Hier zeigt sich das Signal: Das beobachtete Ergebnis liegt tief in den extremen Randbereichen der fairen Verteilung.</p>
                     <div class="chart-container"><canvas id="chart3"></canvas></div>
                     <div class="formula">
-                        <strong>Berechneter p-Wert:</strong> <span id="pVal2"
-                            style="font-weight: 700; color:var(--danger)">0.0000</span>
+                        <strong>Berechneter p-Wert:</strong> <span id="pVal2" style="font-weight: 700; color: var(--danger);">0.0000</span>
                     </div>
                     <div id="pValInterpret2" class="note" style="display:none"></div>
                 </div>
                 <div class="actions">
-                    <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                    <button class="btn-primary" onclick="nextStep()">Zum Urteil</button>
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Zum Urteil &rarr;</button>
                 </div>
             </div>
 
-            <!-- Step 9: Was bedeutet das nun? -->
+            <!-- Step 9: Interpretation & Misconceptions -->
             <div class="step-content" id="step9">
                 <h2>9. Was der p-Wert wirklich bedeutet</h2>
                 <div class="content-body">
-                    <p>Wir nutzen die 5%-Grenze (α = 0.05).</p>
                     <div id="interp2" class="interpretation-box" style="margin-bottom: 1.5rem;"></div>
 
                     <div class="comparison-grid">
                         <div class="compare-box meaning">
-                            <span class="compare-title">RICHTIG:</span>
-                            Der p-Wert zeigt, wie gut die <strong>Daten</strong> zur Hypothese (H₀)
-                            passen. Ein kleiner p-Wert heißt: Die Daten sind extrem unwahrscheinlich unter der H₀.
+                            <span class="compare-title" style="color: var(--success);">RICHTIGE INTERPRETATION:</span>
+                            Der p-Wert beziffert die Wahrscheinlichkeit der <strong>Daten</strong> unter der Annahme, dass die Nullhypothese wahr ist: \(P(\text{Daten} \mid H_0)\).
                         </div>
                         <div class="compare-box misconception">
-                            <span class="compare-title">FALSCH:</span>
-                            Der p-Wert ist <strong>nicht</strong> die Wahrscheinlichkeit, dass die
-                            H₀ wahr ist oder dass die H₁ korrekt ist. Er sagt nichts direkt über Hypothesen aus.
+                            <span class="compare-title" style="color: var(--danger);">HÄUFIGER TRUGSCHLUSS:</span>
+                            Der p-Wert ist <strong>nicht</strong> die Wahrscheinlichkeit, dass die Hypothese wahr ist: \(P(H_0 \mid \text{Daten}) \ne p\).
                         </div>
                     </div>
 
                     <div class="note">
-                        <strong>Wichtig:</strong> "Statistisch signifikant" (p < 0.05) bedeutet nicht
-                            automatisch "wichtig" oder "groß" . Es bedeutet nur: Wahrscheinlich kein reiner Zufall.
-                            </div>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                        <button class="btn-primary" onclick="nextStep()">Fazit</button>
+                        <strong>Wichtig:</strong> „Statistisch signifikant“ (\(p < 0.05\)) bedeutet nicht automatisch praktisch relevant oder groß. Es besagt lediglich: Ein reiner Zufall ist als alleinige Erklärung unwahrscheinlich.
                     </div>
                 </div>
-
-                <!-- Step 10: Fazit -->
-                <div class="step-content" id="step10">
-                    <h2>10. Zusammenfassung</h2>
-                    <div class="content-body">
-                        <p>Herzlichen Glückwunsch! Du hast nun verstanden:</p>
-                        <p>1. <strong>Statistik ist skeptisch</strong>: Wir fangen immer mit der H₀ an.<br>
-                            2. <strong>Daten entscheiden</strong>: Wir sammeln Fakten im Experiment.<br>
-                            3. <strong>Der p-Wert ist das Maß</strong>: Er sagt uns, ob unsere Beobachtung nur
-                            "Rauschen"
-                            (Zufall) oder ein echtes "Signal" (Effekt) ist.</p>
-                        <p style="margin-top: 1.5rem;">Damit bist du bereit für die Welt der empirischen
-                            Bildungsforschung.
-                        </p>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-secondary" onclick="prevStep()">Zurück</button>
-                        <button class="btn-primary" onclick="location.reload()">Experiment neustarten</button>
-                    </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Fazit &rarr;</button>
                 </div>
+            </div>
 
+            <!-- Step 10: Fazit -->
+            <div class="step-content" id="step10">
+                <h2>10. Wissenschaftliche Zusammenfassung</h2>
+                <div class="content-body">
+                    <p>Zusammenfassend gelten drei Grundpfeiler des statistischen Testens:</p>
+                    <p>1. <strong>Skeptischer Ausgangspunkt</strong>: Wir starten stets mit der Nullhypothese \(H_0\).<br>
+                       2. <strong>Empirische Datenbasis</strong>: Beobachtungen im Experiment liefern die Entscheidungsgrundlage.<br>
+                       3. <strong>Der p-Wert als Prüfmaß</strong>: Er trennt systematisches Signal von zufälligem Rauschen.</p>
+                    <p style="margin-top: 1.5rem;">Mit diesem Verständnis sind Sie optimal für inferenzstatistische Fragestellungen aufgestellt.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="prevStep()">&larr; Zurück</button>
+                    <button class="btn btn-primary" onclick="location.reload()">Experiment neu starten</button>
+                </div>
             </div>
         </div>
+    </div>
 
-        <script>
-            let currentStep = 1;
-            let heads1 = 0, total1 = 0;
-            let heads2 = 0, total2 = 0;
-            let charts = {};
+    <footer>
+        <p>Dr. Manuel D. S. Hopp &bull; Interaktive Lehr- und Forschungstools</p>
+    </footer>
 
-            // Custom Plugin for vertical line
-            const verticalLinePlugin = {
-                id: 'verticalLine',
-                afterDraw: (chart, args, opts) => {
-                    if (opts.lineValue !== undefined) {
-                        const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
-                        ctx.save();
-                        ctx.strokeStyle = '#ef4444';
-                        ctx.lineWidth = 2;
-                        ctx.setLineDash([5, 5]);
-                        const xPos = x.getPixelForValue(opts.lineValue);
-                        ctx.beginPath();
-                        ctx.moveTo(xPos, top);
-                        ctx.lineTo(xPos, bottom);
-                        ctx.stroke();
-                        ctx.restore();
-                    }
+    <script>
+        let currentStep = 1;
+        let heads1 = 0, total1 = 0;
+        let heads2 = 0, total2 = 0;
+        let charts = {};
+
+        // Custom Plugin for vertical line
+        const verticalLinePlugin = {
+            id: 'verticalLine',
+            afterDraw: (chart, args, opts) => {
+                if (opts.lineValue !== undefined) {
+                    const { ctx, chartArea: { top, bottom }, scales: { x } } = chart;
+                    ctx.save();
+                    ctx.strokeStyle = '#c4622d';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([6, 4]);
+                    const xPos = x.getPixelForValue(opts.lineValue);
+                    ctx.beginPath();
+                    ctx.moveTo(xPos, top);
+                    ctx.lineTo(xPos, bottom);
+                    ctx.stroke();
+                    ctx.restore();
                 }
-            };
-            Chart.register(verticalLinePlugin);
-
-            function showStep(s) {
-                document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
-                document.getElementById('step' + s).classList.add('active');
-                currentStep = s;
-                updateStepper();
-
-                if (s === 4) renderDist('chart1', heads1, false);
-                if (s === 5) renderDist('chart2', heads1, true);
-                if (s === 6) interpret(heads1, 'interp1');
-                if (s === 8) renderDist('chart3', heads2, true);
-                if (s === 9) interpret(heads2, 'interp2');
-
-                if (window.MathJax) MathJax.typeset();
             }
+        };
+        Chart.register(verticalLinePlugin);
 
-            function updateStepper() {
-                document.querySelectorAll('.step-dot').forEach((dot, i) => {
-                    dot.classList.toggle('active', i + 1 === currentStep);
-                    dot.classList.toggle('completed', i + 1 < currentStep);
-                });
+        function showStep(s) {
+            document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('step' + s).classList.add('active');
+            currentStep = s;
+            updateStepper();
+
+            if (s === 4) renderDist('chart1', heads1, false);
+            if (s === 5) renderDist('chart2', heads1, true);
+            if (s === 6) interpret(heads1, 'interp1');
+            if (s === 8) renderDist('chart3', heads2, true);
+            if (s === 9) interpret(heads2, 'interp2');
+
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
             }
+        }
 
-            function nextStep() { if (currentStep < 10) showStep(currentStep + 1); }
-            function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
+        function updateStepper() {
+            document.querySelectorAll('.step-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i + 1 === currentStep);
+                dot.classList.toggle('completed', i + 1 < currentStep);
+            });
+        }
 
-            function tossOne(manip) {
-                let t = manip ? total2 : total1;
-                if (t >= 20) return;
-                doToss(manip);
-            }
+        function nextStep() { if (currentStep < 10) showStep(currentStep + 1); }
+        function prevStep() { if (currentStep > 1) showStep(currentStep - 1); }
 
-            function tossAll(manip) {
-                let t = manip ? total2 : total1;
-                if (t >= 20) return;
-                const coin = document.getElementById(manip ? 'coin2' : 'coin1');
+        function tossOne(manip) {
+            let t = manip ? total2 : total1;
+            if (t >= 20) return;
+            doToss(manip);
+        }
+
+        function tossAll(manip) {
+            let t = manip ? total2 : total1;
+            if (t >= 20) return;
+            const coin = document.getElementById(manip ? 'coin2' : 'coin1');
+            coin.classList.add('flipping');
+            const interval = setInterval(() => {
+                if ((manip ? total2 : total1) < 20) {
+                    doToss(manip, true);
+                } else {
+                    clearInterval(interval);
+                    coin.classList.remove('flipping');
+                }
+            }, 45);
+        }
+
+        function doToss(manip, silent) {
+            const isHeads = Math.random() < (manip ? 0.85 : 0.5);
+            const coin = document.getElementById(manip ? 'coin2' : 'coin1');
+
+            if (!silent) {
                 coin.classList.add('flipping');
-                const interval = setInterval(() => {
-                    if ((manip ? total2 : total1) < 20) {
-                        doToss(manip, true);
-                    } else {
-                        clearInterval(interval);
-                        coin.classList.remove('flipping');
-                    }
-                }, 50);
-            }
-
-            function doToss(manip, silent) {
-                const h = manip ? heads2 : heads1;
-                const t = manip ? total2 : total1;
-                const coin = document.getElementById(manip ? 'coin2' : 'coin1');
-
-                const isHeads = Math.random() < (manip ? 0.85 : 0.5);
-
-                if (!silent) {
-                    coin.classList.add('flipping');
-                    setTimeout(() => {
-                        coin.classList.remove('flipping');
-                        updateStore(manip, isHeads);
-                    }, 200);
-                } else {
+                setTimeout(() => {
+                    coin.classList.remove('flipping');
                     updateStore(manip, isHeads);
-                }
+                }, 180);
+            } else {
+                updateStore(manip, isHeads);
             }
+        }
 
-            function updateStore(manip, isHeads) {
-                if (manip) {
-                    if (isHeads) heads2++;
-                    total2++;
-                } else {
-                    if (isHeads) heads1++;
-                    total1++;
-                }
-                const h = manip ? heads2 : heads1;
-                const t = manip ? total2 : total1;
-                document.getElementById(manip ? 'heads2' : 'heads1').innerText = h;
-                document.getElementById(manip ? 'total2' : 'total1').innerText = t;
-                document.getElementById(manip ? 'coin2' : 'coin1').innerText = isHeads ? 'KOPF' : 'ZAHL';
-
-                if (t === 20) {
-                    document.getElementById(manip ? 'oneBtn2' : 'oneBtn1').disabled = true;
-                    document.getElementById(manip ? 'allBtn2' : 'allBtn1').disabled = true;
-                    document.getElementById(manip ? 'btn7' : 'btn3').disabled = false;
-                    if (!manip) document.getElementById('resHeads1').innerText = heads1;
-                }
+        function updateStore(manip, isHeads) {
+            if (manip) {
+                if (isHeads) heads2++;
+                total2++;
+            } else {
+                if (isHeads) heads1++;
+                total1++;
             }
+            const h = manip ? heads2 : heads1;
+            const t = manip ? total2 : total1;
+            document.getElementById(manip ? 'heads2' : 'heads1').innerText = h;
+            document.getElementById(manip ? 'total2' : 'total1').innerText = t;
+            document.getElementById(manip ? 'coin2' : 'coin1').innerText = isHeads ? 'KOPF' : 'ZAHL';
 
-            function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }
-            function combination(n, k) {
-                let res = 1;
-                for (let i = 1; i <= Math.min(k, n - k); i++) res = res * (n - i + 1) / i;
-                return res;
+            if (t === 20) {
+                document.getElementById(manip ? 'oneBtn2' : 'oneBtn1').disabled = true;
+                document.getElementById(manip ? 'allBtn2' : 'allBtn1').disabled = true;
+                document.getElementById(manip ? 'btn7' : 'btn3').disabled = false;
+                if (!manip) document.getElementById('resHeads1').innerText = heads1;
             }
-            function binomial(k, n, p) { return combination(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k); }
+        }
 
-            function calculateP(k) {
-                let p = 0;
-                const diff = Math.abs(k - 10);
-                for (let i = 0; i <= 20; i++) {
-                    if (Math.abs(i - 10) >= diff) p += binomial(i, 20, 0.5);
-                }
-                return p;
+        function factorial(n) { if (n <= 1) return 1; return n * factorial(n - 1); }
+        function combination(n, k) {
+            let res = 1;
+            for (let i = 1; i <= Math.min(k, n - k); i++) res = res * (n - i + 1) / i;
+            return res;
+        }
+        function binomial(k, n, p) { return combination(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k); }
+
+        function calculateP(k) {
+            let p = 0;
+            const diff = Math.abs(k - 10);
+            for (let i = 0; i <= 20; i++) {
+                if (Math.abs(i - 10) >= diff) p += binomial(i, 20, 0.5);
             }
+            return p;
+        }
 
-            function renderDist(id, h, highlight) {
-                const ctx = document.getElementById(id).getContext('2d');
-                const labels = Array.from({ length: 21 }, (_, i) => i);
-                const data = labels.map(k => binomial(k, 20, 0.5));
-                const diff = Math.abs(h - 10);
+        function renderDist(id, h, highlight) {
+            const ctx = document.getElementById(id).getContext('2d');
+            const labels = Array.from({ length: 21 }, (_, i) => i);
+            const data = labels.map(k => binomial(k, 20, 0.5));
+            const diff = Math.abs(h - 10);
 
-                const colors = labels.map(i => {
-                    if (highlight && Math.abs(i - 10) >= diff) return 'rgba(239, 68, 68, 0.8)';
-                    return highlight ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.4)';
-                });
+            const colors = labels.map(i => {
+                if (highlight && Math.abs(i - 10) >= diff) return '#c4622d';
+                return highlight ? 'rgba(100, 116, 139, 0.2)' : 'rgba(196, 98, 45, 0.4)';
+            });
 
-                if (charts[id]) charts[id].destroy();
-                charts[id] = new Chart(ctx, {
-                    type: 'bar',
-                    data: { labels, datasets: [{ data, backgroundColor: colors, barPercentage: highlight ? 1.0 : 0.8, categoryPercentage: highlight ? 1.0 : 0.8 }] },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        plugins: { legend: false, verticalLine: { lineValue: h } },
-                        scales: { y: { display: false, min: 0, max: 0.2 }, x: { grid: { display: false }, title: { display: true, text: 'Anzahl Kopf' } } }
+            if (charts[id]) charts[id].destroy();
+            charts[id] = new Chart(ctx, {
+                type: 'bar',
+                data: { labels, datasets: [{ data, backgroundColor: colors, barPercentage: 0.9, categoryPercentage: 0.9 }] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: false, verticalLine: { lineValue: h } },
+                    scales: {
+                        y: { display: false, min: 0, max: 0.2 },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'JetBrains Mono' } },
+                            title: { display: true, text: 'Anzahl Kopf', font: { family: 'DM Sans', weight: 'bold' } }
+                        }
                     }
-                });
-
-                if (id === 'chart2') {
-                    const p = calculateP(h);
-                    document.getElementById('pVal1').innerText = p.toFixed(4);
-                    const interp = document.getElementById('pValInterpret1');
-                    interp.style.display = 'block';
-                    interp.innerHTML = `Das heißt also, dass bei einer fairen Münze in ca. <strong>${(p * 100).toFixed(1)}%</strong> der Fälle ein so extremes Ergebnis auftreten würde.`;
                 }
-                if (id === 'chart3') {
-                    const p = calculateP(h);
-                    document.getElementById('pVal2').innerText = p.toFixed(4);
-                    const interp = document.getElementById('pValInterpret2');
-                    interp.style.display = 'block';
-                    interp.innerHTML = `Das heißt also, dass bei einer fairen Münze in ca. <strong>${(p * 100).toFixed(1)}%</strong> der Fälle ein so extremes Ergebnis auftreten würde.`;
-                }
-            }
+            });
 
-            function interpret(h, id) {
+            if (id === 'chart2') {
                 const p = calculateP(h);
-                const sig = p < 0.05;
-                const box = document.getElementById(id);
-                box.className = 'interpretation-box ' + (sig ? 'significant' : 'not-significant');
-                box.innerHTML = `Ergebnis: p = ${p.toFixed(4)}${sig ? ' < 0.05' : ' ≥ 0.05'}<br>${sig ? '<strong>Signifikant!</strong> H₀ wird abgelehnt. Die Münze ist vermutlich nicht fair.' : '<strong>Nicht signifikant.</strong> H₀ bleibt bestehen. Der Zufall reicht als Erklärung.'}`;
+                document.getElementById('pVal1').innerText = p.toFixed(4);
+                const interp = document.getElementById('pValInterpret1');
+                interp.style.display = 'block';
+                interp.innerHTML = `Bei einer tatsächlich fairen Münze tritt ein derart extremes Ergebnis in ca. <strong>${(p * 100).toFixed(1)}%</strong> aller Versuche rein zufällig auf.`;
             }
-        </script>
+            if (id === 'chart3') {
+                const p = calculateP(h);
+                document.getElementById('pVal2').innerText = p.toFixed(4);
+                const interp = document.getElementById('pValInterpret2');
+                interp.style.display = 'block';
+                interp.innerHTML = `Unter der Annahme einer fairen Münze tritt ein so extremes Ergebnis nur in ca. <strong>${(p * 100).toFixed(2)}%</strong> aller Fälle durch Zufall auf.`;
+            }
+        }
+
+        function interpret(h, id) {
+            const p = calculateP(h);
+            const sig = p < 0.05;
+            const box = document.getElementById(id);
+            box.className = 'interpretation-box ' + (sig ? 'significant' : 'not-significant');
+            box.innerHTML = `Ergebnis: p = ${p.toFixed(4)}${sig ? ' < 0.05' : ' ≥ 0.05'}<br>${sig ? '<strong>Statistisch signifikant!</strong> H₀ wird abgelehnt. Die Daten weichen stark von einer fairen Münze ab.' : '<strong>Nicht signifikant.</strong> H₀ wird beibehalten. Der Zufall erklärt das Ergebnis hinreichend.'}`;
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.getAttribute('data-theme') === 'light') {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('pvalue_theme', 'dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+            } else {
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('pvalue_theme', 'light');
+                document.getElementById('themeIcon').textContent = '🌙';
+            }
+        }
+
+        if (localStorage.getItem('pvalue_theme') === 'dark' || (!localStorage.getItem('pvalue_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('themeIcon').textContent = '☀️';
+        }
+    </script>
 </body>
 
 </html>

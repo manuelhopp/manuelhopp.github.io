@@ -1,97 +1,89 @@
 <!DOCTYPE html>
-<html lang="de" data-theme="dark">
+<html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forschungsdesign & Evaluierung | Hören wir einander wirklich zu?</title>
-  <meta name="description" content="Interaktives Dashboard für Forschungsfragen, empirische Methoden und methodisches Review auf Basis des Codebuchs 'Are We Really Listening to One Another?'.">
+  <title>Forschungsdesign & Evaluierung | Dr. Manuel D. S. Hopp</title>
+  <meta name="description" content="Interaktives Dashboard für 5 hypothesengeleitete Forschungsfragen, empirische Analysemethoden und kritische Fragebogen-Evaluierung auf Basis des Studien-Codebuchs v2.0.">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      /* Dark Theme Tokens (Harmonious Ocean/Slate/Teal - No Violet) */
-      --bg-main: #0b1320;
-      --bg-sidebar: #111a2e;
-      --bg-card: #152238;
-      --bg-card-hover: #1c2b47;
-      --bg-card-inner: #0e1726;
-      
-      --border-color: rgba(255, 255, 255, 0.08);
-      --border-accent: rgba(59, 130, 246, 0.35);
-      
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
+      /* Warm Academic Study Tokens (Light Theme) */
+      --color-accent: #c4622d;
+      --color-accent-light: #d4784d;
+      --color-accent-deep: #a34e20;
+      --color-ink-strong: #7a3a15;
+
+      --bg-main: #faf7f4;
+      --bg-sidebar: rgba(255, 255, 255, 0.85);
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --bg-card-hover: #ffffff;
+      --bg-card-inner: #f3ede6;
+
+      --border-color: #e6ddd5;
+      --border-accent: rgba(196, 98, 45, 0.4);
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
       --text-muted: #64748b;
-      
-      /* Harmonious Domain Color Palette (No Violet/Purple) */
-      --domain-blue: #3b82f6;
-      --domain-blue-bg: rgba(59, 130, 246, 0.12);
-      
-      --domain-teal: #14b8a6;
-      --domain-teal-bg: rgba(20, 184, 166, 0.12);
-      
-      --domain-emerald: #10b981;
-      --domain-emerald-bg: rgba(16, 185, 129, 0.12);
-      
-      --domain-amber: #f59e0b;
-      --domain-amber-bg: rgba(245, 158, 11, 0.12);
-      
-      --domain-sky: #0284c7;
-      --domain-sky-bg: rgba(2, 132, 199, 0.12);
 
-      --domain-rose: #f43f5e;
-      --domain-rose-bg: rgba(244, 63, 94, 0.12);
+      /* Domain Accent Tokens */
+      --domain-1: #c4622d; /* Terracotta - Entwicklungspsychologie */
+      --domain-1-bg: rgba(196, 98, 45, 0.08);
+      --domain-2: #0d9488; /* Teal - Metakognition */
+      --domain-2-bg: rgba(13, 148, 136, 0.08);
+      --domain-3: #10b981; /* Emerald - Mindset */
+      --domain-3-bg: rgba(16, 185, 129, 0.08);
+      --domain-4: #d97706; /* Amber - Ergonomie */
+      --domain-4-bg: rgba(217, 119, 6, 0.08);
+      --domain-5: #2563eb; /* Cobalt - Soziologie */
+      --domain-5-bg: rgba(37, 99, 235, 0.08);
 
-      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
-      --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.35);
+      --shadow-card: 0 4px 20px rgba(28, 24, 22, 0.04);
+      --shadow-hover: 0 12px 32px rgba(28, 24, 22, 0.08);
 
-      --radius-sm: 8px;
-      --radius-md: 14px;
-      --radius-lg: 18px;
-      
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 14px;
+
       --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
       --transition-normal: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    [data-theme="light"] {
-      /* Light Theme Tokens (Harmonious Slate/Navy/Ocean) */
-      --bg-main: #f8fafc;
-      --bg-sidebar: #ffffff;
-      --bg-card: #ffffff;
-      --bg-card-hover: #f1f5f9;
-      --bg-card-inner: #f8fafc;
-      
-      --border-color: rgba(15, 23, 42, 0.09);
-      --border-accent: rgba(37, 99, 235, 0.3);
-      
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      
-      --domain-blue: #2563eb;
-      --domain-blue-bg: rgba(37, 99, 235, 0.08);
-      
-      --domain-teal: #0d9488;
-      --domain-teal-bg: rgba(13, 148, 136, 0.08);
-      
-      --domain-emerald: #059669;
-      --domain-emerald-bg: rgba(5, 150, 105, 0.08);
-      
-      --domain-amber: #d97706;
-      --domain-amber-bg: rgba(217, 119, 6, 0.08);
-      
-      --domain-sky: #0369a1;
-      --domain-sky-bg: rgba(3, 105, 161, 0.08);
+    [data-theme="dark"] {
+      /* Warm Academic Study Tokens (Dark Theme) */
+      --bg-main: #181514;
+      --bg-sidebar: rgba(36, 32, 30, 0.85);
+      --bg-card: rgba(36, 32, 30, 0.9);
+      --bg-card-hover: #2d2825;
+      --bg-card-inner: #1e1a18;
 
-      --domain-rose: #e11d48;
-      --domain-rose-bg: rgba(225, 29, 72, 0.08);
+      --border-color: #342e2a;
+      --border-accent: rgba(224, 149, 106, 0.4);
 
-      --shadow-card: 0 2px 10px rgba(15, 23, 42, 0.05);
-      --shadow-hover: 0 8px 24px rgba(15, 23, 42, 0.09);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --color-ink-strong: #e0956a;
+
+      --domain-1: #e0956a;
+      --domain-1-bg: rgba(224, 149, 106, 0.15);
+      --domain-2: #2dd4bf;
+      --domain-2-bg: rgba(45, 212, 191, 0.12);
+      --domain-3: #34d399;
+      --domain-3-bg: rgba(52, 211, 153, 0.12);
+      --domain-4: #fbbf24;
+      --domain-4-bg: rgba(251, 191, 36, 0.12);
+      --domain-5: #60a5fa;
+      --domain-5-bg: rgba(96, 165, 250, 0.12);
+
+      --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+      --shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -101,126 +93,150 @@
     }
 
     body {
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
       transition: background-color var(--transition-normal), color var(--transition-normal);
     }
 
-    /* Focus States for Accessibility */
-    :focus-visible {
-      outline: 2px solid var(--domain-blue);
-      outline-offset: 3px;
-      border-radius: inherit;
-    }
-
-    /* Motion Sensitivity Support */
-    @media (prefers-reduced-motion: reduce) {
-      *, ::before, ::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
-
-    .app-wrapper {
-      max-width: 1520px;
-      margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
-    }
-
-    /* Top Header */
-    header {
-      margin-bottom: 2rem;
+    /* Top Header Bar */
+    header.app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-sidebar);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-color);
-      padding-bottom: 1.5rem;
+      padding: 0 1.5rem;
+      height: 64px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 1.5rem;
+      justify-content: space-between;
     }
 
-    .header-main {
-      flex: 1;
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
     }
 
-    .badge-top {
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-accent);
+      color: #ffffff;
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: var(--domain-blue-bg);
-      border: 1px solid var(--border-accent);
-      color: var(--domain-blue);
-      padding: 0.35rem 0.85rem;
-      border-radius: 99px;
-      font-size: 0.8rem;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
       font-weight: 600;
-      letter-spacing: 0.02em;
-      margin-bottom: 0.75rem;
+      color: var(--text-primary);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 0px;
+      transition: all var(--transition-fast);
     }
 
-    .badge-top::before {
-      content: '';
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background-color: var(--domain-blue);
+    .btn-header:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    /* Main Dashboard Layout */
+    .app-wrapper {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .dashboard-intro {
+      margin-bottom: 2rem;
+      border-left: 3px solid var(--color-accent);
+      padding-left: 1.25rem;
+    }
+
+    .tag-top {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--color-accent);
+      margin-bottom: 0.25rem;
     }
 
     h1 {
-      font-size: clamp(1.8rem, 3vw, 2.4rem);
-      font-weight: 800;
-      letter-spacing: -0.03em;
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: clamp(1.6rem, 1.2rem + 1.25vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
       line-height: 1.2;
       color: var(--text-primary);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.5rem;
     }
 
     .subtitle {
       color: var(--text-secondary);
-      font-size: 1.05rem;
-      max-width: 950px;
-      font-weight: 400;
+      font-size: 0.95rem;
+      max-width: 900px;
+      line-height: 1.6;
     }
 
-    .theme-toggle-btn {
-      background: var(--bg-sidebar);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 0.55rem 1rem;
-      border-radius: var(--radius-md);
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: var(--transition-fast);
-      box-shadow: var(--shadow-card);
-      flex-shrink: 0;
-    }
-
-    .theme-toggle-btn:hover {
-      border-color: var(--domain-blue);
-    }
-
-    /* Widescreen 2-Column Dashboard Layout */
     .dashboard-layout {
       display: grid;
-      grid-template-columns: 310px 1fr;
+      grid-template-columns: 280px 1fr;
       gap: 2rem;
       align-items: start;
     }
 
-    /* Sticky Sidebar Filter Panel */
+    /* Sidebar Panel */
     .sidebar-panel {
       position: sticky;
-      top: 1.5rem;
+      top: 5rem;
       background: var(--bg-sidebar);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       padding: 1.5rem;
@@ -231,67 +247,64 @@
     }
 
     .sidebar-title {
-      font-size: 0.825rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--text-muted);
       font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Main View Navigation Tabs */
     .view-nav {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .view-nav-btn {
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-secondary);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       font-family: inherit;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-md);
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: var(--transition-fast);
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.5rem;
       text-align: left;
     }
 
     .view-nav-btn:hover {
       color: var(--text-primary);
-      background: var(--domain-blue-bg);
+      background: rgba(196, 98, 45, 0.06);
     }
 
     .view-nav-btn.active {
       color: var(--text-primary);
       background: var(--bg-card);
-      border-color: var(--border-accent);
+      border: 1px solid var(--border-accent);
+      border-left: 3px solid var(--color-accent);
       box-shadow: var(--shadow-card);
     }
 
-    .view-nav-btn.active .nav-icon {
-      color: var(--domain-blue);
-    }
-
-    /* Domain Filter List (Vertical Chips in Sidebar) */
     .domain-filters-list {
       display: flex;
       flex-direction: column;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
 
     .filter-chip-item {
       background: var(--bg-card-inner);
       border: 1px solid var(--border-color);
+      border-left: 2px solid transparent;
       color: var(--text-secondary);
-      padding: 0.55rem 0.85rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.88rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0px;
+      font-size: 0.82rem;
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition-fast);
@@ -302,14 +315,15 @@
     }
 
     .filter-chip-item:hover {
-      border-color: var(--domain-blue);
+      border-color: var(--color-accent);
       color: var(--text-primary);
     }
 
     .filter-chip-item.active {
-      background: var(--domain-blue);
+      background: var(--color-accent);
       color: #ffffff;
-      border-color: var(--domain-blue);
+      border-color: var(--color-accent);
+      border-left-color: var(--color-accent-deep);
     }
 
     .filter-chip-item.active .chip-count {
@@ -318,15 +332,19 @@
     }
 
     .chip-count {
-      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
       font-weight: 700;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 0.15rem 0.45rem;
-      border-radius: 99px;
+      background: rgba(0, 0, 0, 0.08);
+      padding: 0.1rem 0.4rem;
+      border-radius: 0px;
       color: var(--text-muted);
     }
 
-    /* Search Box in Sidebar */
+    .dark .chip-count {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
     .sidebar-search-box {
       position: relative;
       width: 100%;
@@ -337,50 +355,44 @@
       background: var(--bg-card-inner);
       border: 1px solid var(--border-color);
       color: var(--text-primary);
-      padding: 0.55rem 1rem 0.55rem 2.4rem;
-      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.85rem 0.5rem 2.2rem;
+      border-radius: 0px;
       font-family: inherit;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       transition: var(--transition-fast);
     }
 
     .sidebar-search-box input:focus {
       outline: none;
-      border-color: var(--domain-blue);
+      border-color: var(--color-accent);
     }
 
     .sidebar-search-icon {
       position: absolute;
-      left: 0.8rem;
+      left: 0.7rem;
       top: 50%;
       transform: translateY(-50%);
       color: var(--text-muted);
       pointer-events: none;
     }
 
-    .sidebar-controls-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
     .action-btn-small {
-      background: var(--bg-card-inner);
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
       padding: 0.45rem 0.75rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.82rem;
+      border-radius: 0px;
+      font-size: 0.8rem;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
       transition: var(--transition-fast);
+      width: 100%;
     }
 
     .action-btn-small:hover {
-      border-color: var(--domain-blue);
-      color: var(--text-primary);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
     }
 
     /* Main Content Area */
@@ -402,15 +414,17 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Research Questions 2-Column Widescreen Grid */
+    /* Questions Grid */
     .questions-grid-horizontal {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+      grid-template-columns: 1fr;
       gap: 1.5rem;
     }
 
     .question-card {
       background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       overflow: hidden;
@@ -422,14 +436,14 @@
 
     .question-card:hover {
       box-shadow: var(--shadow-hover);
+      border-color: var(--border-accent);
     }
 
-    /* Specific Harmonious Domain Color Themes (No Violet) */
-    .question-card[data-domain="Entwicklungspsychologie"] { border-top: 2px solid var(--domain-blue); }
-    .question-card[data-domain="Metakognition"] { border-top: 2px solid var(--domain-teal); }
-    .question-card[data-domain="Mindset"] { border-top: 2px solid var(--domain-emerald); }
-    .question-card[data-domain="Ergonomie"] { border-top: 2px solid var(--domain-amber); }
-    .question-card[data-domain="Soziologie"] { border-top: 2px solid var(--domain-sky); }
+    .question-card[data-domain="Entwicklungspsychologie"] { border-left: 4px solid var(--domain-1); }
+    .question-card[data-domain="Metakognition"] { border-left: 4px solid var(--domain-2); }
+    .question-card[data-domain="Mindset"] { border-left: 4px solid var(--domain-3); }
+    .question-card[data-domain="Ergonomie"] { border-left: 4px solid var(--domain-4); }
+    .question-card[data-domain="Soziologie"] { border-left: 4px solid var(--domain-5); }
 
     .card-header {
       padding: 1.5rem;
@@ -448,57 +462,61 @@
     .card-meta {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.6rem;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
     }
 
     .fq-badge {
+      font-family: 'JetBrains Mono', monospace;
       color: #ffffff;
       font-weight: 700;
-      font-size: 0.75rem;
-      padding: 0.18rem 0.55rem;
-      border-radius: 6px;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0px;
       letter-spacing: 0.05em;
     }
 
-    .question-card[data-domain="Entwicklungspsychologie"] .fq-badge { background: var(--domain-blue); }
-    .question-card[data-domain="Metakognition"] .fq-badge { background: var(--domain-teal); }
-    .question-card[data-domain="Mindset"] .fq-badge { background: var(--domain-emerald); }
-    .question-card[data-domain="Ergonomie"] .fq-badge { background: var(--domain-amber); }
-    .question-card[data-domain="Soziologie"] .fq-badge { background: var(--domain-sky); }
+    .question-card[data-domain="Entwicklungspsychologie"] .fq-badge { background: var(--domain-1); }
+    .question-card[data-domain="Metakognition"] .fq-badge { background: var(--domain-2); }
+    .question-card[data-domain="Mindset"] .fq-badge { background: var(--domain-3); }
+    .question-card[data-domain="Ergonomie"] .fq-badge { background: var(--domain-4); }
+    .question-card[data-domain="Soziologie"] .fq-badge { background: var(--domain-5); }
 
     .domain-tag {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
-    .question-card[data-domain="Entwicklungspsychologie"] .domain-tag { color: var(--domain-blue); }
-    .question-card[data-domain="Metakognition"] .domain-tag { color: var(--domain-teal); }
-    .question-card[data-domain="Mindset"] .domain-tag { color: var(--domain-emerald); }
-    .question-card[data-domain="Ergonomie"] .domain-tag { color: var(--domain-amber); }
-    .question-card[data-domain="Soziologie"] .domain-tag { color: var(--domain-sky); }
+    .question-card[data-domain="Entwicklungspsychologie"] .domain-tag { color: var(--domain-1); }
+    .question-card[data-domain="Metakognition"] .domain-tag { color: var(--domain-2); }
+    .question-card[data-domain="Mindset"] .domain-tag { color: var(--domain-3); }
+    .question-card[data-domain="Ergonomie"] .domain-tag { color: var(--domain-4); }
+    .question-card[data-domain="Soziologie"] .domain-tag { color: var(--domain-5); }
 
     .card-title {
-      font-size: 1.2rem;
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 1.15rem;
       font-weight: 700;
       line-height: 1.35;
       color: var(--text-primary);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
     }
 
     .card-summary {
       color: var(--text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.5;
+      font-size: 0.9rem;
+      line-height: 1.55;
     }
 
     .toggle-btn {
       background: var(--bg-card-inner);
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      border-radius: 0px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -510,12 +528,11 @@
 
     .question-card.open .toggle-btn {
       transform: rotate(180deg);
-      background: var(--domain-blue);
+      background: var(--color-accent);
       color: #ffffff;
-      border-color: var(--domain-blue);
+      border-color: var(--color-accent);
     }
 
-    /* Horizontal Multi-Column Drawer Body */
     .card-body {
       display: none;
       background: var(--bg-card-inner);
@@ -530,7 +547,7 @@
     .body-inner-horizontal {
       padding: 1.5rem;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 1.5rem;
     }
 
@@ -546,11 +563,12 @@
     }
 
     .block-title {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--text-muted);
       font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
       display: flex;
       align-items: center;
       gap: 0.4rem;
@@ -559,23 +577,23 @@
     .relevance-box {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      padding: 0.9rem 1.1rem;
+      padding: 0.85rem 1rem;
       border-radius: var(--radius-sm);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: var(--text-primary);
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
     .sub-questions-list {
       list-style: none;
       display: grid;
-      gap: 0.5rem;
+      gap: 0.45rem;
     }
 
     .sub-questions-list li {
       position: relative;
-      padding-left: 1.4rem;
-      font-size: 0.9rem;
+      padding-left: 1.25rem;
+      font-size: 0.88rem;
       color: var(--text-secondary);
       line-height: 1.45;
     }
@@ -584,30 +602,30 @@
       content: '→';
       position: absolute;
       left: 0;
-      color: var(--domain-blue);
+      color: var(--color-accent);
       font-weight: 700;
     }
 
     .var-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
 
     .var-badge {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.76rem;
+      font-size: 0.73rem;
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       color: var(--text-secondary);
-      padding: 0.2rem 0.55rem;
-      border-radius: 5px;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0px;
     }
 
     .var-badge.index-var {
-      background: var(--domain-emerald-bg);
-      border-color: var(--domain-emerald);
-      color: var(--domain-emerald);
+      background: rgba(196, 98, 45, 0.1);
+      border-color: var(--color-accent);
+      color: var(--color-ink-strong);
       font-weight: 600;
     }
 
@@ -620,32 +638,160 @@
     .method-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1rem;
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
     }
 
     .method-type {
-      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .method-type.quant { color: var(--domain-2); }
+    .method-type.qual { color: var(--domain-4); }
+
+    .method-title {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
       margin-bottom: 0.3rem;
     }
 
-    .method-type.quant { color: var(--domain-teal); }
-    .method-type.qual { color: var(--domain-amber); }
-
-    .method-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 0.35rem;
-    }
-
     .method-desc {
-      font-size: 0.85rem;
+      font-size: 0.83rem;
       color: var(--text-secondary);
       line-height: 1.45;
+    }
+
+    .code-inline {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      padding: 0.1rem 0.35rem;
+      border-radius: 0px;
+      color: var(--text-primary);
+    }
+
+    /* Evaluation Views */
+    .eval-tabs-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+    }
+
+    .eval-tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 0.6rem 1rem;
+      border-radius: 0px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-card);
+    }
+
+    .eval-tab-btn:hover {
+      border-color: var(--color-accent);
+      color: var(--text-primary);
+    }
+
+    .eval-tab-btn.active {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #ffffff;
+    }
+
+    .eval-panel {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .eval-panel.active {
+      display: grid;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .review-card.warning { border-left: 4px solid var(--domain-4); }
+    .review-card.danger { border-left: 4px solid #e11d48; }
+    .review-card.success { border-left: 4px solid var(--domain-3); }
+    .review-card.info { border-left: 4px solid var(--domain-2); }
+
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .review-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .warning .review-icon { background: var(--domain-4-bg); color: var(--domain-4); }
+    .danger .review-icon { background: rgba(225, 29, 72, 0.12); color: #e11d48; }
+    .success .review-icon { background: var(--domain-3-bg); color: var(--domain-3); }
+    .info .review-icon { background: var(--domain-2-bg); color: var(--domain-2); }
+
+    .review-title {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .review-text {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .action-box {
+      margin-top: auto;
+      background: var(--bg-card-inner);
+      border: 1px solid var(--border-color);
+      padding: 0.75rem;
+      font-size: 0.82rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .action-title {
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     /* Empty State */
@@ -662,229 +808,75 @@
       display: block;
     }
 
-    .empty-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      opacity: 0.6;
-    }
-
-    .empty-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-desc {
-      color: var(--text-secondary);
-      margin-bottom: 1.5rem;
-    }
-
-    /* Questionnaire Evaluation Section (Horizontal Grid Layout) */
-    .eval-tabs-nav {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-      overflow-x: auto;
-      padding-bottom: 0.5rem;
-    }
-
-    .eval-tab-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      padding: 0.6rem 1.1rem;
-      border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: var(--transition-fast);
-      box-shadow: var(--shadow-card);
-    }
-
-    .eval-tab-btn:hover {
-      border-color: var(--domain-blue);
-      color: var(--text-primary);
-    }
-
-    .eval-tab-btn.active {
-      background: var(--domain-blue-bg);
-      border-color: var(--domain-blue);
-      color: var(--text-primary);
-    }
-
-    .eval-panel {
-      display: none;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 1.25rem;
-    }
-
-    .eval-panel.active {
-      display: grid;
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .review-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 1.4rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      box-shadow: var(--shadow-card);
-    }
-
-    .review-header {
-      display: flex;
-      align-items: center;
-      gap: 0.68rem;
-    }
-
-    .review-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
-      flex-shrink: 0;
-    }
-
-    .warning .review-icon { background: var(--domain-amber-bg); color: var(--domain-amber); }
-    .danger .review-icon { background: var(--domain-rose-bg); color: var(--domain-rose); }
-    .success .review-icon { background: var(--domain-emerald-bg); color: var(--domain-emerald); }
-    .info .review-icon { background: var(--domain-teal-bg); color: var(--domain-teal); }
-
-    .review-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .review-text {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .code-inline {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-color);
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      color: var(--text-primary);
-    }
-
-    .action-box {
-      margin-top: auto;
-      background: var(--bg-card-inner);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
-      padding: 0.85rem;
-      font-size: 0.85rem;
-    }
-
-    .action-title {
-      font-weight: 700;
-      color: var(--domain-blue);
-      margin-bottom: 0.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    /* Footer */
     footer {
       margin-top: 4rem;
-      padding-top: 1.5rem;
+      padding: 2rem 1.5rem;
       border-top: 1px solid var(--border-color);
       text-align: center;
       color: var(--text-muted);
-      font-size: 0.88rem;
+      font-size: 0.82rem;
     }
 
-    footer p {
-      margin-bottom: 0.3rem;
-    }
-
-    /* Responsive Breakdown & Touch Target Optimization */
-    @media (max-width: 1024px) {
-      .dashboard-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar-panel {
-        position: static;
-      }
-
-      .questions-grid-horizontal {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 640px) {
-      header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-      .app-wrapper { padding: 1.25rem 0.85rem 3rem; }
-      .body-inner-horizontal { grid-template-columns: 1fr; }
-      
-      /* WCAG Touch Target Sizing on Mobile */
-      .theme-toggle-btn,
-      .action-btn-small,
-      .filter-chip-item,
-      .view-nav-btn {
-        min-height: 44px;
-      }
+    @media (max-width: 900px) {
+      .dashboard-layout { grid-template-columns: 1fr; }
+      .sidebar-panel { position: static; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Top Sticky Header -->
+  <header class="app-header">
+    <a href="#" class="brand-group">
+      <div class="brand-icon">F</div>
+      <div>
+        <div class="brand-title">Forschungsdesign & Evaluierung</div>
+        <div class="brand-subtitle">Dr. Manuel D. S. Hopp &bull; Academic Dashboard</div>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <a href="../index.html" class="btn-header" title="Zurück zur Homepage">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Homepage</span>
+      </a>
+      <button class="btn-header" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Farbschema wechseln">
+        <span id="themeIcon">🌙</span>
+      </button>
+    </div>
+  </header>
+
   <div class="app-wrapper">
     
-    <!-- Top Header -->
-    <header>
-      <div class="header-main">
-        <div class="badge-top">Wissenschaftliches Forschungsdesign & Evaluierung</div>
-        <h1>„Hören wir einander wirklich zu?“</h1>
-        <p class="subtitle">Interaktives Dashboard für 5 hypothesengeleitete Forschungsfragen, empirische Analysemethoden und kritische Fragebogen-Evaluierung auf Basis des Studien-Codebuchs v2.0.</p>
-      </div>
+    <div class="dashboard-intro">
+      <div class="tag-top">Wissenschaftliche Forschungsplanung & Methodik</div>
+      <h1>„Hören wir einander wirklich zu?“</h1>
+      <p class="subtitle">
+        Interaktives Dashboard für 5 theoriegeleitete Forschungsfragen, methodische Analysematrizen und psychometrische Fragebogen-Evaluierung basierend auf dem Codebuch v2.0.
+      </p>
+    </div>
 
-      <!-- Theme Switcher Button -->
-      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Farbschema wechseln">
-        <span id="themeIcon" aria-hidden="true">☀️</span>
-        <span id="themeLabel">Light Mode</span>
-      </button>
-    </header>
-
-    <!-- Widescreen 2-Column Dashboard Layout -->
     <div class="dashboard-layout">
       
-      <!-- Left Sidebar: Filter Panel & Navigation -->
+      <!-- Left Sidebar -->
       <aside class="sidebar-panel">
-        
         <div>
-          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Hauptansicht</div>
-          <nav class="view-nav" role="tablist" aria-label="Hauptnavigation">
+          <div class="sidebar-title" style="margin-bottom: 0.6rem;">Ansicht</div>
+          <nav class="view-nav" role="tablist">
             <button class="view-nav-btn active" role="tab" aria-selected="true" aria-controls="questions-view" onclick="switchView('questions-view', this)">
-              <span class="nav-icon" aria-hidden="true">💡</span>
-              Forschungsfragen & Methoden
+              <span>💡</span>
+              <span>Forschungsfragen</span>
             </button>
             <button class="view-nav-btn" role="tab" aria-selected="false" aria-controls="eval-view" onclick="switchView('eval-view', this)">
-              <span class="nav-icon" aria-hidden="true">📊</span>
-              Fragebogen-Evaluation
+              <span>📊</span>
+              <span>Methodik-Evaluierung</span>
             </button>
           </nav>
         </div>
 
         <div>
-          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Themen-Filter</div>
-          <div class="domain-filters-list" role="toolbar" aria-label="Themen-Filter">
+          <div class="sidebar-title" style="margin-bottom: 0.6rem;">Themen-Filter</div>
+          <div class="domain-filters-list">
             <button class="filter-chip-item active" onclick="filterDomain('all', this)">
               <span>Alle Themen</span>
               <span class="chip-count">5</span>
@@ -913,35 +905,30 @@
         </div>
 
         <div>
-          <div class="sidebar-title" style="margin-bottom: 0.75rem;">Suche & Steuerung</div>
-          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div class="sidebar-title" style="margin-bottom: 0.6rem;">Suche & Steuerung</div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem;">
             <div class="sidebar-search-box">
-              <svg class="sidebar-search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-              <input type="text" id="searchInput" placeholder="Variablen, Methoden..." onkeyup="handleSearch()" aria-label="Forschungsfragen durchsuchen">
+              <svg class="sidebar-search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="searchInput" placeholder="Variablen, Methoden..." onkeyup="handleSearch()">
             </div>
-            <div class="sidebar-controls-row">
-              <button class="action-btn-small" id="expandToggleBtn" onclick="toggleExpandAll()" style="width: 100%;">Alle aufklappen</button>
-            </div>
+            <button class="action-btn-small" id="expandToggleBtn" onclick="toggleExpandAll()">Alle aufklappen</button>
           </div>
         </div>
-
       </aside>
 
-      <!-- Right Main Content Area -->
+      <!-- Right Main Content -->
       <main class="main-content-area">
 
-        <!-- VIEW 1: Forschungsfragen & Methoden -->
+        <!-- VIEW 1: Questions & Methods -->
         <div id="questions-view" class="view-panel active" role="tabpanel">
           
-          <!-- Empty State -->
           <div class="empty-state" id="emptyState">
-            <div class="empty-icon">🔍</div>
-            <div class="empty-title">Keine Forschungsfragen gefunden</div>
-            <div class="empty-desc">Es gibt keine Treffer für Ihre aktuelle Filter- oder Sucheinstellung.</div>
-            <button class="action-btn-small" onclick="resetFilters()">Filter & Suche zurücksetzen</button>
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
+            <div style="font-family: 'Merriweather', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem;">Keine Forschungsfragen gefunden</div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">Es gibt keine Treffer für Ihre aktuelle Filter- oder Sucheinstellung.</div>
+            <button class="action-btn-small" style="max-width: 200px; margin: 0 auto;" onclick="resetFilters()">Filter zurücksetzen</button>
           </div>
 
-          <!-- Widescreen 2-Column Cards Grid -->
           <div class="questions-grid-horizontal" id="questionsGrid">
 
             <!-- Card 1 -->
@@ -956,26 +943,22 @@
                   <p class="card-summary">Inwiefern prädiziert der retrospektive Erziehungs-Validierungsscore im Erwachsenenalter das eigene Empfinden des Gehörtwerdens sowie die eigene Zuhörpräsenz?</p>
                 </div>
                 <div class="toggle-btn" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
               </div>
               <div class="card-body">
                 <div class="body-inner-horizontal">
                   
-                  <!-- Left Column: Relevanz + Subfragen -->
                   <div class="drawer-col">
                     <div class="section-block">
-                      <div class="block-title">
-                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        Relevanz & Forschungslücke
-                      </div>
+                      <div class="block-title">Relevanz & Forschungslücke</div>
                       <div class="relevance-box">
                         Schließt die Lücke zwischen kindlicher emotionaler Validierung und der späteren Fähigkeit zur Präsenz in Erwachsenengesprächen. Bisherige Bindungsforschung untersucht selten die spezifische Übertragung von Zuhörgewohnheiten auf die eigene Aufmerksamkeitsregulation.
                       </div>
                     </div>
 
                     <div class="section-block">
-                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <div class="block-title">Unterfragen</div>
                       <ul class="sub-questions-list">
                         <li>Welches spezifische Erziehungsmuster weist die stärkste negative Prädiktionskraft für emotionale Erschöpfung beim Zuhören auf?</li>
                         <li>Moderiert das Geschlecht den Zusammenhang zwischen emotionaler Vermeidung im Elternhaus und der Tendenz zum Schweigen?</li>
@@ -983,7 +966,6 @@
                     </div>
                   </div>
 
-                  <!-- Right Column: Variablen + Methoden -->
                   <div class="drawer-col">
                     <div class="section-block">
                       <div class="block-title">Verwendete Codebuch-Variablen</div>
@@ -1032,7 +1014,7 @@
                   <p class="card-summary">Besteht eine signifikante Asymmetrie zwischen dem wahrgenommenen eigenen Gehörtwerden und der Annahme, dass nahestehende Personen sich von einem selbst gehört fühlen?</p>
                 </div>
                 <div class="toggle-btn" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
               </div>
               <div class="card-body">
@@ -1042,12 +1024,12 @@
                     <div class="section-block">
                       <div class="block-title">Relevanz & Forschungslücke</div>
                       <div class="relevance-box">
-                        Deckt die metakognitive Selbstwert-Täuschung (Self-Serving Bias in der Kommunikation) auf. Bisherige Studien untersuchen meist nur eine Perspektive (Sender oder Empfänger), aber selten den intra-personellen Abgleich im selben Befragten.
+                        Deckt die metakognitive Selbstwert-Täuschung (Self-Serving Bias in der Kommunikation) auf. Bisherige Studien untersuchen meist nur eine Perspektive, selten den intra-personellen Abgleich im selben Befragten.
                       </div>
                     </div>
 
                     <div class="section-block">
-                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <div class="block-title">Unterfragen</div>
                       <ul class="sub-questions-list">
                         <li>Unterscheidet sich die Reziprozitäts-Divergenz je nachdem, wer am wenigsten zuhört (Partner vs. Autoritäten)?</li>
                         <li>Welche verhaltensnahen Indikatoren unterscheiden Personen mit hoher Reziprozitäts-Übereinstimmung von Ego-Zentrierten?</li>
@@ -1102,7 +1084,7 @@
                   <p class="card-summary">Wie beeinflusst das implizite Zuhör-Mindset (Growth vs. Fixed) die Motivation zur Weiterentwicklung von Zuhörfertigkeiten und das Empfinden von Zuhöranstrengung?</p>
                 </div>
                 <div class="toggle-btn" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
               </div>
               <div class="card-body">
@@ -1117,7 +1099,7 @@
                     </div>
 
                     <div class="section-block">
-                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <div class="block-title">Unterfragen</div>
                       <ul class="sub-questions-list">
                         <li>Haben Personen mit Growth Mindset eine höhere Selbst-Präsenzwahrnehmung und realistischere Verbesserungspotenziale?</li>
                         <li>Weisen Personen mit Fixed Mindset eine stärkere Attribuierung von Zuhörproblemen auf äußere Störfaktoren auf?</li>
@@ -1171,7 +1153,7 @@
                   <p class="card-summary">Welche situationalen Konfigurationen (Zusammenspiel aus Ort und mentalem Zustand) erzeugen den stärksten Abfall der aktiven Zuhörpräsenz?</p>
                 </div>
                 <div class="toggle-btn" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
               </div>
               <div class="card-body">
@@ -1186,7 +1168,7 @@
                     </div>
 
                     <div class="section-block">
-                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <div class="block-title">Unterfragen</div>
                       <ul class="sub-questions-list">
                         <li>Gibt es systematische Altersunterschiede hinsichtlich präferierter Orte und Zeiten für qualitativ hochwertiges Zuhören?</li>
                         <li>Welche konkreten Interventionen und Umgebungsfaktoren werden genannt, um kognitive Überlastung zu kompensieren?</li>
@@ -1241,7 +1223,7 @@
                   <p class="card-summary">Inwiefern prädiziert das eigene Gefühl des Ungehörtwerdens und die Zuordnung zu marginalisierten Gruppen die Wahrnehmung eines negativen gesellschaftlichen Zuhör-Trends?</p>
                 </div>
                 <div class="toggle-btn" aria-hidden="true">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                 </div>
               </div>
               <div class="card-body">
@@ -1256,7 +1238,7 @@
                     </div>
 
                     <div class="section-block">
-                      <div class="block-title">Unterfragen (Sub-Questions)</div>
+                      <div class="block-title">Unterfragen</div>
                       <ul class="sub-questions-list">
                         <li>Welche Gruppen werden am häufigsten als laut wahrgenommen und wie korreliert dies mit den Zielgruppen für mehr Zuhören?</li>
                         <li>Verändert sich die wahrgenommene Hauptursache für den Trend (z. B. Technologie vs. Polarisierung) in Abhängigkeit vom Alter?</li>
@@ -1302,192 +1284,157 @@
           </div>
         </div>
 
-        <!-- VIEW 2: Fragebogen-Evaluation & Bereinigung -->
+        <!-- VIEW 2: Questionnaire Evaluation -->
         <div id="eval-view" class="view-panel" role="tabpanel">
           
-          <!-- Internal Tab Bar for Review Categories -->
-          <div class="eval-tabs-nav" role="tablist" aria-label="Evaluierungs-Bereiche">
+          <div class="eval-tabs-nav" role="tablist">
             <button class="eval-tab-btn active" role="tab" aria-selected="true" aria-controls="scales-panel" onclick="switchEvalTab('scales-panel', this)">⚖️ Skalen & Messniveau</button>
             <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="cleaning-panel" onclick="switchEvalTab('cleaning-panel', this)">🧹 Datenbereinigung & Ingestion</button>
             <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="psych-panel" onclick="switchEvalTab('psych-panel', this)">🧠 Psychometrie & Biases</button>
             <button class="eval-tab-btn" role="tab" aria-selected="false" aria-controls="strengths-panel" onclick="switchEvalTab('strengths-panel', this)">✨ Methodische Stärken</button>
           </div>
 
-          <!-- Tab 1: Skalen & Messniveau -->
+          <!-- Tab 1: Skalen -->
           <div id="scales-panel" class="eval-panel active">
-            
             <div class="review-card danger">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">!</div>
+                <div class="review-icon">!</div>
                 <h3 class="review-title">Die Nominal-Falle bei SOC_BETTER_WORSE</h3>
               </div>
               <p class="review-text">
                 Das Item <span class="code-inline">SOC_BETTER_WORSE</span> enthält die Kategorien <span class="code-inline">1=Wird schlechter</span>, <span class="code-inline">2=Bleibt gleich</span>, <span class="code-inline">3=Wird besser</span> und <span class="code-inline">4=Es kommt darauf an</span>. Kategorie 4 stellt keine lineare Steigerung dar.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
+                <div class="action-title">Bereinigungsschritt</div>
                 Kategorie <span class="code-inline">4</span> muss vor ordinalen Analysen als System-Fehlwert (<span class="code-inline">NA</span>) umkodiert oder separat in multinomialen Logit-Modellen ausgewertet werden.
               </div>
             </div>
 
             <div class="review-card warning">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">⚠</div>
+                <div class="review-icon">⚠</div>
                 <h3 class="review-title">Heterogene Likert-Skalenlängen</h3>
               </div>
               <p class="review-text">
                 Im Fragebogen werden 4-stufige Skalen (z. B. <span class="code-inline">HABIT_HARD_WORK</span>, 1–4) und 5-stufige Skalen (z. B. <span class="code-inline">HEARD_OVERALL_FEEL</span>, 1–5) gemischt.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
-                Vor korrelativen Analysen oder Faktorenanalysen müssen alle Items via z-Transformation ($\frac{x-\mu}{\sigma}$) oder Prozentwert-Transformation standardisiert werden.
+                <div class="action-title">Bereinigungsschritt</div>
+                Vor korrelativen Analysen oder Faktorenanalysen müssen alle Items via z-Transformation standardisiert werden.
               </div>
             </div>
 
             <div class="review-card warning">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">🔄</div>
+                <div class="review-icon">🔄</div>
                 <h3 class="review-title">Inkonsistente Polungsrichtungen</h3>
               </div>
               <p class="review-text">
                 Bei <span class="code-inline">HEARD_OVERALL_FEEL</span> bedeutet <span class="code-inline">5</span> das Maximum. Bei <span class="code-inline">JOURNEY_COULD_LISTEN_BETTER</span> entspricht <span class="code-inline">4</span> dem höchsten Verbesserungsbedarf, während <span class="code-inline">1</span> bedeutet: „Ich höre bereits gut zu“.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
+                <div class="action-title">Bereinigungsschritt</div>
                 Sorgfältige Rekodierung/Umpolung vor der Erstellung zusammengesetzter Indizes durchführen.
               </div>
             </div>
-
           </div>
 
-          <!-- Tab 2: Datenbereinigung & Ingestion -->
+          <!-- Tab 2: Cleaning -->
           <div id="cleaning-panel" class="eval-panel">
-            
             <div class="review-card danger">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">99</div>
+                <div class="review-icon">99</div>
                 <h3 class="review-title">Handling von Spezial- & Fehlwerten</h3>
               </div>
               <p class="review-text">
                 Das Codebuch definiert Werte wie <span class="code-inline">-99</span> (Übersprungen), <span class="code-inline">-98</span> (Keine Angabe), <span class="code-inline">-97</span> (Unleserlich) und <span class="code-inline">999</span> (Systemfehler).
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
-                Diese Zahlenwerte müssen in R/Python zwingend als echte Nullwerte (<span class="code-inline">NA</span> / <span class="code-inline">NaN</span>) zugewiesen werden, um verzerrte Mittelwerte zu vermeiden.
+                <div class="action-title">Bereinigungsschritt</div>
+                Diese Zahlenwerte müssen in R/Python zwingend als echte Nullwerte (<span class="code-inline">NA</span> / <span class="code-inline">NaN</span>) zugewiesen werden.
               </div>
             </div>
 
             <div class="review-card info">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">⚙️</div>
+                <div class="review-icon">⚙️</div>
                 <h3 class="review-title">Regex-Parsing für Checkbox-Strings</h3>
               </div>
               <p class="review-text">
                 Google Forms exportiert Mehrfachauswahlen als durch Semikolons getrennte Textketten (z. B. <span class="code-inline">"Zu Hause; Bei Freunden"</span>).
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
+                <div class="action-title">Bereinigungsschritt</div>
                 Aufspaltung in binäre Dummys (<span class="code-inline">LOC_BEST_HOME=1</span> etc.) mittels robuster String-Matching-Skripte durchführen.
               </div>
             </div>
 
             <div class="review-card info">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">🧹</div>
+                <div class="review-icon">🧹</div>
                 <h3 class="review-title">Freitext-Parsing bei DEMO_AGE</h3>
               </div>
               <p class="review-text">
                 Freitextfelder beim Alter enthalten häufig Kombinationen wie <span class="code-inline">"25 Jahre"</span> oder Tippfehler.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Bereinigungsschritt
-                </div>
+                <div class="action-title">Bereinigungsschritt</div>
                 Nutzung von Regex zur Extraktion rein numerischer Ganzzahlen und Plausibilitätsfilterung (<span class="code-inline">14 &le; Age &le; 100</span>).
               </div>
             </div>
-
           </div>
 
-          <!-- Tab 3: Psychometrie & Biases -->
+          <!-- Tab 3: Psychometrie -->
           <div id="psych-panel" class="eval-panel">
-            
             <div class="review-card warning">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">📉</div>
+                <div class="review-icon">📉</div>
                 <h3 class="review-title">Validität von INDEX_DEV_VALIDATION</h3>
               </div>
               <p class="review-text">
-                Der synthetische Score berechnet eine ungewichtete Summe (Positive minus Negative Items). Er setzt fälschlicherweise voraus, dass Internatsunterbringung (<span class="code-inline">UP_SENT_AWAY_BOARDING</span>) und einfaches Ausredenlassen (<span class="code-inline">UP_EXPECTED_QUIET</span>) dasselbe Gewicht besitzen.
+                Der synthetische Score berechnet eine ungewichtete Summe. Er setzt fälschlicherweise voraus, dass Internatsunterbringung (<span class="code-inline">UP_SENT_AWAY_BOARDING</span>) und einfaches Ausredenlassen dasselbe Gewicht besitzen.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Methodische Empfehlung
-                </div>
+                <div class="action-title">Methodische Empfehlung</div>
                 Vorab Durchführung einer Explorativen Faktorenanalyse (EFA) zur Überprüfung der Eindimensionalität.
               </div>
             </div>
 
             <div class="review-card warning">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">🎭</div>
+                <div class="review-icon">🎭</div>
                 <h3 class="review-title">Social Desirability & Response Bias</h3>
               </div>
               <p class="review-text">
                 Selbsteinschätzungen zum eigenen Zuhörverhalten unterliegen starker Selbstwert-Protektion (Selbstüberschätzung eigenen Zuhörens).
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Methodische Empfehlung
-                </div>
+                <div class="action-title">Methodische Empfehlung</div>
                 Triangulation von Selbstberichten mit verhaltensnahen Qualitativ-Texten (<span class="code-inline">QUAL_TELL_OTHER_LISTENING</span>).
               </div>
             </div>
 
             <div class="review-card warning">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">⏳</div>
+                <div class="review-icon">⏳</div>
                 <h3 class="review-title">Recall Bias & Stichproben-Selektion</h3>
               </div>
               <p class="review-text">
-                Retrospektive Erziehungsangaben (<span class="code-inline">UP_*</span>) hängen vom aktuellen Gemütszustand ab. Zudem führt die Online-Umfrage zu einem *Self-Selection Bias* (überdurchschnittlich kommunikationsinteressierte Teilnehmende).
+                Retrospektive Erziehungsangaben hängen vom aktuellen Gemütszustand ab. Zudem führt die Online-Umfrage zu einem Self-Selection Bias.
               </p>
               <div class="action-box">
-                <div class="action-title">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Methodische Empfehlung
-                </div>
+                <div class="action-title">Methodische Empfehlung</div>
                 Adressierung der Selektionseffekte in den Limitations der wissenschaftlichen Publikation.
               </div>
             </div>
-
           </div>
 
-          <!-- Tab 4: Methodische Stärken -->
+          <!-- Tab 4: Stärken -->
           <div id="strengths-panel" class="eval-panel">
-            
             <div class="review-card success">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">✓</div>
-                <h3 class="review-title">Holistische Interdisziplinariatät</h3>
+                <div class="review-icon">✓</div>
+                <h3 class="review-title">Holistische Interdisziplinarität</h3>
               </div>
               <p class="review-text">
                 Das Instrument verknüpft Entwicklungspsychologie, Kommunikationswissenschaft und Makrosoziologie in einer einzigen kohärenten Erhebung.
@@ -1496,7 +1443,7 @@
 
             <div class="review-card success">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">✓</div>
+                <div class="review-icon">✓</div>
                 <h3 class="review-title">Methodische Triangulation</h3>
               </div>
               <p class="review-text">
@@ -1506,14 +1453,13 @@
 
             <div class="review-card success">
               <div class="review-header">
-                <div class="review-icon" aria-hidden="true">✓</div>
+                <div class="review-icon">✓</div>
                 <h3 class="review-title">Vordefiniertes Kodierschema</h3>
               </div>
               <p class="review-text">
                 Das integrierte Braun & Clarke Themenschema (Codes 101–503) sichert hohe Inter-Rater-Reliabilität bei der Auswertung.
               </p>
             </div>
-
           </div>
 
         </div>
@@ -1522,19 +1468,16 @@
 
     </div>
 
-    <!-- Footer -->
     <footer>
-      <p><strong>Studie: Are We Really Listening to One Another?</strong> | Codebuch-Version 2.0</p>
-      <p>Interaktives Dashboard zur wissenschaftlichen Forschungsplanung und methodischen Qualitätssicherung.</p>
+      <p><strong>Studie: Are We Really Listening to One Another?</strong> &bull; Codebuch-Version 2.0</p>
+      <p>Dr. Manuel D. S. Hopp &bull; Wissenschaftliches Dashboard zur Forschungsplanung und Qualitätssicherung</p>
     </footer>
 
   </div>
 
-  <!-- Interactive Logic -->
   <script>
     let currentFilterDomain = 'all';
 
-    // Theme Management Logic
     function initTheme() {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
@@ -1553,20 +1496,21 @@
 
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
       localStorage.setItem('theme', theme);
       
       const iconEl = document.getElementById('themeIcon');
-      const labelEl = document.getElementById('themeLabel');
       if (theme === 'light') {
         iconEl.innerText = '🌙';
-        labelEl.innerText = 'Dark Mode';
       } else {
         iconEl.innerText = '☀️';
-        labelEl.innerText = 'Light Mode';
       }
     }
 
-    // View Switcher (Main Nav)
     function switchView(viewId, btn) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.view-nav-btn').forEach(el => {
@@ -1579,7 +1523,6 @@
       btn.setAttribute('aria-selected', 'true');
     }
 
-    // Evaluation Internal Tabs
     function switchEvalTab(panelId, btn) {
       document.querySelectorAll('.eval-panel').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.eval-tab-btn').forEach(el => {
@@ -1592,14 +1535,12 @@
       btn.setAttribute('aria-selected', 'true');
     }
 
-    // Toggle Expandable Card
     function toggleCard(headerEl) {
       const card = headerEl.closest('.question-card');
       const isOpen = card.classList.toggle('open');
       headerEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     }
 
-    // Keyboard support for Card Header
     function handleCardKeydown(event, headerEl) {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -1607,21 +1548,17 @@
       }
     }
 
-    // Filter Chips for Research Questions
     function filterDomain(domain, chipBtn) {
       currentFilterDomain = domain;
       document.querySelectorAll('.filter-chip-item').forEach(c => c.classList.remove('active'));
       chipBtn.classList.add('active');
-
       applyFilterAndSearch();
     }
 
-    // Search Input Logic
     function handleSearch() {
       applyFilterAndSearch();
     }
 
-    // Combined Filter + Search Execution
     function applyFilterAndSearch() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const cards = document.querySelectorAll('.question-card');
@@ -1647,14 +1584,12 @@
       }
     }
 
-    // Reset Filters
     function resetFilters() {
       document.getElementById('searchInput').value = '';
       const allChip = document.querySelector('.filter-chip-item');
       filterDomain('all', allChip);
     }
 
-    // Global Expand/Collapse All
     function toggleExpandAll() {
       const btn = document.getElementById('expandToggleBtn');
       const cards = document.querySelectorAll('.question-card');
@@ -1676,7 +1611,6 @@
       btn.innerText = isExpanding ? 'Alle zuklappen' : 'Alle aufklappen';
     }
 
-    // Run theme initialization on load
     initTheme();
   </script>
 </body>

@@ -1,36 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScholarCite - Multi-Source Edition</title>
+    <title>ScholarCite | Dr. Manuel D. S. Hopp</title>
+    <meta name="description" content="Multi-Source Academic Profile & Citation Explorer. Search OpenAlex and Semantic Scholar, merge author profiles, and generate APA 7th citations.">
 
-    <!-- Tailwind CSS -->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with custom academic config -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        terracotta: {
+                            DEFAULT: '#c4622d',
+                            light: '#d4784d',
+                            deep: '#a34e20',
+                            50: '#fdf7f3',
+                            100: '#faeee6',
+                            500: '#c4622d',
+                            600: '#a34e20',
+                            700: '#7a3a15',
+                        },
+                        paper: {
+                            DEFAULT: '#faf7f4',
+                            hero: '#f3ede6',
+                            surface: '#ffffff',
+                            hairline: '#e6ddd5',
+                        },
+                        study: {
+                            dark: '#181514',
+                            hero: '#1e1a18',
+                            surface: '#24201e',
+                            hairline: '#342e2a',
+                            accent: '#e0956a',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Merriweather', 'Georgia', 'serif'],
+                        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
 
     <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* APA Specific Styling */
+        :root {
+            --color-accent: #c4622d;
+            --color-accent-deep: #a34e20;
+            --color-bg: #faf7f4;
+            --color-surface: #ffffff;
+            --color-border: #e6ddd5;
+            --color-text-main: #1e293b;
+        }
+        .dark {
+            --color-bg: #181514;
+            --color-surface: #24201e;
+            --color-border: #342e2a;
+            --color-text-main: #e2e8f0;
+        }
+        body {
+            font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.35s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .apa-citation em { font-style: italic; }
-
-        /* Custom Checkbox */
-        .custom-checkbox:checked {
-            background-color: #2563eb;
-            border-color: #2563eb;
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(230, 221, 213, 0.6);
+            border-radius: 14px;
+            box-shadow: 0 8px 32px 0 rgba(28, 24, 22, 0.03);
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .dark .glass-card {
+            background: rgba(36, 32, 30, 0.75);
+            border: 1px solid rgba(52, 46, 42, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+        .dark .glass-card:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .keyword-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.015em;
+            border-left: 2px solid #c4622d;
+            background: rgba(196, 98, 45, 0.08);
+            color: #7a3a15;
+            border-radius: 0px;
+        }
+        .dark .keyword-tag {
+            background: rgba(196, 98, 45, 0.18);
+            color: #e0956a;
+        }
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.015em;
+            border-left: 2px solid #a09488;
+            background: rgba(120, 108, 96, 0.08);
+            color: #5c4e44;
+            border-radius: 0px;
+        }
+        .dark .skill-tag {
+            background: rgba(140, 128, 116, 0.15);
+            color: #c0b0a4;
+        }
+        .btn-editorial {
+            border-radius: 0px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .btn-editorial:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body class="min-h-screen flex flex-col">
 
     <div id="root"></div>
 
@@ -39,16 +162,16 @@
 
         // --- Icons ---
         const Icons = {
-            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
-            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
-            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
-            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
-            ExternalLink: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
-            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
-            Globe: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>,
-            Layers: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
-            X: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
+            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+            Layers: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+            Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+            Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
+            Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         };
 
         // --- API Config ---
@@ -56,17 +179,16 @@
         const S2_BASE = "https://api.semanticscholar.org/graph/v1";
         const OA_BASE = "https://api.openalex.org";
 
-        // --- Data Normalizers ---
-
+        // --- Normalizers ---
         const normalizeAuthor = (data, source) => {
             if (source === 'openalex') {
                 return {
                     id: data.id,
                     uniqueId: `oa_${data.id}`,
                     name: data.display_name,
-                    affiliation: data.last_known_institution?.display_name || 'Independent',
-                    citationCount: data.cited_by_count,
-                    worksCount: data.works_count,
+                    affiliation: data.last_known_institution?.display_name || 'Independent Scholar',
+                    citationCount: data.cited_by_count || 0,
+                    worksCount: data.works_count || 0,
                     hIndex: data.summary_stats?.h_index || 'N/A',
                     source: 'openalex',
                     original: data
@@ -76,8 +198,8 @@
                     id: data.authorId,
                     uniqueId: `s2_${data.authorId}`,
                     name: data.name,
-                    affiliation: data.affiliations?.[0] || 'Independent',
-                    citationCount: data.citationCount,
+                    affiliation: data.affiliations?.[0] || 'Independent Scholar',
+                    citationCount: data.citationCount || 0,
                     worksCount: data.paperCount || 'N/A',
                     hIndex: data.hIndex || 'N/A',
                     source: 's2',
@@ -97,79 +219,67 @@
                 pages: '',
                 doi: '',
                 url: '',
-                source: source // Track origin
+                source: source
             };
 
             if (source === 'openalex') {
-                work.title = data.title;
+                work.title = data.title || 'Untitled Work';
                 work.year = data.publication_year;
-                work.authors = data.authorships.map(ship => ship.author.display_name);
-                work.journal = data.primary_location?.source?.display_name;
-                work.volume = data.biblio?.volume;
-                work.issue = data.biblio?.issue;
+                work.authors = (data.authorships || []).map(ship => ship.author?.display_name).filter(Boolean);
+                work.journal = data.primary_location?.source?.display_name || '';
+                work.volume = data.biblio?.volume || '';
+                work.issue = data.biblio?.issue || '';
                 work.pages = (data.biblio?.first_page && data.biblio?.last_page)
                     ? `${data.biblio.first_page}-${data.biblio.last_page}`
-                    : data.biblio?.first_page;
-                work.doi = data.doi;
-                work.url = data.doi || data.primary_location?.landing_page_url;
+                    : (data.biblio?.first_page || '');
+                work.doi = data.doi || '';
+                work.url = data.doi || data.primary_location?.landing_page_url || '';
             } else if (source === 's2') {
-                work.title = data.title;
+                work.title = data.title || 'Untitled Work';
                 work.year = data.year;
-                work.authors = data.authors.map(a => a.name);
-                work.journal = data.venue;
-                work.doi = data.externalIds?.DOI || data.doi;  // FIX: Extract DOI from S2 response
-                work.url = data.url || data.openAccessPdf?.url;
+                work.authors = (data.authors || []).map(a => a.name).filter(Boolean);
+                work.journal = data.venue || '';
+                work.doi = data.externalIds?.DOI || data.doi || '';
+                work.url = data.url || data.openAccessPdf?.url || (work.doi ? `https://doi.org/${work.doi}` : '');
             }
             return work;
         };
 
-        // --- Deduplication Logic ---
         const deduplicateWorks = (allWorks) => {
             const uniqueMap = new Map();
 
             allWorks.forEach(work => {
                 if (!work.title) return;
-
-                // Create a "fingerprint" for the work: lowercase, alphanumeric only + year
-                // Example: "deep learning 2023" -> "deeplearning2023"
                 const titleKey = work.title.toLowerCase().replace(/[^a-z0-9]/g, "");
                 const key = `${titleKey}_${work.year || 'nd'}`;
 
                 if (!uniqueMap.has(key)) {
                     uniqueMap.set(key, work);
                 } else {
-                    // Merge Strategy: Keep the record with more metadata
                     const existing = uniqueMap.get(key);
-
-                    // Prefer DOI if existing doesn't have it
                     if (!existing.doi && work.doi) {
                         uniqueMap.set(key, work);
-                    }
-                    // Prefer Journal name if existing doesn't have it
-                    else if (!existing.journal && work.journal && existing.doi === work.doi) {
+                    } else if (!existing.journal && work.journal && existing.doi === work.doi) {
                         uniqueMap.set(key, work);
                     }
-                    // Otherwise keep existing (usually first fetched is fine)
                 }
             });
 
-            // Return sorted by date descending
             return Array.from(uniqueMap.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
         };
 
-        // --- APA 7th Generation Logic ---
         const formatAuthorsAPA = (authorNames) => {
             if (!authorNames || authorNames.length === 0) return "Unknown Author";
 
             const formatName = (name) => {
                 const parts = name.trim().split(/\s+/);
+                if (parts.length === 1) return parts[0];
                 const last = parts[parts.length - 1];
                 const initials = parts.slice(0, parts.length - 1).map(p => p[0].toUpperCase() + '.').join(' ');
                 return `${last}, ${initials}`;
             };
 
             const formattedList = authorNames.map(formatName);
-
             if (formattedList.length === 1) return formattedList[0];
             if (formattedList.length === 2) return `${formattedList[0]} & ${formattedList[1]}`;
             if (formattedList.length > 20) {
@@ -186,7 +296,7 @@
             const volume = work.volume || '';
             const issue = work.issue ? `(${work.issue})` : '';
             const pages = work.pages ? `, ${work.pages}` : '';
-            const doi = work.doi ? `https://doi.org/${work.doi.replace('https://doi.org/', '')}` : '';
+            const doi = work.doi ? (work.doi.startsWith('http') ? work.doi : `https://doi.org/${work.doi}`) : '';
             const url = (!work.doi && work.url) ? work.url : '';
 
             let plainText = `${authors} ${year}. ${title}.`;
@@ -201,51 +311,106 @@
             else if (url) plainText += ` ${url}`;
 
             const jsx = (
-                <span className="apa-citation text-gray-800 leading-relaxed">
-                    <span className="font-semibold text-gray-900">{authors}</span> {year}. {title}.{' '}
+                <span className="apa-citation leading-relaxed text-slate-800 dark:text-stone-200">
+                    <span className="font-semibold text-slate-900 dark:text-white font-sans">{authors}</span> {year}. <span className="font-serif">{title}</span>.{' '}
                     {journal && (
                         <span>
-                            <em>{journal}</em>
+                            <em className="text-slate-700 dark:text-stone-300">{journal}</em>
                             {volume && <span>, <em>{volume}</em></span>}
                             {issue}{pages}.
                         </span>
                     )}
-                    {doi && <a href={doi} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all ml-1">{doi}</a>}
-                    {!doi && url && <a href={url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline break-all ml-1">{url}</a>}
+                    {doi && (
+                        <a href={doi} target="_blank" rel="noreferrer" className="text-terracotta hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                            {doi}
+                        </a>
+                    )}
+                    {!doi && url && (
+                        <a href={url} target="_blank" rel="noreferrer" className="text-terracotta hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                            {url}
+                        </a>
+                    )}
                 </span>
             );
 
             return { plainText, jsx };
         };
 
-        // --- Components ---
+        const copyToClipboard = async (text) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (e) {
+                    console.warn("Clipboard API failed, trying fallback...", e);
+                }
+            }
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                success = false;
+            }
+            document.body.removeChild(textArea);
+            return success;
+        };
 
-        const Header = ({ resetApp }) => (
-            <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        // --- Navigation Header ---
+        const Header = ({ resetApp, isDark, toggleTheme }) => (
+            <header className="sticky top-0 z-50 bg-paper/90 dark:bg-study-dark/90 backdrop-blur-md border-b border-paper-hairline dark:border-study-hairline transition-colors duration-300">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
                     <div
-                        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity group"
+                        className="flex items-center gap-3 cursor-pointer group select-none"
                         onClick={resetApp}
                     >
-                        <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+                        <div className="w-8 h-8 bg-terracotta text-white flex items-center justify-center shadow-sm group-hover:bg-terracotta-deep transition-colors">
                             <Icons.BookOpen />
                         </div>
                         <div>
-                            <span className="text-xl font-bold text-gray-900 tracking-tight block leading-none">ScholarCite</span>
-                            <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Multi-Source Engine</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-serif font-bold text-lg text-slate-900 dark:text-white tracking-tight leading-none">ScholarCite</span>
+                                <span className="text-[11px] font-mono text-terracotta dark:text-study-accent font-semibold">Multi-Source</span>
+                            </div>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">Dr. Manuel D. S. Hopp &bull; Academic Tools</p>
                         </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <a
+                            href="../index.html"
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-terracotta dark:hover:text-white border border-paper-hairline dark:border-study-hairline hover:border-terracotta transition-colors"
+                            title="Return to Main Homepage"
+                        >
+                            <Icons.Home />
+                            <span>Homepage</span>
+                        </a>
+
+                        <button
+                            onClick={toggleTheme}
+                            aria-label="Toggle Theme"
+                            className="p-2 border border-paper-hairline dark:border-study-hairline hover:border-terracotta dark:hover:border-terracotta text-stone-700 dark:text-stone-300 hover:text-terracotta transition-colors"
+                        >
+                            {isDark ? <Icons.Sun /> : <Icons.Moon />}
+                        </button>
                     </div>
                 </div>
             </header>
         );
 
+        // --- Search Screen ---
         const SearchScreen = ({ onProfilesSelect }) => {
             const [query, setQuery] = useState('');
             const [results, setResults] = useState([]);
             const [loading, setLoading] = useState(false);
             const [hasSearched, setHasSearched] = useState(false);
             const [status, setStatus] = useState('');
-            const [selectedIds, setSelectedIds] = useState(new Set()); // Track checked items
+            const [selectedIds, setSelectedIds] = useState(new Set());
 
             const searchAuthors = async (e) => {
                 e.preventDefault();
@@ -253,26 +418,32 @@
 
                 setLoading(true);
                 setHasSearched(true);
-                setStatus('Connecting to databases...');
+                setStatus('Querying OpenAlex and Semantic Scholar APIs...');
                 setResults([]);
-                setSelectedIds(new Set()); // Reset selections on new search
+                setSelectedIds(new Set());
 
-                const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=5`)
+                const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=6`)
                     .then(res => res.json())
-                    .then(data => data.results.map(r => normalizeAuthor(r, 'openalex')))
-                    .catch(() => []);
+                    .then(data => (data.results || []).map(r => normalizeAuthor(r, 'openalex')))
+                    .catch(err => {
+                        console.warn('OpenAlex fetch failed:', err);
+                        return [];
+                    });
 
-                const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=5`)}`)
+                const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=6`)}`)
                     .then(res => res.json())
                     .then(data => (data.data || []).map(r => normalizeAuthor(r, 's2')))
-                    .catch(() => []);
+                    .catch(err => {
+                        console.warn('Semantic Scholar fetch failed:', err);
+                        return [];
+                    });
 
                 try {
                     const [oaResults, s2Results] = await Promise.all([p1, p2]);
                     const combined = [...oaResults, ...s2Results].sort((a, b) => b.citationCount - a.citationCount);
                     setResults(combined);
                 } catch (err) {
-                    setStatus('Error fetching data.');
+                    setStatus('Error connecting to academic databases.');
                 } finally {
                     setLoading(false);
                     setStatus('');
@@ -295,26 +466,29 @@
             };
 
             return (
-                <div className="min-h-[calc(100vh-64px)] flex flex-col items-center py-24 px-4 fade-in pb-32">
+                <div className="flex-1 flex flex-col items-center py-16 px-4 fade-in pb-32 max-w-4xl mx-auto w-full">
                     <div className="text-center max-w-2xl w-full mb-10">
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
-                            Find a Researcher
+                        <div className="inline-block border-l-2 border-terracotta pl-3 mb-3">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-terracotta dark:text-study-accent">Bibliographic Query Tool</span>
+                        </div>
+                        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">
+                            Author & Publication Explorer
                         </h1>
-                        <p className="text-lg text-slate-600 leading-relaxed">
-                            Search across databases. Select multiple profiles to <strong className="text-blue-600">merge and deduplicate</strong> results.
+                        <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed">
+                            Search cross-database profiles from OpenAlex and Semantic Scholar. Select matching author profiles to merge and generate unified APA 7th bibliographies.
                         </p>
                     </div>
 
-                    <div className="w-full max-w-xl mb-12 relative z-10">
-                        <form onSubmit={searchAuthors} className="relative flex shadow-xl rounded-2xl overflow-hidden bg-white ring-1 ring-gray-900/5 transition-all focus-within:ring-2 focus-within:ring-blue-500">
+                    <div className="w-full max-w-2xl mb-10">
+                        <form onSubmit={searchAuthors} className="relative flex shadow-sm border border-paper-hairline dark:border-study-hairline bg-white dark:bg-study-surface focus-within:border-terracotta transition-colors">
                             <div className="relative flex-grow">
-                                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400">
                                     <Icons.Search />
                                 </div>
                                 <input
                                     type="text"
-                                    className="block w-full pl-12 pr-4 py-4 text-gray-900 placeholder-gray-400 border-none outline-none text-lg bg-transparent"
-                                    placeholder="Search researcher name (e.g. 'Demis Hassabis')"
+                                    className="block w-full pl-11 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-stone-400 border-none outline-none text-base bg-transparent font-sans"
+                                    placeholder="Search researcher name (e.g., 'Manuel Hopp', 'Demis Hassabis')"
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                 />
@@ -322,19 +496,24 @@
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 bg-slate-900 text-white font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2"
+                                className="px-6 py-3.5 bg-terracotta hover:bg-terracotta-deep text-white font-semibold btn-editorial text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
                             >
-                                {loading ? 'Scanning...' : 'Search'}
+                                {loading ? 'Searching...' : 'Search'}
                             </button>
                         </form>
                     </div>
 
                     <div className="w-full max-w-2xl space-y-4">
-                        {status && <div className="text-center text-sm text-gray-500 animate-pulse">{status}</div>}
+                        {status && (
+                            <div className="text-center text-xs font-mono text-terracotta dark:text-study-accent animate-pulse py-2">
+                                {status}
+                            </div>
+                        )}
 
                         {hasSearched && results.length === 0 && !loading && !status && (
-                            <div className="text-center text-gray-500 py-8 bg-white rounded-xl border border-gray-100 shadow-sm">
-                                No researchers found.
+                            <div className="text-center text-stone-500 dark:text-stone-400 py-12 glass-card">
+                                <p className="font-serif text-lg text-slate-800 dark:text-stone-200 mb-1">No researcher profiles found</p>
+                                <p className="text-xs">Try adjusting spelling or searching with alternative name variants.</p>
                             </div>
                         )}
 
@@ -344,38 +523,45 @@
                                 <div
                                     key={author.uniqueId}
                                     onClick={() => toggleSelection(author.uniqueId)}
-                                    className={`bg-white p-5 rounded-xl shadow-sm border transition-all flex flex-col sm:flex-row sm:items-center justify-between group gap-4 cursor-pointer select-none ${
-                                        isSelected ? 'border-blue-500 ring-1 ring-blue-500 bg-blue-50/10' : 'border-gray-100 hover:border-blue-300'
+                                    className={`p-5 glass-card cursor-pointer select-none transition-all border ${
+                                        isSelected
+                                            ? 'border-terracotta ring-1 ring-terracotta bg-terracotta-50/50 dark:bg-terracotta-900/10'
+                                            : 'border-paper-hairline dark:border-study-hairline hover:border-terracotta/50'
                                     }`}
                                 >
-                                    <div className="flex items-center gap-4 w-full">
+                                    <div className="flex items-start gap-4">
                                         {/* Checkbox */}
-                                        <div className={`w-6 h-6 rounded border flex items-center justify-center transition-colors ${
-                                            isSelected ? 'bg-blue-600 border-blue-600' : 'border-gray-300 bg-white'
+                                        <div className={`w-5 h-5 mt-1 border flex items-center justify-center flex-shrink-0 transition-colors ${
+                                            isSelected ? 'bg-terracotta border-terracotta text-white' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-study-dark'
                                         }`}>
-                                            {isSelected && <span className="text-white"><Icons.Check /></span>}
+                                            {isSelected && <Icons.Check />}
                                         </div>
 
-                                        <div className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0 ${
-                                            author.source === 'openalex' ? 'bg-blue-100 text-blue-700' : 'bg-indigo-100 text-indigo-700'
-                                        }`}>
-                                            {author.name.charAt(0)}
-                                        </div>
                                         <div className="flex-grow">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h3 className="text-lg font-bold text-gray-900 leading-tight">{author.name}</h3>
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                                                    author.source === 'openalex' ? 'bg-blue-50 text-blue-600' : 'bg-indigo-50 text-indigo-600'
-                                                }`}>
+                                            <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                <h3 className="font-serif font-bold text-lg text-slate-900 dark:text-white leading-snug">
+                                                    {author.name}
+                                                </h3>
+                                                <span className={author.source === 'openalex' ? 'keyword-tag text-[10px]' : 'skill-tag text-[10px]'}>
                                                     {author.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
                                                 </span>
                                             </div>
-                                            <p className="text-gray-600 text-sm mb-1.5">
+
+                                            <p className="text-stone-600 dark:text-stone-300 text-sm mb-3">
                                                 {author.affiliation}
                                             </p>
-                                            <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
-                                                <span className="flex items-center gap-1"><Icons.FileText /> {author.citationCount.toLocaleString()} Citations</span>
-                                                {author.hIndex !== 'N/A' && <span>• h-index: {author.hIndex}</span>}
+
+                                            <div className="flex items-center gap-4 text-xs text-stone-500 dark:text-stone-400 font-mono">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Icons.FileText />
+                                                    <strong className="text-slate-800 dark:text-stone-200">{author.citationCount.toLocaleString()}</strong> citations
+                                                </span>
+                                                {author.hIndex !== 'N/A' && (
+                                                    <span>&bull; h-index: <strong className="text-slate-800 dark:text-stone-200">{author.hIndex}</strong></span>
+                                                )}
+                                                {author.worksCount !== 'N/A' && (
+                                                    <span>&bull; <strong className="text-slate-800 dark:text-stone-200">{author.worksCount}</strong> works</span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -384,18 +570,18 @@
                         })}
                     </div>
 
-                    {/* Floating Combine Bar */}
+                    {/* Floating Selection Action Bar */}
                     {selectedIds.size > 0 && (
-                        <div className="fixed bottom-8 z-50 animate-[slideUp_0.3s_ease-out]">
+                        <div className="fixed bottom-8 z-50 animate-bounce-short">
                             <button
                                 onClick={handleCombine}
-                                className="bg-slate-900 text-white pl-6 pr-8 py-3 rounded-full shadow-2xl flex items-center gap-3 hover:bg-slate-800 hover:scale-105 transition-all"
+                                className="bg-slate-900 dark:bg-study-surface text-white px-6 py-3.5 shadow-2xl flex items-center gap-3 hover:bg-terracotta dark:hover:bg-terracotta transition-all border border-paper-hairline dark:border-study-hairline"
                             >
-                                <span className="bg-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                                <span className="bg-terracotta w-6 h-6 flex items-center justify-center text-xs font-mono font-bold text-white">
                                     {selectedIds.size}
                                 </span>
-                                <span className="font-semibold text-lg">
-                                    {selectedIds.size > 1 ? 'Combine & View Profiles' : 'View Profile'}
+                                <span className="font-sans font-semibold text-sm">
+                                    {selectedIds.size > 1 ? 'Merge & View Combined Works' : 'View Author Works'}
                                 </span>
                                 <Icons.Layers />
                             </button>
@@ -405,69 +591,60 @@
             );
         };
 
+        // --- Citation Card ---
         const CitationCard = ({ work }) => {
             const [copied, setCopied] = useState(false);
             const { plainText, jsx } = getAPA(work);
 
-            const handleCopy = () => {
-                const textArea = document.createElement("textarea");
-                textArea.value = plainText;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
+            const handleCopy = async () => {
+                const ok = await copyToClipboard(plainText);
+                if (ok) {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
-                } catch (err) {
-                    console.error('Copy failed', err);
                 }
-                document.body.removeChild(textArea);
             };
 
             return (
-                <div className="bg-white p-6 rounded-xl border border-gray-200/60 shadow-sm hover:shadow-md transition-shadow group relative overflow-hidden">
-                    {/* Source Indicator Line */}
-                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${work.source === 'openalex' ? 'bg-blue-400' : 'bg-indigo-400'}`}></div>
-
-                    <div className="flex items-start gap-4 pl-2">
-                        <div className="flex-grow">
-                            <div className="mb-4 text-gray-800 text-[15px]">
+                <div className="p-5 glass-card relative overflow-hidden group">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-grow pr-2">
+                            <div className="mb-3 text-[14px]">
                                 {jsx}
                             </div>
-
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-                                <div className="flex items-center gap-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                    <span className={`px-1.5 py-0.5 rounded ${work.source === 'openalex' ? 'bg-blue-50 text-blue-600' : 'bg-indigo-50 text-indigo-600'}`}>
-                                        {work.source === 'openalex' ? 'OA' : 'S2'}
-                                    </span>
-                                    <span>{work.year}</span>
-                                    {work.journal && <span className="max-w-[150px] truncate hidden sm:inline" title={work.journal}>{work.journal}</span>}
-                                </div>
-                                <button
-                                    onClick={handleCopy}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
-                                        copied
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                                    }`}
-                                >
-                                    {copied ? <Icons.Check /> : <Icons.Copy />}
-                                    {copied ? 'Copied' : 'Copy'}
-                                </button>
+                            <div className="flex items-center gap-3 text-xs font-mono text-stone-500 dark:text-stone-400">
+                                <span className={work.source === 'openalex' ? 'keyword-tag text-[10px]' : 'skill-tag text-[10px]'}>
+                                    {work.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+                                </span>
+                                <span>{work.year || 'n.d.'}</span>
+                                {work.journal && <span className="truncate max-w-[240px] text-stone-600 dark:text-stone-400">{work.journal}</span>}
                             </div>
                         </div>
+
+                        <button
+                            onClick={handleCopy}
+                            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold transition-colors border ${
+                                copied
+                                    ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-300'
+                                    : 'bg-white dark:bg-study-surface text-stone-700 dark:text-stone-300 border-paper-hairline dark:border-study-hairline hover:border-terracotta'
+                            }`}
+                            title="Copy APA Citation"
+                        >
+                            {copied ? <Icons.Check /> : <Icons.Copy />}
+                            <span>{copied ? 'Copied' : 'Copy'}</span>
+                        </button>
                     </div>
                 </div>
             );
         };
 
+        // --- Profile Screen ---
         const ProfileScreen = ({ profiles, onBack }) => {
             const [works, setWorks] = useState([]);
             const [loading, setLoading] = useState(true);
+            const [allCopied, setAllCopied] = useState(false);
 
-            // Use the primary profile (highest citations or first selected) for display info
             const primaryProfile = useMemo(() => {
-                return profiles.sort((a,b) => b.citationCount - a.citationCount)[0];
+                return [...profiles].sort((a, b) => b.citationCount - a.citationCount)[0];
             }, [profiles]);
 
             useEffect(() => {
@@ -477,22 +654,17 @@
 
                     profiles.forEach(p => {
                         if (p.source === 'openalex') {
-                            // CHANGED: Increased limit from 20 to 100
-                            // FIX: URL-encode the author ID to handle special characters in OpenAlex URLs
                             const promise = fetch(`${OA_BASE}/works?filter=author.id:${encodeURIComponent(p.id)}&sort=publication_date:desc&per-page=100`)
                                 .then(res => res.json())
-                                .then(data => data.results.map(r => normalizeWork(r, 'openalex')))
-                                .catch(e => { console.error('OA fetch err', e); return []; });
+                                .then(data => (data.results || []).map(r => normalizeWork(r, 'openalex')))
+                                .catch(e => { console.warn('OA fetch err', e); return []; });
                             allFetches.push(promise);
                         } else {
-                            // Semantic Scholar
-                            // CHANGED: Increased limit from 20 to 100
-                            // FIX: Added externalIds to fields to get DOI
                             const url = `${S2_BASE}/author/${p.id}/papers?fields=title,year,venue,authors,url,publicationDate,externalIds,openAccessPdf&limit=100`;
                             const promise = fetch(`${PROXY_URL}${encodeURIComponent(url)}`)
                                 .then(res => res.json())
                                 .then(data => (data.data || []).map(r => normalizeWork(r, 's2')))
-                                .catch(e => { console.error('S2 fetch err', e); return []; });
+                                .catch(e => { console.warn('S2 fetch err', e); return []; });
                             allFetches.push(promise);
                         }
                     });
@@ -503,7 +675,7 @@
                         const uniqueSorted = deduplicateWorks(flattened);
                         setWorks(uniqueSorted);
                     } catch (error) {
-                        console.error("Failed to fetch works", error);
+                        console.error("Failed to fetch publications", error);
                     } finally {
                         setLoading(false);
                     }
@@ -512,91 +684,120 @@
                 fetchAllWorks();
             }, [profiles]);
 
+            const copyAllCitations = async () => {
+                const fullText = works.map(w => getAPA(w).plainText).join("\n\n");
+                const ok = await copyToClipboard(fullText);
+                if (ok) {
+                    setAllCopied(true);
+                    setTimeout(() => setAllCopied(false), 2500);
+                }
+            };
+
             return (
-                <div className="min-h-[calc(100vh-64px)] bg-slate-50 pb-20 fade-in">
-                    {/* Header */}
-                    <div className="bg-white border-b border-gray-200">
-                        <div className="max-w-5xl mx-auto px-4 py-8">
+                <div className="flex-1 flex flex-col fade-in pb-24">
+                    {/* Header Banner */}
+                    <div className="bg-paper-hero dark:bg-study-hero border-b border-paper-hairline dark:border-study-hairline py-10 transition-colors">
+                        <div className="max-w-5xl mx-auto px-4 sm:px-6">
                             <button
                                 onClick={onBack}
-                                className="text-sm font-medium text-slate-500 hover:text-slate-900 mb-6 flex items-center gap-1 transition-colors"
+                                className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-terracotta dark:hover:text-white mb-6 flex items-center gap-1.5 transition-colors border border-paper-hairline dark:border-study-hairline px-3 py-1.5 bg-white dark:bg-study-surface w-fit"
                             >
-                                <span className="transform rotate-180 inline-block"><Icons.ChevronRight /></span> Back to Search
+                                <Icons.ChevronLeft />
+                                <span>Back to Search</span>
                             </button>
 
-                            <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                                <div className="w-24 h-24 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center text-3xl text-white font-bold shadow-xl flex-shrink-0">
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                <div className="w-16 h-16 bg-terracotta text-white flex items-center justify-center font-serif text-2xl font-bold shadow-md flex-shrink-0">
                                     {primaryProfile.name.charAt(0)}
                                 </div>
 
-                                <div className="flex-grow text-center md:text-left">
-                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{primaryProfile.name}</h1>
-                                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                                <div className="flex-grow">
+                                    <div className="border-l-3 border-terracotta pl-3 mb-1">
+                                        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+                                            {primaryProfile.name}
+                                        </h1>
+                                    </div>
+                                    <p className="text-stone-600 dark:text-stone-300 text-sm font-medium mb-3">
+                                        {primaryProfile.affiliation}
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
                                         {profiles.map(p => (
-                                            <span key={p.uniqueId} className={`text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wider flex items-center gap-1 ${
-                                                p.source === 'openalex' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-indigo-50 text-indigo-700 border-indigo-100'
-                                            }`}>
-                                                {p.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
-                                                <Icons.Check />
+                                            <span key={p.uniqueId} className={p.source === 'openalex' ? 'keyword-tag' : 'skill-tag'}>
+                                                {p.source === 'openalex' ? 'OpenAlex Profile' : 'Semantic Scholar Profile'}
                                             </span>
                                         ))}
                                     </div>
-                                    <p className="text-lg text-gray-600 max-w-2xl font-medium">
-                                        {primaryProfile.affiliation}
-                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Stats & Content */}
-                    <div className="max-w-5xl mx-auto px-4 py-10">
-                        {/* Render stats for each selected profile */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    {/* Content Section */}
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 w-full">
+                        {/* Profile Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-10">
                             {profiles.map(p => (
-                                <div key={p.uniqueId} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden">
-                                    <div className={`absolute top-0 left-0 w-1 h-full ${p.source === 'openalex' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
-                                    <div className="flex justify-between items-start mb-4 pl-3">
-                                        <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">{p.source === 'openalex' ? 'OpenAlex Stats' : 'SemScholar Stats'}</div>
+                                <div key={p.uniqueId} className="p-5 glass-card border-l-4 border-terracotta">
+                                    <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-2">
+                                        {p.source === 'openalex' ? 'OpenAlex Metrics' : 'Semantic Scholar Metrics'}
                                     </div>
-                                    <div className="flex gap-6 pl-3">
+                                    <div className="flex gap-6">
                                         <div>
-                                            <div className="text-2xl font-extrabold text-gray-900">{p.citationCount.toLocaleString()}</div>
-                                            <div className="text-xs text-gray-500">Citations</div>
+                                            <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+                                                {p.citationCount.toLocaleString()}
+                                            </div>
+                                            <div className="text-xs text-stone-500">Citations</div>
                                         </div>
                                         <div>
-                                            <div className="text-2xl font-extrabold text-gray-900">{p.hIndex}</div>
-                                            <div className="text-xs text-gray-500">h-index</div>
+                                            <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+                                                {p.hIndex}
+                                            </div>
+                                            <div className="text-xs text-stone-500">h-index</div>
                                         </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
 
+                        {/* Publications List */}
                         <div>
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-2xl font-bold text-gray-900">
-                                    Combined Publications
-                                    <span className="ml-3 text-sm font-normal text-gray-500 bg-gray-100 px-3 py-1 rounded-full">{works.length} items</span>
-                                </h2>
-                                <span className="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">APA 7th</span>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-3 border-b border-paper-hairline dark:border-study-hairline">
+                                <div>
+                                    <h2 className="font-serif text-xl font-bold text-slate-900 dark:text-white">
+                                        Publications & Citations
+                                    </h2>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5">
+                                        {works.length} deduplicated works &bull; formatted in APA 7th Edition
+                                    </p>
+                                </div>
+
+                                {works.length > 0 && (
+                                    <button
+                                        onClick={copyAllCitations}
+                                        className="btn-editorial px-4 py-2 bg-terracotta hover:bg-terracotta-deep text-white text-xs font-mono font-semibold flex items-center gap-2 transition-colors"
+                                    >
+                                        {allCopied ? <Icons.Check /> : <Icons.Copy />}
+                                        <span>{allCopied ? 'All Works Copied!' : 'Copy All (APA)'}</span>
+                                    </button>
+                                )}
                             </div>
 
                             <div className="space-y-4">
                                 {loading ? (
-                                    <div className="space-y-4">
-                                        {[1,2,3,4].map(i => (
-                                            <div key={i} className="bg-white h-32 rounded-xl animate-pulse border border-gray-100"></div>
+                                    <div className="space-y-3">
+                                        {[1, 2, 3, 4].map(i => (
+                                            <div key={i} className="p-6 glass-card animate-pulse h-28 bg-stone-100 dark:bg-study-surface/40"></div>
                                         ))}
                                     </div>
                                 ) : (
-                                    works.map((work, i) => (
-                                        <CitationCard key={`${work.title}_${i}`} work={work} />
+                                    works.map((work, idx) => (
+                                        <CitationCard key={`${work.title}_${idx}`} work={work} />
                                     ))
                                 )}
+
                                 {!loading && works.length === 0 && (
-                                    <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-100 border-dashed">
-                                        No publications found for the selected profiles.
+                                    <div className="text-center py-12 glass-card text-stone-500">
+                                        No publications found for the selected author profiles.
                                     </div>
                                 )}
                             </div>
@@ -606,12 +807,34 @@
             );
         };
 
+        // --- Main App ---
         const App = () => {
             const [selectedProfiles, setSelectedProfiles] = useState([]);
+            const [isDark, setIsDark] = useState(() => {
+                const saved = localStorage.getItem('scholarcite_theme');
+                if (saved) return saved === 'dark';
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            });
+
+            useEffect(() => {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('scholarcite_theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('scholarcite_theme', 'light');
+                }
+            }, [isDark]);
+
+            const toggleTheme = () => setIsDark(!isDark);
 
             return (
-                <div className="antialiased text-gray-900 min-h-screen">
-                    <Header resetApp={() => setSelectedProfiles([])} />
+                <div className="flex flex-col min-h-screen">
+                    <Header
+                        resetApp={() => setSelectedProfiles([])}
+                        isDark={isDark}
+                        toggleTheme={toggleTheme}
+                    />
                     {selectedProfiles.length > 0 ? (
                         <ProfileScreen
                             profiles={selectedProfiles}
