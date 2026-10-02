@@ -14,27 +14,29 @@
   <style>
     :root {
       /* Warm Academic Study Tokens (Light Theme) */
-      --color-accent: #c4622d;
-      --color-accent-light: #d4784d;
-      --color-accent-deep: #a34e20;
-      --color-ink-strong: #7a3a15;
+      --color-accent: #f86116;
+      --color-accent-text: #b83b05;
+      --body-shine: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.8) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 40%), linear-gradient(135deg, #eef2f6 0%, #e2e8f0 14%, #f8fafc 28%, #ffffff 40%, #e5ecf3 52%, #f9fbfd 66%, #e0e8f1 80%, #edf3f8 100%);
+      --color-accent-light: #fb7c3c;
+      --color-accent-deep: #b83b05;
+      --color-ink-strong: #8f2e03;
 
-      --bg-main: #faf7f4;
+      --bg-main: #f1f5f9;
       --bg-sidebar: rgba(255, 255, 255, 0.85);
       --bg-card: rgba(255, 255, 255, 0.9);
       --bg-card-hover: #ffffff;
-      --bg-card-inner: #f3ede6;
+      --bg-card-inner: #edf2f7;
 
-      --border-color: #e6ddd5;
-      --border-accent: rgba(196, 98, 45, 0.4);
+      --border-color: #dbe3ec;
+      --border-accent: rgba(248, 97, 22, 0.4);
 
       --text-primary: #0f172a;
       --text-secondary: #475569;
       --text-muted: #64748b;
 
       /* Domain Accent Tokens */
-      --domain-1: #c4622d; /* Terracotta - Entwicklungspsychologie */
-      --domain-1-bg: rgba(196, 98, 45, 0.08);
+      --domain-1: #f86116; /* Terracotta - Entwicklungspsychologie */
+      --domain-1-bg: rgba(248, 97, 22, 0.08);
       --domain-2: #0d9488; /* Teal - Metakognition */
       --domain-2-bg: rgba(13, 148, 136, 0.08);
       --domain-3: #10b981; /* Emerald - Mindset */
@@ -44,8 +46,8 @@
       --domain-5: #2563eb; /* Cobalt - Soziologie */
       --domain-5-bg: rgba(37, 99, 235, 0.08);
 
-      --shadow-card: 0 4px 20px rgba(28, 24, 22, 0.04);
-      --shadow-hover: 0 12px 32px rgba(28, 24, 22, 0.08);
+      --shadow-card: 0 4px 20px rgba(100, 125, 155, 0.04);
+      --shadow-hover: 0 12px 32px rgba(100, 125, 155, 0.08);
 
       --radius-sm: 4px;
       --radius-md: 8px;
@@ -56,23 +58,25 @@
     }
 
     [data-theme="dark"] {
+      --color-accent-text: #fb7c3c;
+      --body-shine: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(30, 58, 95, 0.18) 0%, transparent 70%), linear-gradient(145deg, #0a0f15 0%, #0d141f 40%, #0a0f15 100%);
       /* Warm Academic Study Tokens (Dark Theme) */
-      --bg-main: #181514;
-      --bg-sidebar: rgba(36, 32, 30, 0.85);
-      --bg-card: rgba(36, 32, 30, 0.9);
+      --bg-main: #0a0f15;
+      --bg-sidebar: rgba(16, 24, 34, 0.72);
+      --bg-card: rgba(16, 24, 34, 0.72);
       --bg-card-hover: #2d2825;
-      --bg-card-inner: #1e1a18;
+      --bg-card-inner: #0f161f;
 
-      --border-color: #342e2a;
-      --border-accent: rgba(224, 149, 106, 0.4);
+      --border-color: #16222f;
+      --border-accent: rgba(251, 124, 60, 0.4);
 
       --text-primary: #f8fafc;
       --text-secondary: #cbd5e1;
       --text-muted: #94a3b8;
-      --color-ink-strong: #e0956a;
+      --color-ink-strong: #fb7c3c;
 
-      --domain-1: #e0956a;
-      --domain-1-bg: rgba(224, 149, 106, 0.15);
+      --domain-1: #fb7c3c;
+      --domain-1-bg: rgba(251, 124, 60, 0.15);
       --domain-2: #2dd4bf;
       --domain-2-bg: rgba(45, 212, 191, 0.12);
       --domain-3: #34d399;
@@ -95,6 +99,8 @@
     body {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
       background-color: var(--bg-main);
+      background-image: var(--body-shine);
+      background-attachment: fixed;
       color: var(--text-primary);
       line-height: 1.6;
       min-height: 100vh;
@@ -178,7 +184,7 @@
 
     .btn-header:hover {
       border-color: var(--color-accent);
-      color: var(--color-accent);
+      color: var(--color-accent-text);
     }
 
     /* Main Dashboard Layout */
@@ -202,7 +208,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--color-accent);
+      color: var(--color-accent-text);
       margin-bottom: 0.25rem;
     }
 
@@ -280,7 +286,7 @@
 
     .view-nav-btn:hover {
       color: var(--text-primary);
-      background: rgba(196, 98, 45, 0.06);
+      background: rgba(248, 97, 22, 0.06);
     }
 
     .view-nav-btn.active {
@@ -392,7 +398,7 @@
 
     .action-btn-small:hover {
       border-color: var(--color-accent);
-      color: var(--color-accent);
+      color: var(--color-accent-text);
     }
 
     /* Main Content Area */
@@ -602,7 +608,7 @@
       content: '→';
       position: absolute;
       left: 0;
-      color: var(--color-accent);
+      color: var(--color-accent-text);
       font-weight: 700;
     }
 
@@ -623,7 +629,7 @@
     }
 
     .var-badge.index-var {
-      background: rgba(196, 98, 45, 0.1);
+      background: rgba(248, 97, 22, 0.1);
       border-color: var(--color-accent);
       color: var(--color-ink-strong);
       font-weight: 600;
@@ -787,7 +793,7 @@
 
     .action-title {
       font-weight: 700;
-      color: var(--color-accent);
+      color: var(--color-accent-text);
       margin-bottom: 0.25rem;
       display: flex;
       align-items: center;

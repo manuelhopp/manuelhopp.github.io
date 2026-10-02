@@ -15,23 +15,25 @@
   <style>
     :root {
       /* Light Theme (Terracotta & Warm Paper) */
-      --color-accent: #c4622d;
-      --color-accent-light: #d4784d;
-      --color-accent-deep: #a34e20;
-      --color-ink-strong: #7a3a15;
-      --accent-wash: rgba(196, 98, 45, 0.08);
+      --color-accent: #f86116;
+      --color-accent-text: #b83b05;
+      --body-shine: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.8) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 40%), linear-gradient(135deg, #eef2f6 0%, #e2e8f0 14%, #f8fafc 28%, #ffffff 40%, #e5ecf3 52%, #f9fbfd 66%, #e0e8f1 80%, #edf3f8 100%);
+      --color-accent-light: #fb7c3c;
+      --color-accent-deep: #b83b05;
+      --color-ink-strong: #8f2e03;
+      --accent-wash: rgba(248, 97, 22, 0.08);
 
-      --bg-body: #faf7f4;
-      --bg-hero: #f3ede6;
+      --bg-body: #f1f5f9;
+      --bg-hero: #edf2f7;
       --bg-surface: #ffffff;
-      --bg-surface-glass: rgba(255, 255, 255, 0.85);
+      --bg-surface-glass: rgba(255, 255, 255, 0.72);
 
       --text-main: #1e293b;
       --text-heading: #0f172a;
       --text-muted: #64748b;
-      --border: #e6ddd5;
-      --border-glass: rgba(230, 221, 213, 0.6);
-      --tag-neutral-border: #a09488;
+      --border: #dbe3ec;
+      --border-glass: rgba(255, 255, 255, 0.85);
+      --tag-neutral-border: #8ba0b5;
 
       --danger: #e11d48;
       --danger-bg: rgba(225, 29, 72, 0.10);
@@ -41,33 +43,32 @@
       --success-ink: #047857;
       --warning: #d97706;
 
-      --shadow-glass: 0 8px 32px 0 rgba(28, 24, 22, 0.04);
+      --shadow-glass: 0 8px 32px 0 rgba(100, 125, 155, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
       --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.06);
 
       --focus-ring: 0 0 0 2px var(--bg-body), 0 0 0 4px var(--color-accent);
-      --pulse-strong: rgba(196, 98, 45, 0.55);
-      --pulse-soft: rgba(196, 98, 45, 0.25);
+      --pulse-strong: rgba(248, 97, 22, 0.55);
+      --pulse-soft: rgba(248, 97, 22, 0.25);
     }
 
     [data-theme="dark"] {
+      --color-accent-text: #fb7c3c;
+      --body-shine: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(30, 58, 95, 0.18) 0%, transparent 70%), linear-gradient(145deg, #0a0f15 0%, #0d141f 40%, #0a0f15 100%);
       /* Dark Theme (Study Dark) */
-      --color-accent: #e0956a;
-      --color-accent-light: #d4784d;
-      --color-accent-deep: #c4622d;
-      --color-ink-strong: #e0956a;
-      --accent-wash: rgba(196, 98, 45, 0.16);
+      --color-ink-strong: #fb7c3c;
+      --accent-wash: rgba(248, 97, 22, 0.16);
 
-      --bg-body: #181514;
-      --bg-hero: #1e1a18;
-      --bg-surface: #24201e;
-      --bg-surface-glass: rgba(36, 32, 30, 0.85);
+      --bg-body: #0a0f15;
+      --bg-hero: #0f161f;
+      --bg-surface: #101822;
+      --bg-surface-glass: rgba(16, 24, 34, 0.72);
 
       --text-main: #e2e8f0;
       --text-heading: #ffffff;
-      --text-muted: #a8a29e;
-      --border: #342e2a;
-      --border-glass: rgba(52, 46, 42, 0.6);
-      --tag-neutral-border: #6b5f55;
+      --text-muted: #94a3b8;
+      --border: #16222f;
+      --border-glass: rgba(80, 115, 155, 0.22);
+      --tag-neutral-border: #476685;
 
       --danger: #f43f5e;
       --danger-bg: rgba(244, 63, 94, 0.18);
@@ -77,11 +78,11 @@
       --success-ink: #6ee7b7;
       --warning: #f59e0b;
 
-      --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
       --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.4);
 
-      --pulse-strong: rgba(224, 149, 106, 0.65);
-      --pulse-soft: rgba(224, 149, 106, 0.3);
+      --pulse-strong: rgba(251, 124, 60, 0.65);
+      --pulse-soft: rgba(251, 124, 60, 0.3);
     }
 
     /* ==========================================================================
@@ -96,6 +97,8 @@
     body {
       font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
       background-color: var(--bg-body);
+      background-image: var(--body-shine);
+      background-attachment: fixed;
       color: var(--text-main);
       line-height: 1.5;
       min-height: 100vh;
@@ -132,7 +135,7 @@
       background: var(--bg-surface-glass);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-glass);
+      border-bottom: 1px solid var(--border);
       padding: 0.5rem 1.5rem;
       min-height: 64px;
       display: flex;
@@ -213,7 +216,7 @@
 
     .btn:hover {
       border-color: var(--color-accent);
-      color: var(--color-accent);
+      color: var(--color-accent-text);
     }
 
     .btn:active {
@@ -230,10 +233,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
-    [data-theme="dark"] .btn-primary {
-      background: var(--color-accent-deep);
-      border-color: var(--color-accent-deep);
-    }
 
     .btn-primary:hover {
       background: var(--color-accent-deep);
@@ -243,10 +242,6 @@
       box-shadow: var(--shadow-lifted);
     }
 
-    [data-theme="dark"] .btn-primary:hover {
-      background: var(--color-accent-light);
-      border-color: var(--color-accent-light);
-    }
 
     .btn-sm {
       padding: 4px 9px;
@@ -278,7 +273,7 @@
     .badge-ins   { border-left-color: var(--success); background: var(--success-bg); color: var(--success-ink); }
     .badge-neutral {
       border-left-color: var(--tag-neutral-border);
-      background: rgba(120, 108, 96, 0.08);
+      background: rgba(140, 165, 195, 0.10);
       color: var(--text-muted);
     }
 
@@ -399,7 +394,7 @@
     }
 
     .pill-btn:hover {
-      color: var(--color-accent);
+      color: var(--color-accent-text);
     }
 
     .pill-btn.active {
@@ -791,7 +786,7 @@
       height: 48px;
       margin-bottom: 1rem;
       opacity: 0.5;
-      color: var(--color-accent);
+      color: var(--color-accent-text);
     }
 
     .empty-title {
@@ -1810,11 +1805,11 @@
   <meta charset="utf-8">
   <title>DiffCraft Comparison Report</title>
   <style>
-    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 2rem; max-width: 900px; margin: auto; line-height: 1.8; color: #1e293b; background: #faf7f4; }
-    h1 { font-family: Merriweather, Georgia, serif; font-size: 1.5rem; color: #0f172a; border-bottom: 1px solid #e6ddd5; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 2rem; max-width: 900px; margin: auto; line-height: 1.8; color: #1e293b; background: #f1f5f9; }
+    h1 { font-family: Merriweather, Georgia, serif; font-size: 1.5rem; color: #0f172a; border-bottom: 1px solid #dbe3ec; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
     del.diff-del { background-color: rgba(225, 29, 72, 0.10); color: #be123c; text-decoration: line-through; text-decoration-color: #e11d48; text-decoration-thickness: 2px; padding: 1px 4px; border-radius: 2px; border-bottom: 1px solid #e11d48; }
     ins.diff-ins { background-color: rgba(5, 150, 105, 0.11); color: #047857; text-decoration: none; font-weight: 500; padding: 1px 4px; border-radius: 2px; border-bottom: 1px solid #059669; }
-    .diff-output { white-space: pre-wrap; font-size: 1.05rem; padding: 1.5rem; background: #ffffff; border: 1px solid #e6ddd5; border-radius: 14px; }
+    .diff-output { white-space: pre-wrap; font-size: 1.05rem; padding: 1.5rem; background: #ffffff; border: 1px solid #dbe3ec; border-radius: 14px; }
   </style>
 </head>
 <body>

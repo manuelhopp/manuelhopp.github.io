@@ -20,27 +20,27 @@
                 extend: {
                     colors: {
                         terracotta: {
-                            DEFAULT: '#c4622d',
-                            light: '#d4784d',
-                            deep: '#a34e20',
-                            50: '#fdf7f3',
-                            100: '#faeee6',
-                            500: '#c4622d',
-                            600: '#a34e20',
-                            700: '#7a3a15',
+                            DEFAULT: '#f86116',
+                            light: '#fb7c3c',
+                            deep: '#b83b05',
+                            50: '#fff4ed',
+                            100: '#ffe6d5',
+                            500: '#f86116',
+                            600: '#b83b05',
+                            700: '#8f2e03',
                         },
                         paper: {
-                            DEFAULT: '#faf7f4',
-                            hero: '#f3ede6',
+                            DEFAULT: '#f1f5f9',
+                            hero: '#edf2f7',
                             surface: '#ffffff',
-                            hairline: '#e6ddd5',
+                            hairline: '#dbe3ec',
                         },
                         study: {
-                            dark: '#181514',
-                            hero: '#1e1a18',
-                            surface: '#24201e',
-                            hairline: '#342e2a',
-                            accent: '#e0956a',
+                            dark: '#0a0f15',
+                            hero: '#0f161f',
+                            surface: '#101822',
+                            hairline: '#16222f',
+                            accent: '#fb7c3c',
                         }
                     },
                     fontFamily: {
@@ -62,22 +62,28 @@
 
     <style>
         :root {
-            --color-accent: #c4622d;
-            --color-accent-deep: #a34e20;
-            --color-bg: #faf7f4;
+            --color-accent: #f86116;
+            --color-accent-text: #b83b05;
+            --body-shine: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.8) 0%, transparent 45%), radial-gradient(circle at 15% 85%, rgba(255, 255, 255, 0.5) 0%, transparent 40%), linear-gradient(135deg, #eef2f6 0%, #e2e8f0 14%, #f8fafc 28%, #ffffff 40%, #e5ecf3 52%, #f9fbfd 66%, #e0e8f1 80%, #edf3f8 100%);
+            --color-accent-deep: #b83b05;
+            --color-bg: #f1f5f9;
             --color-surface: #ffffff;
-            --color-border: #e6ddd5;
+            --color-border: #dbe3ec;
             --color-text-main: #1e293b;
         }
         .dark {
-            --color-bg: #181514;
-            --color-surface: #24201e;
-            --color-border: #342e2a;
+            --color-accent-text: #fb7c3c;
+            --body-shine: radial-gradient(ellipse 80% 40% at 50% 0%, rgba(30, 58, 95, 0.18) 0%, transparent 70%), linear-gradient(145deg, #0a0f15 0%, #0d141f 40%, #0a0f15 100%);
+            --color-bg: #0a0f15;
+            --color-surface: #101822;
+            --color-border: #16222f;
             --color-text-main: #e2e8f0;
         }
         body {
             font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
             background-color: var(--color-bg);
+            background-image: var(--body-shine);
+            background-attachment: fixed;
             color: var(--color-text-main);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -90,18 +96,18 @@
         }
         .apa-citation em { font-style: italic; }
         .glass-card {
-            background: rgba(255, 255, 255, 0.75);
+            background: rgba(255, 255, 255, 0.72);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(230, 221, 213, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.85);
             border-radius: 14px;
-            box-shadow: 0 8px 32px 0 rgba(28, 24, 22, 0.03);
+            box-shadow: 0 8px 32px 0 rgba(100, 125, 155, 0.08), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
             transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .dark .glass-card {
-            background: rgba(36, 32, 30, 0.75);
-            border: 1px solid rgba(52, 46, 42, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            background: rgba(16, 24, 34, 0.72);
+            border: 1px solid rgba(80, 115, 155, 0.22);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
         }
         .glass-card:hover {
             transform: translateY(-2px);
@@ -117,14 +123,14 @@
             font-size: 0.75rem;
             font-weight: 500;
             letter-spacing: 0.015em;
-            border-left: 2px solid #c4622d;
-            background: rgba(196, 98, 45, 0.08);
-            color: #7a3a15;
+            border-left: 2px solid #f86116;
+            background: rgba(248, 97, 22, 0.08);
+            color: #8f2e03;
             border-radius: 0px;
         }
         .dark .keyword-tag {
-            background: rgba(196, 98, 45, 0.18);
-            color: #e0956a;
+            background: rgba(248, 97, 22, 0.18);
+            color: #fb7c3c;
         }
         .skill-tag {
             display: inline-flex;
@@ -133,14 +139,14 @@
             font-size: 0.75rem;
             font-weight: 500;
             letter-spacing: 0.015em;
-            border-left: 2px solid #a09488;
-            background: rgba(120, 108, 96, 0.08);
-            color: #5c4e44;
+            border-left: 2px solid #8ba0b5;
+            background: rgba(140, 165, 195, 0.10);
+            color: #334e68;
             border-radius: 0px;
         }
         .dark .skill-tag {
-            background: rgba(140, 128, 116, 0.15);
-            color: #c0b0a4;
+            background: rgba(90, 125, 165, 0.14);
+            color: #9bb2c9;
         }
         .btn-editorial {
             border-radius: 0px;
@@ -321,12 +327,12 @@
                         </span>
                     )}
                     {doi && (
-                        <a href={doi} target="_blank" rel="noreferrer" className="text-terracotta hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                        <a href={doi} target="_blank" rel="noreferrer" className="text-terracotta-deep hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
                             {doi}
                         </a>
                     )}
                     {!doi && url && (
-                        <a href={url} target="_blank" rel="noreferrer" className="text-terracotta hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                        <a href={url} target="_blank" rel="noreferrer" className="text-terracotta-deep hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
                             {url}
                         </a>
                     )}
@@ -375,7 +381,7 @@
                         <div>
                             <div className="flex items-center gap-2">
                                 <span className="font-serif font-bold text-lg text-slate-900 dark:text-white tracking-tight leading-none">ScholarCite</span>
-                                <span className="text-[11px] font-mono text-terracotta dark:text-study-accent font-semibold">Multi-Source</span>
+                                <span className="text-[11px] font-mono text-terracotta-deep dark:text-study-accent font-semibold">Multi-Source</span>
                             </div>
                             <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">Dr. Manuel D. S. Hopp &bull; Academic Tools</p>
                         </div>
@@ -384,7 +390,7 @@
                     <div className="flex items-center gap-3">
                         <a
                             href="../index.html"
-                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-terracotta dark:hover:text-white border border-paper-hairline dark:border-study-hairline hover:border-terracotta transition-colors"
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-terracotta-deep dark:hover:text-white border border-paper-hairline dark:border-study-hairline hover:border-terracotta transition-colors"
                             title="Return to Main Homepage"
                         >
                             <Icons.Home />
@@ -394,7 +400,7 @@
                         <button
                             onClick={toggleTheme}
                             aria-label="Toggle Theme"
-                            className="p-2 border border-paper-hairline dark:border-study-hairline hover:border-terracotta dark:hover:border-terracotta text-stone-700 dark:text-stone-300 hover:text-terracotta transition-colors"
+                            className="p-2 border border-paper-hairline dark:border-study-hairline hover:border-terracotta dark:hover:border-terracotta text-stone-700 dark:text-stone-300 hover:text-terracotta-deep transition-colors"
                         >
                             {isDark ? <Icons.Sun /> : <Icons.Moon />}
                         </button>
@@ -469,7 +475,7 @@
                 <div className="flex-1 flex flex-col items-center py-16 px-4 fade-in pb-32 max-w-4xl mx-auto w-full">
                     <div className="text-center max-w-2xl w-full mb-10">
                         <div className="inline-block border-l-2 border-terracotta pl-3 mb-3">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-terracotta dark:text-study-accent">Bibliographic Query Tool</span>
+                            <span className="text-xs uppercase tracking-wider font-semibold text-terracotta-deep dark:text-study-accent">Bibliographic Query Tool</span>
                         </div>
                         <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">
                             Author & Publication Explorer
@@ -505,7 +511,7 @@
 
                     <div className="w-full max-w-2xl space-y-4">
                         {status && (
-                            <div className="text-center text-xs font-mono text-terracotta dark:text-study-accent animate-pulse py-2">
+                            <div className="text-center text-xs font-mono text-terracotta-deep dark:text-study-accent animate-pulse py-2">
                                 {status}
                             </div>
                         )}
@@ -700,7 +706,7 @@
                         <div className="max-w-5xl mx-auto px-4 sm:px-6">
                             <button
                                 onClick={onBack}
-                                className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-terracotta dark:hover:text-white mb-6 flex items-center gap-1.5 transition-colors border border-paper-hairline dark:border-study-hairline px-3 py-1.5 bg-white dark:bg-study-surface w-fit"
+                                className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-terracotta-deep dark:hover:text-white mb-6 flex items-center gap-1.5 transition-colors border border-paper-hairline dark:border-study-hairline px-3 py-1.5 bg-white dark:bg-study-surface w-fit"
                             >
                                 <Icons.ChevronLeft />
                                 <span>Back to Search</span>
