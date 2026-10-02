@@ -308,6 +308,8 @@
         document.head.appendChild(styleSheet);
 
         requestAnimationFrame(loop);
+        // canvas text uses the web fonts: redraw once they are loaded
+        if (document.fonts) document.fonts.ready.then(draw);
     }
 
     function resize() {
@@ -323,6 +325,11 @@
         ctx.scale(dpr, dpr);
 
         if (points.H.x === 0 && points.H.y === 0) resetPositions();
+        // keep the points reachable after the viewport shrinks (e.g. phone rotation)
+        Object.values(points).forEach(p => {
+            p.x = Math.min(p.x, width - 30);
+            p.y = Math.min(p.y, height - 30);
+        });
         draw();
     }
 

@@ -723,7 +723,20 @@
             updateUI();
         }
 
+        function hasOutliers() {
+            return sortedData.some(d => d.value < stats.lowerFence || d.value > stats.upperFence);
+        }
+
+        // Draw samples until one has a visible outlier on the fixed axis
+        // (fences beyond 140/210 cannot be exceeded, so injecting one would not work)
         function generateData() {
+            for (let attempt = 0; attempt < 200; attempt++) {
+                drawSample();
+                if (hasOutliers()) return;
+            }
+        }
+
+        function drawSample() {
             rawData = [];
             const mean = 175;
             const std = 11;
@@ -744,16 +757,14 @@
             }
             sortedData = [...rawData].sort((a, b) => a.value - b.value);
 
-            // Ensure at least one distinct outlier
+            // Ensure at least one distinct outlier where the axis allows it
             calculateStats();
-            const vals = sortedData.map(d => d.value);
-            const hasOutliers = vals.some(v => v < stats.lowerFence || v > stats.upperFence);
 
-            if (!hasOutliers) {
+            if (!hasOutliers()) {
                 const indexToReplace = Math.random() > 0.5 ? 0 : DATA_COUNT - 1;
                 const newValue = (indexToReplace === 0)
-                    ? Math.min(stats.lowerFence - 3, MIN_VAL + 4)
-                    : Math.max(stats.upperFence + 3, MAX_VAL - 4);
+                    ? Math.max(MIN_VAL, Math.min(stats.lowerFence - 3, MIN_VAL + 4))
+                    : Math.min(MAX_VAL, Math.max(stats.upperFence + 3, MAX_VAL - 4));
 
                 const originalId = sortedData[indexToReplace].id;
                 const rawIndex = rawData.findIndex(d => d.id === originalId);
@@ -873,7 +884,6 @@
             exText.textContent = step.exText;
             nextBtn.textContent = step.btnText;
 
-            nextBtn.disabled = currentStep === STEPS.length - 1;
             prevBtn.disabled = currentStep === 0;
 
             document.getElementById('stat-min').textContent = (currentStep >= 1) ? stats.min : "-";

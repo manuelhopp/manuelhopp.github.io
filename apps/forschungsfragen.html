@@ -1570,7 +1570,7 @@
 
       cards.forEach(card => {
         const matchesDomain = (currentFilterDomain === 'all' || card.dataset.domain === currentFilterDomain);
-        const matchesSearch = !query || card.innerText.toLowerCase().includes(query);
+        const matchesSearch = !query || card.textContent.toLowerCase().includes(query);
 
         if (matchesDomain && matchesSearch) {
           card.style.display = 'flex';

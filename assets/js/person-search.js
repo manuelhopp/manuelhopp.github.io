@@ -16,16 +16,16 @@ const PROXY_URL = "https://corsproxy.io/?";
 const S2_BASE = "https://api.semanticscholar.org/graph/v1";
 const OA_BASE = "https://api.openalex.org";
 const normalizeAuthor = (data, source) => {
-  var _a, _b, _c;
+  var _a, _b, _c, _d, _e;
   if (source === "openalex") {
     return {
       id: data.id,
       uniqueId: `oa_${data.id}`,
       name: data.display_name,
-      affiliation: ((_a = data.last_known_institution) == null ? void 0 : _a.display_name) || "Independent Scholar",
+      affiliation: ((_b = (_a = data.last_known_institutions) == null ? void 0 : _a[0]) == null ? void 0 : _b.display_name) || ((_c = data.last_known_institution) == null ? void 0 : _c.display_name) || "Independent Scholar",
       citationCount: data.cited_by_count || 0,
       worksCount: data.works_count || 0,
-      hIndex: ((_b = data.summary_stats) == null ? void 0 : _b.h_index) || "N/A",
+      hIndex: ((_d = data.summary_stats) == null ? void 0 : _d.h_index) || "N/A",
       source: "openalex",
       original: data
     };
@@ -34,7 +34,7 @@ const normalizeAuthor = (data, source) => {
       id: data.authorId,
       uniqueId: `s2_${data.authorId}`,
       name: data.name,
-      affiliation: ((_c = data.affiliations) == null ? void 0 : _c[0]) || "Independent Scholar",
+      affiliation: ((_e = data.affiliations) == null ? void 0 : _e[0]) || "Independent Scholar",
       citationCount: data.citationCount || 0,
       worksCount: data.paperCount || "N/A",
       hIndex: data.hIndex || "N/A",
@@ -67,7 +67,7 @@ const normalizeWork = (data, source) => {
     work.journal = ((_b = (_a = data.primary_location) == null ? void 0 : _a.source) == null ? void 0 : _b.display_name) || "";
     work.volume = ((_c = data.biblio) == null ? void 0 : _c.volume) || "";
     work.issue = ((_d = data.biblio) == null ? void 0 : _d.issue) || "";
-    work.pages = ((_e = data.biblio) == null ? void 0 : _e.first_page) && ((_f = data.biblio) == null ? void 0 : _f.last_page) ? `${data.biblio.first_page}-${data.biblio.last_page}` : ((_g = data.biblio) == null ? void 0 : _g.first_page) || "";
+    work.pages = ((_e = data.biblio) == null ? void 0 : _e.first_page) && ((_f = data.biblio) == null ? void 0 : _f.last_page) ? `${data.biblio.first_page}\u2013${data.biblio.last_page}` : ((_g = data.biblio) == null ? void 0 : _g.first_page) || "";
     work.doi = data.doi || "";
     work.url = data.doi || ((_h = data.primary_location) == null ? void 0 : _h.landing_page_url) || "";
   } else if (source === "s2") {
@@ -84,7 +84,7 @@ const deduplicateWorks = (allWorks) => {
   const uniqueMap = /* @__PURE__ */ new Map();
   allWorks.forEach((work) => {
     if (!work.title) return;
-    const titleKey = work.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const titleKey = work.title.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
     const key = `${titleKey}_${work.year || "nd"}`;
     if (!uniqueMap.has(key)) {
       uniqueMap.set(key, work);
@@ -110,7 +110,7 @@ const formatAuthorsAPA = (authorNames) => {
   };
   const formattedList = authorNames.map(formatName);
   if (formattedList.length === 1) return formattedList[0];
-  if (formattedList.length === 2) return `${formattedList[0]} & ${formattedList[1]}`;
+  if (formattedList.length === 2) return `${formattedList[0]}, & ${formattedList[1]}`;
   if (formattedList.length > 20) {
     return `${formattedList.slice(0, 19).join(", ")}, ... ${formattedList[formattedList.length - 1]}`;
   }
@@ -196,6 +196,7 @@ const SearchScreen = ({ onProfilesSelect }) => {
   const [hasSearched, setHasSearched] = useState(false);
   const [status, setStatus] = useState("");
   const [selectedIds, setSelectedIds] = useState(/* @__PURE__ */ new Set());
+  const [error, setError] = useState("");
   const searchAuthors = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
@@ -203,21 +204,31 @@ const SearchScreen = ({ onProfilesSelect }) => {
     setHasSearched(true);
     setStatus("Querying OpenAlex and Semantic Scholar APIs...");
     setResults([]);
+    setError("");
     setSelectedIds(/* @__PURE__ */ new Set());
-    const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=6`).then((res) => res.json()).then((data) => (data.results || []).map((r) => normalizeAuthor(r, "openalex"))).catch((err) => {
+    const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=6`).then((res) => {
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }).then((data) => (data.results || []).map((r) => normalizeAuthor(r, "openalex"))).catch((err) => {
       console.warn("OpenAlex fetch failed:", err);
-      return [];
+      return null;
     });
-    const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=6`)}`).then((res) => res.json()).then((data) => (data.data || []).map((r) => normalizeAuthor(r, "s2"))).catch((err) => {
+    const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=6`)}`).then((res) => {
+      if (!res.ok) throw new Error(res.status);
+      return res.json();
+    }).then((data) => (data.data || []).map((r) => normalizeAuthor(r, "s2"))).catch((err) => {
       console.warn("Semantic Scholar fetch failed:", err);
-      return [];
+      return null;
     });
     try {
       const [oaResults, s2Results] = await Promise.all([p1, p2]);
-      const combined = [...oaResults, ...s2Results].sort((a, b) => b.citationCount - a.citationCount);
+      if (oaResults === null && s2Results === null) {
+        setError("Could not reach OpenAlex or Semantic Scholar. Please check your connection and try again.");
+      } else if (oaResults === null || s2Results === null) {
+        setError(`${oaResults === null ? "OpenAlex" : "Semantic Scholar"} did not respond - showing results from the other source only.`);
+      }
+      const combined = [...oaResults || [], ...s2Results || []].sort((a, b) => b.citationCount - a.citationCount);
       setResults(combined);
-    } catch (err) {
-      setStatus("Error connecting to academic databases.");
     } finally {
       setLoading(false);
       setStatus("");
@@ -253,7 +264,7 @@ const SearchScreen = ({ onProfilesSelect }) => {
       className: "px-6 py-3.5 bg-terracotta hover:bg-terracotta-deep text-white font-semibold btn-editorial text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
     },
     loading ? "Searching..." : "Search"
-  ))), /* @__PURE__ */ React.createElement("div", { className: "w-full max-w-2xl space-y-4" }, status && /* @__PURE__ */ React.createElement("div", { className: "text-center text-xs font-mono text-terracotta-deep dark:text-study-accent animate-pulse py-2" }, status), hasSearched && results.length === 0 && !loading && !status && /* @__PURE__ */ React.createElement("div", { className: "text-center text-stone-500 dark:text-stone-400 py-12 glass-card" }, /* @__PURE__ */ React.createElement("p", { className: "font-serif text-lg text-slate-800 dark:text-stone-200 mb-1" }, "No researcher profiles found"), /* @__PURE__ */ React.createElement("p", { className: "text-xs" }, "Try adjusting spelling or searching with alternative name variants.")), results.map((author) => {
+  ))), /* @__PURE__ */ React.createElement("div", { className: "w-full max-w-2xl space-y-4" }, status && /* @__PURE__ */ React.createElement("div", { className: "text-center text-xs font-mono text-terracotta-deep dark:text-study-accent animate-pulse py-2" }, status), error && /* @__PURE__ */ React.createElement("div", { className: "text-center text-xs font-mono text-terracotta-deep dark:text-study-accent py-2", role: "alert" }, error), hasSearched && results.length === 0 && !loading && !status && !error && /* @__PURE__ */ React.createElement("div", { className: "text-center text-stone-500 dark:text-stone-400 py-12 glass-card" }, /* @__PURE__ */ React.createElement("p", { className: "font-serif text-lg text-slate-800 dark:text-stone-200 mb-1" }, "No researcher profiles found"), /* @__PURE__ */ React.createElement("p", { className: "text-xs" }, "Try adjusting spelling or searching with alternative name variants.")), results.map((author) => {
     const isSelected = selectedIds.has(author.uniqueId);
     return /* @__PURE__ */ React.createElement(
       "div",
@@ -309,7 +320,7 @@ const ProfileScreen = ({ profiles, onBack }) => {
       let allFetches = [];
       profiles.forEach((p) => {
         if (p.source === "openalex") {
-          const promise = fetch(`${OA_BASE}/works?filter=author.id:${encodeURIComponent(p.id)}&sort=publication_date:desc&per-page=100`).then((res) => res.json()).then((data) => (data.results || []).map((r) => normalizeWork(r, "openalex"))).catch((e) => {
+          const promise = fetch(`${OA_BASE}/works?filter=author.id:${p.id.split("/").pop()}&sort=publication_date:desc&per-page=100`).then((res) => res.json()).then((data) => (data.results || []).map((r) => normalizeWork(r, "openalex"))).catch((e) => {
             console.warn("OA fetch err", e);
             return [];
           });

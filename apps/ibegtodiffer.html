@@ -1554,7 +1554,7 @@
       function jumpToChange(direction) {
         if (diffTargets.length === 0) return;
 
-        diffTargets.forEach(el => el.classList.remove('diff-target-active'));
+        document.querySelectorAll('.diff-target-active').forEach(el => el.classList.remove('diff-target-active'));
 
         if (direction === 'next') {
           currentTargetIdx = (currentTargetIdx + 1) % diffTargets.length;
@@ -1562,11 +1562,12 @@
           currentTargetIdx = (currentTargetIdx - 1 + diffTargets.length) % diffTargets.length;
         }
 
-        const targetEl = diffTargets[currentTargetIdx];
-        if (targetEl) {
-          targetEl.classList.add('diff-target-active');
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        // the same change exists in the unified and the split view; scroll the one that is visible
+        const id = diffTargets[currentTargetIdx].getAttribute('data-diff-target');
+        const matches = Array.from(document.querySelectorAll(`[data-diff-target="${id}"]`));
+        matches.forEach(el => el.classList.add('diff-target-active'));
+        const visible = matches.find(el => el.offsetParent !== null);
+        if (visible) visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
         updateChangeCounter();
       }
 
@@ -1846,11 +1847,13 @@
           e.preventDefault();
           clearAllBtn.click();
         }
-        if (document.activeElement !== textOriginal && document.activeElement !== textModified) {
-          if (e.key === 'j' || e.key === 'ArrowDown') {
+        const typing = /^(TEXTAREA|INPUT|SELECT)$/.test(document.activeElement.tagName);
+        if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          // only j/k: the arrow keys must keep scrolling the page
+          if (e.key === 'j') {
             e.preventDefault();
             jumpToChange('next');
-          } else if (e.key === 'k' || e.key === 'ArrowUp') {
+          } else if (e.key === 'k') {
             e.preventDefault();
             jumpToChange('prev');
           }

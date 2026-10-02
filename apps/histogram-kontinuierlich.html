@@ -377,6 +377,40 @@
             100% { transform: scale(0); opacity: 0; }
         }
 
+
+        /* Count label above bars too short to hold it */
+        .bar-count-above {
+            margin-bottom: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--color-text-heading);
+        }
+
+        /* Mean marker (x̄) */
+        .mean-marker {
+            position: absolute;
+            width: 0;
+            border-left: 2px dashed var(--color-text-heading);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .mean-marker span {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            transform: translateX(-50%);
+            padding: 1px 6px;
+            border-radius: 2px;
+            background: var(--color-text-heading);
+            color: var(--color-surface);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+
         /* Histogram Area */
         .histogram-container {
             display: flex;
@@ -511,8 +545,6 @@
         .stat-lbl {
             font-size: 0.72rem;
             color: var(--color-text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
         }
 
         .info-box {
@@ -707,7 +739,9 @@
         }
 
         function getBinKey(height, binWidth) {
-            const binIndex = Math.floor((height - MIN_HEIGHT) / binWidth);
+            const numBins = Math.ceil((MAX_HEIGHT - MIN_HEIGHT) / binWidth);
+            // MAX_HEIGHT itself belongs to the last bin
+            const binIndex = Math.min(Math.floor((height - MIN_HEIGHT) / binWidth), numBins - 1);
             const start = MIN_HEIGHT + binIndex * binWidth;
             const end = start + binWidth;
             return `${start}-${end}`;
@@ -753,7 +787,10 @@
             return newHistogramData;
         }
 
+        let runId = 0; // invalidates pending animations after a reset
+
         function init() {
+            runId++;
             updateTheme();
             individuals = [...SAMPLE_DATA];
             currentBinWidth = DEFAULT_BIN_WIDTH;
@@ -809,9 +846,15 @@
                 bar.style.height = `${height}px`;
 
                 const countLabel = document.createElement('span');
-                countLabel.className = 'bar-count';
                 countLabel.textContent = count;
-                bar.appendChild(countLabel);
+                if (count > 0 && height < 26) {
+                    // bar too short: show the count above it instead of clipping it
+                    countLabel.className = 'bar-count-above';
+                    wrapper.appendChild(countLabel);
+                } else {
+                    countLabel.className = 'bar-count';
+                    bar.appendChild(countLabel);
+                }
 
                 const stackedDots = document.createElement('div');
                 stackedDots.className = 'stacked-dots';
@@ -839,6 +882,40 @@
                 wrapper.appendChild(sublabel);
                 histogramContainer.appendChild(wrapper);
             });
+            drawMeanMarker();
+        }
+
+        function getPlacedMean() {
+            let sum = 0, count = 0;
+            individuals.forEach((h, i) => {
+                if (h === null) { sum += SAMPLE_DATA[i]; count++; }
+            });
+            return count > 0 ? sum / count : null;
+        }
+
+        function drawMeanMarker() {
+            const old = histogramContainer.querySelector('.mean-marker');
+            if (old) old.remove();
+            const mean = getPlacedMean();
+            if (mean === null) return;
+
+            const bins = getAllBins(currentBinWidth);
+            const wrappers = histogramContainer.querySelectorAll('.histogram-bar-wrapper');
+            let idx = bins.findIndex(b => mean >= b.start && mean < b.end);
+            if (idx < 0) idx = mean >= MAX_HEIGHT ? bins.length - 1 : 0;
+            const bin = bins[idx], w = wrappers[idx];
+            if (!w) return;
+
+            const label = w.querySelector('.bar-label');
+            const bottom = label.offsetTop - parseFloat(getComputedStyle(label).marginTop);
+            const marker = document.createElement('div');
+            marker.className = 'mean-marker';
+            marker.style.left = `${w.offsetLeft + (mean - bin.start) / (bin.end - bin.start) * w.offsetWidth}px`;
+            marker.style.top = `${bottom - 240}px`;
+            marker.style.height = '240px';
+            marker.title = `Mittelwert x̄ = ${mean.toFixed(1)} cm`;
+            marker.innerHTML = `<span>x̄ = ${mean.toFixed(1)}</span>`;
+            histogramContainer.appendChild(marker);
         }
 
         function moveIndividual(index) {
@@ -850,7 +927,9 @@
 
             individualEl.classList.add('moving');
 
+            const run = runId;
             setTimeout(() => {
+                if (run !== runId || individuals[index] === null) return;
                 individuals[index] = null;
                 const binKey = getBinKey(height, currentBinWidth);
                 if (histogramData.hasOwnProperty(binKey)) {
@@ -875,8 +954,9 @@
             if (remainingIndices.length === 0) return;
 
             remainingIndices.forEach((index, idx) => {
+                const run = runId;
                 setTimeout(() => {
-                    if (individuals[index] !== null) {
+                    if (run === runId && individuals[index] !== null) {
                         moveIndividual(index);
                     }
                 }, idx * 45);
@@ -886,25 +966,12 @@
         function updateStats() {
             const total = SAMPLE_DATA.length;
             const remaining = individuals.filter(h => h !== null).length;
-            const placed = total - remaining;
 
             totalCountEl.textContent = total;
             remainingCountEl.textContent = remaining;
 
-            if (placed > 0) {
-                let sum = 0;
-                let count = 0;
-                for (let i = 0; i < individuals.length; i++) {
-                    if (individuals[i] === null) {
-                        sum += SAMPLE_DATA[i];
-                        count++;
-                    }
-                }
-                const mean = count > 0 ? (sum / count).toFixed(1) : '-';
-                meanValueEl.textContent = mean;
-            } else {
-                meanValueEl.textContent = '-';
-            }
+            const mean = getPlacedMean();
+            meanValueEl.textContent = mean === null ? '-' : mean.toFixed(1);
         }
 
         function updateButtons() {
@@ -933,6 +1000,7 @@
             renderHistogram();
         }
 
+        window.addEventListener('resize', drawMeanMarker);
         transformAllBtn.addEventListener('click', transformAll);
         resetBtn.addEventListener('click', init);
 

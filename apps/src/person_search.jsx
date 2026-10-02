@@ -26,7 +26,7 @@
                     id: data.id,
                     uniqueId: `oa_${data.id}`,
                     name: data.display_name,
-                    affiliation: data.last_known_institution?.display_name || 'Independent Scholar',
+                    affiliation: data.last_known_institutions?.[0]?.display_name || data.last_known_institution?.display_name || 'Independent Scholar',
                     citationCount: data.cited_by_count || 0,
                     worksCount: data.works_count || 0,
                     hIndex: data.summary_stats?.h_index || 'N/A',
@@ -70,7 +70,7 @@
                 work.volume = data.biblio?.volume || '';
                 work.issue = data.biblio?.issue || '';
                 work.pages = (data.biblio?.first_page && data.biblio?.last_page)
-                    ? `${data.biblio.first_page}-${data.biblio.last_page}`
+                    ? `${data.biblio.first_page}–${data.biblio.last_page}`
                     : (data.biblio?.first_page || '');
                 work.doi = data.doi || '';
                 work.url = data.doi || data.primary_location?.landing_page_url || '';
@@ -90,7 +90,7 @@
 
             allWorks.forEach(work => {
                 if (!work.title) return;
-                const titleKey = work.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+                const titleKey = work.title.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
                 const key = `${titleKey}_${work.year || 'nd'}`;
 
                 if (!uniqueMap.has(key)) {
@@ -121,7 +121,7 @@
 
             const formattedList = authorNames.map(formatName);
             if (formattedList.length === 1) return formattedList[0];
-            if (formattedList.length === 2) return `${formattedList[0]} & ${formattedList[1]}`;
+            if (formattedList.length === 2) return `${formattedList[0]}, & ${formattedList[1]}`;
             if (formattedList.length > 20) {
                 return `${formattedList.slice(0, 19).join(', ')}, ... ${formattedList[formattedList.length - 1]}`;
             }
@@ -251,6 +251,7 @@
             const [hasSearched, setHasSearched] = useState(false);
             const [status, setStatus] = useState('');
             const [selectedIds, setSelectedIds] = useState(new Set());
+            const [error, setError] = useState('');
 
             const searchAuthors = async (e) => {
                 e.preventDefault();
@@ -260,30 +261,34 @@
                 setHasSearched(true);
                 setStatus('Querying OpenAlex and Semantic Scholar APIs...');
                 setResults([]);
+                setError('');
                 setSelectedIds(new Set());
 
                 const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=6`)
-                    .then(res => res.json())
+                    .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
                     .then(data => (data.results || []).map(r => normalizeAuthor(r, 'openalex')))
                     .catch(err => {
                         console.warn('OpenAlex fetch failed:', err);
-                        return [];
+                        return null;
                     });
 
                 const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=6`)}`)
-                    .then(res => res.json())
+                    .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
                     .then(data => (data.data || []).map(r => normalizeAuthor(r, 's2')))
                     .catch(err => {
                         console.warn('Semantic Scholar fetch failed:', err);
-                        return [];
+                        return null;
                     });
 
                 try {
                     const [oaResults, s2Results] = await Promise.all([p1, p2]);
-                    const combined = [...oaResults, ...s2Results].sort((a, b) => b.citationCount - a.citationCount);
+                    if (oaResults === null && s2Results === null) {
+                        setError('Could not reach OpenAlex or Semantic Scholar. Please check your connection and try again.');
+                    } else if (oaResults === null || s2Results === null) {
+                        setError(`${oaResults === null ? 'OpenAlex' : 'Semantic Scholar'} did not respond - showing results from the other source only.`);
+                    }
+                    const combined = [...(oaResults || []), ...(s2Results || [])].sort((a, b) => b.citationCount - a.citationCount);
                     setResults(combined);
-                } catch (err) {
-                    setStatus('Error connecting to academic databases.');
                 } finally {
                     setLoading(false);
                     setStatus('');
@@ -350,7 +355,13 @@
                             </div>
                         )}
 
-                        {hasSearched && results.length === 0 && !loading && !status && (
+                        {error && (
+                            <div className="text-center text-xs font-mono text-terracotta-deep dark:text-study-accent py-2" role="alert">
+                                {error}
+                            </div>
+                        )}
+
+                        {hasSearched && results.length === 0 && !loading && !status && !error && (
                             <div className="text-center text-stone-500 dark:text-stone-400 py-12 glass-card">
                                 <p className="font-serif text-lg text-slate-800 dark:text-stone-200 mb-1">No researcher profiles found</p>
                                 <p className="text-xs">Try adjusting spelling or searching with alternative name variants.</p>
@@ -494,7 +505,7 @@
 
                     profiles.forEach(p => {
                         if (p.source === 'openalex') {
-                            const promise = fetch(`${OA_BASE}/works?filter=author.id:${encodeURIComponent(p.id)}&sort=publication_date:desc&per-page=100`)
+                            const promise = fetch(`${OA_BASE}/works?filter=author.id:${p.id.split('/').pop()}&sort=publication_date:desc&per-page=100`)
                                 .then(res => res.json())
                                 .then(data => (data.results || []).map(r => normalizeWork(r, 'openalex')))
                                 .catch(e => { console.warn('OA fetch err', e); return []; });

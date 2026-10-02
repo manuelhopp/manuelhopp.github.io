@@ -790,6 +790,9 @@
         Chart.register(verticalLinePlugin);
 
         function showStep(s) {
+            // the evaluation steps need the finished experiment (stepper dots can jump ahead)
+            if (s >= 4 && total1 < 20) s = Math.min(s, 3);
+            if (s >= 8 && total2 < 20) s = Math.min(s, 7);
             document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
             document.getElementById('step' + s).classList.add('active');
             currentStep = s;
@@ -853,6 +856,7 @@
         }
 
         function updateStore(manip, isHeads) {
+            if ((manip ? total2 : total1) >= 20) return; // pending clicks must not exceed 20 tosses
             if (manip) {
                 if (isHeads) heads2++;
                 total2++;
@@ -892,6 +896,7 @@
         }
 
         function renderDist(id, h, highlight) {
+            Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim();
             const ctx = document.getElementById(id).getContext('2d');
             const labels = Array.from({ length: 21 }, (_, i) => i);
             const data = labels.map(k => binomial(k, 20, 0.5));
@@ -956,6 +961,7 @@
                 localStorage.setItem('pvalue_theme', 'light');
                 document.getElementById('themeIcon').textContent = '🌙';
             }
+            showStep(currentStep); // re-render charts in the new theme colors
         }
 
         if (localStorage.getItem('pvalue_theme') === 'dark' || (!localStorage.getItem('pvalue_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {

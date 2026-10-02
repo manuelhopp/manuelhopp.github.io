@@ -357,6 +357,40 @@
         .grade-5 { background-color: var(--grade-5); }
         .grade-6 { background-color: var(--grade-6); }
 
+
+        /* Count label above bars too short to hold it */
+        .bar-count-above {
+            margin-bottom: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--color-text-heading);
+        }
+
+        /* Mean marker (x̄) */
+        .mean-marker {
+            position: absolute;
+            width: 0;
+            border-left: 2px dashed var(--color-text-heading);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .mean-marker span {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            transform: translateX(-50%);
+            padding: 1px 6px;
+            border-radius: 2px;
+            background: var(--color-text-heading);
+            color: var(--color-surface);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 0.68rem;
+            white-space: nowrap;
+        }
+
         /* Histogram Area */
         .histogram-container {
             display: flex;
@@ -491,8 +525,6 @@
         .stat-lbl {
             font-size: 0.72rem;
             color: var(--color-text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
         }
 
         .info-box {
@@ -662,7 +694,10 @@
             updateTheme();
         });
 
+        let runId = 0; // invalidates pending animations after a reset
+
         function init() {
+            runId++;
             updateTheme();
             individuals = [...SAMPLE_DATA];
             histogramData = {};
@@ -679,6 +714,7 @@
             individualsContainer.innerHTML = '';
 
             individuals.forEach((grade, index) => {
+                if (grade === null) return;
                 const div = document.createElement('div');
                 div.className = `individual grade-${grade}`;
                 div.textContent = grade;
@@ -710,9 +746,15 @@
                 bar.style.height = `${height}px`;
 
                 const countLabel = document.createElement('span');
-                countLabel.className = 'bar-count';
                 countLabel.textContent = count;
-                bar.appendChild(countLabel);
+                if (count > 0 && height < 26) {
+                    // bar too short: show the count above it instead of clipping it
+                    countLabel.className = 'bar-count-above';
+                    wrapper.appendChild(countLabel);
+                } else {
+                    countLabel.className = 'bar-count';
+                    bar.appendChild(countLabel);
+                }
 
                 const stackedDots = document.createElement('div');
                 stackedDots.className = 'stacked-dots';
@@ -739,18 +781,53 @@
                 wrapper.appendChild(sublabel);
                 histogramContainer.appendChild(wrapper);
             });
+            drawMeanMarker();
+        }
+
+        function getPlacedMean() {
+            let sum = 0, count = 0;
+            individuals.forEach((g, i) => {
+                if (g === null) { sum += SAMPLE_DATA[i]; count++; }
+            });
+            return count > 0 ? sum / count : null;
+        }
+
+        function drawMeanMarker() {
+            const old = histogramContainer.querySelector('.mean-marker');
+            if (old) old.remove();
+            const mean = getPlacedMean();
+            if (mean === null) return;
+
+            const wrappers = histogramContainer.querySelectorAll('.histogram-bar-wrapper');
+            const lo = Math.min(Math.floor(mean), GRADES.length - 1);
+            const hi = Math.min(lo + 1, GRADES.length);
+            const center = g => { const w = wrappers[g - 1]; return w.offsetLeft + w.offsetWidth / 2; };
+            const x = center(lo) + (mean - lo) * (center(hi) - center(lo));
+
+            const label = wrappers[0].querySelector('.bar-label');
+            const bottom = label.offsetTop - parseFloat(getComputedStyle(label).marginTop);
+            const marker = document.createElement('div');
+            marker.className = 'mean-marker';
+            marker.style.left = `${x}px`;
+            marker.style.top = `${bottom - 240}px`;
+            marker.style.height = '240px';
+            marker.title = `Mittelwert x̄ = ${mean.toFixed(2)}`;
+            marker.innerHTML = `<span>x̄ = ${mean.toFixed(2)}</span>`;
+            histogramContainer.appendChild(marker);
         }
 
         function moveIndividual(index) {
             const grade = individuals[index];
             if (grade === null) return;
 
-            const individualEl = individualsContainer.children[index];
+            const individualEl = individualsContainer.querySelector(`[data-index="${index}"]`);
             if (!individualEl) return;
 
             individualEl.classList.add('moving');
 
+            const run = runId;
             setTimeout(() => {
+                if (run !== runId || individuals[index] === null) return;
                 individuals[index] = null;
                 histogramData[grade]++;
 
@@ -772,8 +849,9 @@
             if (remainingIndices.length === 0) return;
 
             remainingIndices.forEach((index, idx) => {
+                const run = runId;
                 setTimeout(() => {
-                    if (individuals[index] !== null) {
+                    if (run === runId && individuals[index] !== null) {
                         moveIndividual(index);
                     }
                 }, idx * 60);
@@ -783,25 +861,12 @@
         function updateStats() {
             const total = SAMPLE_DATA.length;
             const remaining = individuals.filter(g => g !== null).length;
-            const placed = total - remaining;
 
             totalCountEl.textContent = total;
             remainingCountEl.textContent = remaining;
 
-            if (placed > 0) {
-                let sum = 0;
-                let count = 0;
-                for (let i = 0; i < individuals.length; i++) {
-                    if (individuals[i] === null) {
-                        sum += SAMPLE_DATA[i];
-                        count++;
-                    }
-                }
-                const mean = count > 0 ? (sum / count).toFixed(2) : '-';
-                meanValueEl.textContent = mean;
-            } else {
-                meanValueEl.textContent = '-';
-            }
+            const mean = getPlacedMean();
+            meanValueEl.textContent = mean === null ? '-' : mean.toFixed(2);
         }
 
         function updateButtons() {
@@ -809,6 +874,7 @@
             transformAllBtn.disabled = remaining === 0;
         }
 
+        window.addEventListener('resize', drawMeanMarker);
         transformAllBtn.addEventListener('click', transformAll);
         resetBtn.addEventListener('click', init);
 
