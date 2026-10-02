@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DiffCraft | Dr. Manuel D. S. Hopp</title>
+  <meta name="description" content="Fast, private, word-by-word visual text comparison. Everything runs in your browser; no text is uploaded.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23c4622d'/><path d='M8 12h8m-8 8h16' stroke='white' stroke-width='2.5' stroke-linecap='square'/><path d='M20 9v6m-3-3h6' stroke='white' stroke-width='2.5' stroke-linecap='square'/></svg>">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      /* Light Theme (Terracotta & Warm Paper) */
+      --color-accent: #c4622d;
+      --color-accent-light: #d4784d;
+      --color-accent-deep: #a34e20;
+      --color-ink-strong: #7a3a15;
+      --accent-wash: rgba(196, 98, 45, 0.08);
+
+      --bg-body: #faf7f4;
+      --bg-hero: #f3ede6;
+      --bg-surface: #ffffff;
+      --bg-surface-glass: rgba(255, 255, 255, 0.85);
+
+      --text-main: #1e293b;
+      --text-heading: #0f172a;
+      --text-muted: #64748b;
+      --border: #e6ddd5;
+      --border-glass: rgba(230, 221, 213, 0.6);
+      --tag-neutral-border: #a09488;
+
+      --danger: #e11d48;
+      --danger-bg: rgba(225, 29, 72, 0.10);
+      --danger-ink: #be123c;
+      --success: #059669;
+      --success-bg: rgba(5, 150, 105, 0.11);
+      --success-ink: #047857;
+      --warning: #d97706;
+
+      --shadow-glass: 0 8px 32px 0 rgba(28, 24, 22, 0.04);
+      --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.06);
+
+      --focus-ring: 0 0 0 2px var(--bg-body), 0 0 0 4px var(--color-accent);
+      --pulse-strong: rgba(196, 98, 45, 0.55);
+      --pulse-soft: rgba(196, 98, 45, 0.25);
+    }
+
+    [data-theme="dark"] {
+      /* Dark Theme (Study Dark) */
+      --color-accent: #e0956a;
+      --color-accent-light: #d4784d;
+      --color-accent-deep: #c4622d;
+      --color-ink-strong: #e0956a;
+      --accent-wash: rgba(196, 98, 45, 0.16);
+
+      --bg-body: #181514;
+      --bg-hero: #1e1a18;
+      --bg-surface: #24201e;
+      --bg-surface-glass: rgba(36, 32, 30, 0.85);
+
+      --text-main: #e2e8f0;
+      --text-heading: #ffffff;
+      --text-muted: #a8a29e;
+      --border: #342e2a;
+      --border-glass: rgba(52, 46, 42, 0.6);
+      --tag-neutral-border: #6b5f55;
+
+      --danger: #f43f5e;
+      --danger-bg: rgba(244, 63, 94, 0.18);
+      --danger-ink: #fda4af;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.18);
+      --success-ink: #6ee7b7;
+      --warning: #f59e0b;
+
+      --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+      --shadow-lifted: 0 12px 40px rgba(0, 0, 0, 0.4);
+
+      --pulse-strong: rgba(224, 149, 106, 0.65);
+      --pulse-soft: rgba(224, 149, 106, 0.3);
+    }
+
+    /* ==========================================================================
+       Global & Reset
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible,
+    a:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    /* ==========================================================================
+       Header
+       ========================================================================== */
+    header.app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-glass);
+      padding: 0.5rem 1.5rem;
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--color-accent);
+      color: #ffffff;
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-family: 'Merriweather', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--text-heading);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions > .btn {
+      min-height: 32px;
+    }
+
+    /* ==========================================================================
+       Buttons & Tags
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 6px 12px;
+      border-radius: 0;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #ffffff;
+      font-size: 0.9rem;
+      padding: 10px 20px;
+      gap: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .btn-primary {
+      background: var(--color-accent-deep);
+      border-color: var(--color-accent-deep);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-accent-deep);
+      border-color: var(--color-accent-deep);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lifted);
+    }
+
+    [data-theme="dark"] .btn-primary:hover {
+      background: var(--color-accent-light);
+      border-color: var(--color-accent-light);
+    }
+
+    .btn-sm {
+      padding: 4px 9px;
+      font-size: 0.75rem;
+    }
+
+    .btn-icon {
+      padding: 6px 10px;
+    }
+
+    select.btn {
+      appearance: auto;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 3px 10px;
+      border-left: 2px solid var(--color-accent);
+      background: var(--accent-wash);
+      color: var(--color-ink-strong);
+    }
+
+    .badge-del   { border-left-color: var(--danger);  background: var(--danger-bg);  color: var(--danger-ink); }
+    .badge-ins   { border-left-color: var(--success); background: var(--success-bg); color: var(--success-ink); }
+    .badge-neutral {
+      border-left-color: var(--tag-neutral-border);
+      background: rgba(120, 108, 96, 0.08);
+      color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       Main Layout
+       ========================================================================== */
+    main.app-main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    .page-intro {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .tag-badge {
+      display: inline-block;
+      border-left: 2px solid var(--color-accent);
+      background: var(--accent-wash);
+      color: var(--color-ink-strong);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: clamp(1.8rem, 1.4rem + 1.5vw, 2.4rem);
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 65ch;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ==========================================================================
+       Glass cards (shared surface)
+       ========================================================================== */
+    .controls-panel,
+    .input-card,
+    .diff-container {
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      box-shadow: var(--shadow-glass);
+    }
+
+    /* ==========================================================================
+       Toolbar & Options Bar
+       ========================================================================== */
+    .controls-panel {
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .controls-left, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Segmented control (squared, no pills) */
+    .pill-group {
+      display: inline-flex;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+    }
+
+    .pill-btn {
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 6px 12px;
+      border: none;
+      border-left: 2px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-btn + .pill-btn {
+      box-shadow: -1px 0 0 var(--border);
+    }
+
+    .pill-btn:hover {
+      color: var(--color-accent);
+    }
+
+    .pill-btn.active {
+      border-left-color: var(--color-accent);
+      background: var(--accent-wash);
+      color: var(--color-ink-strong);
+    }
+
+    .toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.82rem;
+      color: var(--text-main);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--color-accent);
+      cursor: pointer;
+    }
+
+    /* ==========================================================================
+       Input Section (Side-by-side Cards)
+       ========================================================================== */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    @media (max-width: 860px) {
+      .inputs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .input-card {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .input-card:focus-within {
+      border-color: var(--color-accent);
+    }
+
+    .card-header {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-dot {
+      width: 8px;
+      height: 8px;
+      flex-shrink: 0;
+    }
+
+    .dot-original { background-color: var(--danger); }
+    .dot-modified { background-color: var(--success); }
+
+    .card-title {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      letter-spacing: -0.01em;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .card-body {
+      position: relative;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea.diff-textarea {
+      width: 100%;
+      height: 200px;
+      min-height: 140px;
+      max-height: 550px;
+      resize: vertical;
+      padding: 1.25rem;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      border: none;
+      background: transparent;
+      color: var(--text-main);
+      outline: none;
+    }
+
+    textarea.diff-textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .card-footer {
+      padding: 0.5rem 1.25rem;
+      background-color: var(--bg-hero);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .card-footer span:first-child {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Floating Swap Button in Center */
+    .swap-btn-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .btn-swap {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .btn-swap:hover {
+      background: var(--color-accent);
+      color: #ffffff;
+      border-color: var(--color-accent);
+      box-shadow: var(--shadow-lifted);
+      transform: scale(1.06) rotate(180deg);
+    }
+
+    @media (max-width: 860px) {
+      .swap-btn-container {
+        position: static;
+        transform: none;
+        display: flex;
+        justify-content: center;
+        margin: -0.75rem 0;
+      }
+      .btn-swap:hover {
+        transform: scale(1.06);
+      }
+    }
+
+    .input-card.dragover {
+      border-color: var(--color-accent);
+      background-color: var(--accent-wash);
+    }
+
+    /* ==========================================================================
+       Diff Results Section
+       ========================================================================== */
+    .diff-container {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-header {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .diff-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .similarity-ring {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-heading);
+    }
+
+    .similarity-bar-bg {
+      width: 64px;
+      height: 6px;
+      background-color: var(--border);
+      overflow: hidden;
+    }
+
+    .similarity-bar-fill {
+      height: 100%;
+      background: var(--success);
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .diff-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .jump-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      padding: 2px 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .jump-nav .btn {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .jump-nav .btn:hover {
+      border-color: transparent;
+    }
+
+    .diff-content-wrapper {
+      position: relative;
+      min-height: 220px;
+    }
+
+    /* Unified / Inline View */
+    .unified-view {
+      padding: 1.5rem 1.75rem;
+      font-size: 1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--text-main);
+      max-width: 100%;
+    }
+
+    /* Side by Side (Split View) */
+    .split-view {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 220px;
+    }
+
+    @media (max-width: 860px) {
+      .split-view {
+        grid-template-columns: 1fr;
+      }
+      .split-pane-left {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    .split-pane {
+      padding: 1.25rem 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      max-height: 600px;
+    }
+
+    .split-pane-header {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .split-pane-left {
+      border-right: 1px solid var(--border);
+    }
+
+    /* ==========================================================================
+       DIFF HIGHLIGHT STYLES (Core Requirement)
+       Red strike-through for deletions, green for additions
+       ========================================================================== */
+    del.diff-del {
+      background-color: var(--danger-bg);
+      color: var(--danger-ink);
+      text-decoration: line-through;
+      text-decoration-color: var(--danger);
+      text-decoration-thickness: 2px;
+      padding: 1px 4px;
+      margin: 0 1px;
+      border-radius: 2px;
+      border-bottom: 1px solid var(--danger);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      display: inline;
+      cursor: pointer;
+      transition: outline 0.15s ease, background-color 0.15s ease;
+    }
+
+    del.diff-del:hover {
+      outline: 2px solid var(--danger);
+    }
+
+    ins.diff-ins {
+      background-color: var(--success-bg);
+      color: var(--success-ink);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 1px 4px;
+      margin: 0 1px;
+      border-radius: 2px;
+      border-bottom: 1px solid var(--success);
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      display: inline;
+      cursor: pointer;
+      transition: outline 0.15s ease, background-color 0.15s ease;
+    }
+
+    ins.diff-ins:hover {
+      outline: 2px solid var(--success);
+    }
+
+    .diff-target-active {
+      box-shadow: 0 0 0 4px var(--pulse-strong) !important;
+      animation: targetPulse 1.5s ease;
+    }
+
+    @keyframes targetPulse {
+      0%   { box-shadow: 0 0 0 6px var(--pulse-strong); }
+      70%  { box-shadow: 0 0 0 4px var(--pulse-soft); }
+      100% { box-shadow: 0 0 0 2px transparent; }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      white-space: normal;
+    }
+
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      color: var(--color-accent);
+    }
+
+    .empty-title {
+      font-family: 'Merriweather', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-desc {
+      font-size: 0.9rem;
+      max-width: 460px;
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .samples-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ==========================================================================
+       Toast Notifications
+       ========================================================================== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--text-heading);
+      color: var(--bg-body);
+      padding: 0.65rem 1.1rem;
+      border-left: 3px solid var(--color-accent);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 100;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ==========================================================================
+       Footer
+       ========================================================================== */
+    footer.app-footer {
+      margin-top: 2rem;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+    }
+
+    .footer-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      text-align: center;
+    }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem 2rem;
+      flex-wrap: wrap;
+    }
+
+    .diff-legend {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+    }
+
+    kbd, .kbd {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.1rem 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       Responsive header
+       ========================================================================== */
+    @media (max-width: 640px) {
+      header.app-header { padding: 0.5rem 1rem; }
+      .brand-subtitle { display: none; }
+      .btn-label { display: none; }
+      main.app-main { padding: 1.75rem 1rem 3rem; }
+      .controls-panel { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <a href="#" class="brand-group" title="DiffCraft Word Diff Tool">
+      <div class="brand-icon" aria-hidden="true">D</div>
+      <div>
+        <div class="brand-title">DiffCraft</div>
+        <div class="brand-subtitle">Dr. Manuel D. S. Hopp &bull; Word Diff Tool</div>
+      </div>
+    </a>
+
+    <div class="header-actions">
+      <select id="sampleSelect" class="btn btn-sm" aria-label="Load preset sample texts">
+        <option value="" selected disabled>Load Sample Text</option>
+        <option value="editorial">Article Revision</option>
+        <option value="code">Code / Config</option>
+        <option value="contract">Legal Agreement Clause</option>
+      </select>
+
+      <button id="clearAllBtn" class="btn" title="Clear both inputs (Alt+C)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+        <span class="btn-label">Clear All</span>
+      </button>
+
+      <a href="../index.html" class="btn" title="Back to homepage">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="btn-label">Homepage</span>
+      </a>
+
+      <button id="themeToggleBtn" class="btn" title="Toggle dark/light mode" aria-label="Toggle theme">
+        <span id="themeIcon" aria-hidden="true">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <div class="page-intro">
+      <div class="tag-badge">Text Comparison</div>
+      <h1>Word-by-Word Text Diff</h1>
+      <p class="subtitle">Paste two versions of a text and see exactly what changed. Everything runs in your browser; nothing is uploaded.</p>
+    </div>
+
+    <!-- Controls & Settings Toolbar -->
+    <section class="controls-panel" aria-label="Diff Controls">
+      <div class="controls-left">
+        <span class="control-label">Mode:</span>
+        <div class="pill-group" role="radiogroup" aria-label="Diff Granularity">
+          <button class="pill-btn active" data-mode="word" title="Compare by words (Default)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+            Word
+          </button>
+          <button class="pill-btn" data-mode="char" title="Compare character-by-character">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+            Character
+          </button>
+          <button class="pill-btn" data-mode="line" title="Compare whole lines">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            Line
+          </button>
+        </div>
+
+        <label class="toggle-label" title="Treat upper and lower case letters as identical">
+          <input type="checkbox" id="optIgnoreCase">
+          <span>Ignore Case</span>
+        </label>
+
+        <label class="toggle-label" title="Ignore differences in multiple spaces or tabs">
+          <input type="checkbox" id="optIgnoreWs">
+          <span>Ignore Whitespace</span>
+        </label>
+
+        <label class="toggle-label" title="Automatically re-diff as you type or paste">
+          <input type="checkbox" id="optLiveDiff" checked>
+          <span>Live Diff</span>
+        </label>
+      </div>
+
+      <div class="controls-right">
+        <button id="compareBtn" class="btn btn-primary" title="Compute diff immediately (Ctrl+Enter)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Compare
+        </button>
+      </div>
+    </section>
+
+    <!-- Side-by-side Input Cards -->
+    <section class="inputs-grid" aria-label="Text Inputs">
+      <!-- Original Text Card (Left) -->
+      <div class="input-card" id="cardOriginal">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-dot dot-original" aria-hidden="true"></span>
+            <span class="card-title">Original Text (Before)</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-sm" id="pasteOrigBtn" title="Paste from clipboard">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              Paste
+            </button>
+            <button class="btn btn-sm" id="clearOrigBtn" title="Clear original text">Clear</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea id="textOriginal" class="diff-textarea" placeholder="Paste or drag original text here..." spellcheck="false"></textarea>
+        </div>
+        <div class="card-footer">
+          <span id="origCounts">0 words &bull; 0 characters</span>
+          <span>Original Version</span>
+        </div>
+      </div>
+
+      <!-- Center Floating Swap Button -->
+      <div class="swap-btn-container">
+        <button id="swapBtn" class="btn-swap" title="Swap texts (Alt+S)" aria-label="Swap original and modified text">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 17H4M4 17l4 4M4 17l4-4M4 7h16m0 0l-4-4m4 4l-4 4"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Modified Text Card (Right) -->
+      <div class="input-card" id="cardModified">
+        <div class="card-header">
+          <div class="card-title-group">
+            <span class="card-dot dot-modified" aria-hidden="true"></span>
+            <span class="card-title">Modified Text (After)</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-sm" id="pasteModBtn" title="Paste from clipboard">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              Paste
+            </button>
+            <button class="btn btn-sm" id="clearModBtn" title="Clear modified text">Clear</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <textarea id="textModified" class="diff-textarea" placeholder="Paste or drag modified text here..." spellcheck="false"></textarea>
+        </div>
+        <div class="card-footer">
+          <span id="modCounts">0 words &bull; 0 characters</span>
+          <span>Modified Version</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Diff Output Section -->
+    <section class="diff-container" aria-label="Diff Result">
+      <div class="diff-header">
+        <!-- Stats Badges -->
+        <div class="diff-stats" id="diffStats">
+          <div class="similarity-ring" title="Text Similarity Score">
+            <span id="similarityScore">100% Match</span>
+            <div class="similarity-bar-bg" aria-hidden="true">
+              <div class="similarity-bar-fill" id="similarityBar" style="width: 100%;"></div>
+            </div>
+          </div>
+          <span class="badge badge-del" id="delCountBadge">- 0 deletions</span>
+          <span class="badge badge-ins" id="insCountBadge">+ 0 additions</span>
+          <span class="badge badge-neutral" id="equalCountBadge">= 0 unchanged</span>
+        </div>
+
+        <!-- Jump Navigation & View Switcher -->
+        <div class="diff-actions">
+          <div class="jump-nav" title="Navigate through changes">
+            <button class="btn btn-icon btn-sm" id="prevChangeBtn" title="Previous change (k or ↑)">▲</button>
+            <span id="changeCounter">0 / 0</span>
+            <button class="btn btn-icon btn-sm" id="nextChangeBtn" title="Next change (j or ↓)">▼</button>
+          </div>
+
+          <div class="pill-group" role="radiogroup" aria-label="Diff View Mode">
+            <button class="pill-btn active" data-view="unified" title="Inline view with strike-through and additions">
+              Unified
+            </button>
+            <button class="pill-btn" data-view="split" title="Side-by-side parallel view">
+              Split
+            </button>
+          </div>
+
+          <button class="btn btn-sm" id="copyDiffBtn" title="Copy diff formatted HTML">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            Copy
+          </button>
+          <button class="btn btn-sm" id="downloadHtmlBtn" title="Save standalone HTML snapshot">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Diff Content Display Area -->
+      <div class="diff-content-wrapper">
+        <!-- Unified (Inline) View -->
+        <div id="unifiedView" class="unified-view">
+          <div class="empty-state" id="emptyState">
+            <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"></path>
+            </svg>
+            <div class="empty-title">Ready to compare</div>
+            <div class="empty-desc">
+              Paste your original and modified texts in the boxes above, or try one of the instant samples below:
+            </div>
+            <div class="samples-chips">
+              <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('editorial')">Article Revision</button>
+              <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('code')">Code Config</button>
+              <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('contract')">Legal Clause</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Split (Side-by-Side) View -->
+        <div id="splitView" class="split-view" style="display: none;">
+          <div class="split-pane split-pane-left" id="splitPaneLeft">
+            <div class="split-pane-header">
+              <span>Original (With Deletions)</span>
+            </div>
+            <div id="splitContentLeft"></div>
+          </div>
+          <div class="split-pane split-pane-right" id="splitPaneRight">
+            <div class="split-pane-header">
+              <span>Modified (With Additions)</span>
+            </div>
+            <div id="splitContentRight"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer with Visual Legend and Shortcuts -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-row">
+        <div class="diff-legend">
+          <span style="font-weight: 600;">Legend:</span>
+          <div class="legend-item">
+            <del class="diff-del" style="cursor: default;">deletion</del>
+            <span>Removed word (<kbd>del</kbd>)</span>
+          </div>
+          <div class="legend-item">
+            <ins class="diff-ins" style="cursor: default;">addition</ins>
+            <span>Added word (<kbd>ins</kbd>)</span>
+          </div>
+        </div>
+        <div>
+          Shortcuts: <kbd>Ctrl</kbd>+<kbd>Enter</kbd> Compare &bull; <kbd>Alt</kbd>+<kbd>S</kbd> Swap &bull; <kbd>j</kbd>/<kbd>k</kbd> Next/Prev Diff
+        </div>
+      </div>
+      <p>Dr. Manuel D. S. Hopp &bull; Interactive Teaching &amp; Research Tools</p>
+    </div>
+  </footer>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Diff Engine & UI Logic -->
+  <script>
+    (function() {
+      'use strict';
+
+      const SAMPLES = {
+        editorial: {
+          orig: "The quick brown fox jumps gracefully over the lazy dog on a sunny afternoon in the quiet countryside.\n\nAll team members must submit their weekly progress reports by 5:00 PM on Friday afternoon without exception. Failure to comply will result in a warning.",
+          mod: "The fast red fox leaped swiftly over the very sleepy dog on a crisp autumn morning in the peaceful countryside.\n\nAll team contributors should submit their weekly sprint summaries by 4:00 PM on Thursday afternoon whenever possible. Let your manager know if you need an extension."
+        },
+        code: {
+          orig: '{\n  "name": "diff-craft",\n  "version": "1.0.0",\n  "port": 3000,\n  "debug": true,\n  "max_connections": 50,\n  "database": "sqlite://./dev.db",\n  "features": ["word-diff", "auto-save"]\n}',
+          mod: '{\n  "name": "diff-craft",\n  "version": "1.2.0",\n  "port": 8080,\n  "debug": false,\n  "max_connections": 100,\n  "database": "postgres://localhost:5432/production",\n  "features": ["word-diff", "auto-save", "dark-mode", "split-view"]\n}'
+        },
+        contract: {
+          orig: "The Consultant shall deliver all completed milestones within thirty (30) business days following receipt of the initial deposit payment. The Client retains the unrestricted right to terminate this agreement at any time with seven (7) days written notice.",
+          mod: "The Consultant will deliver all approved deliverables within forty-five (45) business days following receipt of the initial deposit payment. The Client may terminate this agreement for material breach only with thirty (30) days formal written notice."
+        }
+      };
+
+      const textOriginal = document.getElementById('textOriginal');
+      const textModified = document.getElementById('textModified');
+      const cardOriginal = document.getElementById('cardOriginal');
+      const cardModified = document.getElementById('cardModified');
+
+      const origCounts = document.getElementById('origCounts');
+      const modCounts = document.getElementById('modCounts');
+
+      const compareBtn = document.getElementById('compareBtn');
+      const swapBtn = document.getElementById('swapBtn');
+      const clearAllBtn = document.getElementById('clearAllBtn');
+      const clearOrigBtn = document.getElementById('clearOrigBtn');
+      const clearModBtn = document.getElementById('clearModBtn');
+      const pasteOrigBtn = document.getElementById('pasteOrigBtn');
+      const pasteModBtn = document.getElementById('pasteModBtn');
+
+      const sampleSelect = document.getElementById('sampleSelect');
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+
+      const optIgnoreCase = document.getElementById('optIgnoreCase');
+      const optIgnoreWs = document.getElementById('optIgnoreWs');
+      const optLiveDiff = document.getElementById('optLiveDiff');
+
+      const similarityScore = document.getElementById('similarityScore');
+      const similarityBar = document.getElementById('similarityBar');
+      const delCountBadge = document.getElementById('delCountBadge');
+      const insCountBadge = document.getElementById('insCountBadge');
+      const equalCountBadge = document.getElementById('equalCountBadge');
+
+      const prevChangeBtn = document.getElementById('prevChangeBtn');
+      const nextChangeBtn = document.getElementById('nextChangeBtn');
+      const changeCounter = document.getElementById('changeCounter');
+
+      const copyDiffBtn = document.getElementById('copyDiffBtn');
+      const downloadHtmlBtn = document.getElementById('downloadHtmlBtn');
+
+      const unifiedView = document.getElementById('unifiedView');
+      const splitView = document.getElementById('splitView');
+      const splitContentLeft = document.getElementById('splitContentLeft');
+      const splitContentRight = document.getElementById('splitContentRight');
+      const splitPaneLeft = document.getElementById('splitPaneLeft');
+      const splitPaneRight = document.getElementById('splitPaneRight');
+
+      const toastEl = document.getElementById('toast');
+
+      let currentMode = 'word';
+      let currentView = 'unified';
+      let diffTargets = [];
+      let currentTargetIdx = -1;
+      let debounceTimer = null;
+      let isSyncScrolling = false;
+
+      function tokenize(text, mode, ignoreCase, ignoreWs) {
+        if (!text) return [];
+
+        if (ignoreWs) {
+          text = text.replace(/[^\S\r\n]+/g, ' ');
+        }
+
+        if (mode === 'char') {
+          return Array.from(text);
+        }
+
+        if (mode === 'line') {
+          return text.match(/[^\n]*\n|[^\n]+/g) || [];
+        }
+
+        return text.match(/\s+|[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu) || [];
+      }
+
+      function computeDiff(textA, textB, options) {
+        options = options || {};
+        const mode = options.mode || 'word';
+        const ignoreCase = !!options.ignoreCase;
+        const ignoreWs = !!options.ignoreWs;
+
+        const tokensA = tokenize(textA, mode, ignoreCase, ignoreWs);
+        const tokensB = tokenize(textB, mode, ignoreCase, ignoreWs);
+
+        function eq(a, b) {
+          if (a === b) return true;
+          if (ignoreCase && a.toLowerCase() === b.toLowerCase()) return true;
+          if (ignoreWs && /^\s+$/.test(a) && /^\s+$/.test(b)) return true;
+          return false;
+        }
+
+        let start = 0;
+        while (start < tokensA.length && start < tokensB.length && eq(tokensA[start], tokensB[start])) {
+          start++;
+        }
+
+        let endA = tokensA.length - 1;
+        let endB = tokensB.length - 1;
+        while (endA >= start && endB >= start && eq(tokensA[endA], tokensB[endB])) {
+          endA--;
+          endB--;
+        }
+
+        const prefix = tokensA.slice(0, start).map(val => ({ type: 'equal', valA: val, valB: val }));
+        const suffix = tokensA.slice(endA + 1).map(val => ({ type: 'equal', valA: val, valB: val }));
+
+        const midA = tokensA.slice(start, endA + 1);
+        const midB = tokensB.slice(start, endB + 1);
+        const n = midA.length;
+        const m = midB.length;
+
+        let midEdits = [];
+
+        if (n === 0 && m === 0) {
+          // Identical
+        } else if (n === 0) {
+          midEdits = midB.map(val => ({ type: 'add', val: val }));
+        } else if (m === 0) {
+          midEdits = midA.map(val => ({ type: 'delete', val: val }));
+        } else {
+          const max = Math.min(n + m, 5000);
+          const offset = max;
+          const v = new Int32Array(2 * max + 1);
+          v.fill(-1);
+          v[offset + 1] = 0;
+          const trace = [];
+          let foundD = -1;
+
+          for (let d = 0; d <= max; d++) {
+            trace.push(new Int32Array(v));
+            for (let k = -d; k <= d; k += 2) {
+              let kIdx = offset + k;
+              let x;
+              if (k === -d || (k !== d && v[kIdx - 1] < v[kIdx + 1])) {
+                x = v[kIdx + 1];
+              } else {
+                x = v[kIdx - 1] + 1;
+              }
+              let y = x - k;
+              while (x < n && y < m && eq(midA[x], midB[y])) {
+                x++;
+                y++;
+              }
+              v[kIdx] = x;
+              if (x >= n && y >= m) {
+                foundD = d;
+                break;
+              }
+            }
+            if (foundD !== -1) break;
+          }
+
+          if (foundD === -1) {
+            midEdits = [
+              ...midA.map(val => ({ type: 'delete', val: val })),
+              ...midB.map(val => ({ type: 'add', val: val }))
+            ];
+          } else {
+            let curX = n;
+            let curY = m;
+            for (let d = foundD; d > 0; d--) {
+              const prevV = trace[d];
+              const curK = curX - curY;
+              let prevK;
+              const kOffset = offset + curK;
+              if (curK === -d || (curK !== d && prevV[kOffset - 1] < prevV[kOffset + 1])) {
+                prevK = curK + 1;
+              } else {
+                prevK = curK - 1;
+              }
+              const prevX = prevV[offset + prevK];
+              const prevY = prevX - prevK;
+
+              while (curX > prevX && curY > prevY) {
+                midEdits.unshift({ type: 'equal', valA: midA[curX - 1], valB: midB[curY - 1] });
+                curX--;
+                curY--;
+              }
+              if (curX === prevX) {
+                midEdits.unshift({ type: 'add', val: midB[curY - 1] });
+                curY--;
+              } else {
+                midEdits.unshift({ type: 'delete', val: midA[curX - 1] });
+                curX--;
+              }
+            }
+            while (curX > 0 && curY > 0) {
+              midEdits.unshift({ type: 'equal', valA: midA[curX - 1], valB: midB[curY - 1] });
+              curX--;
+              curY--;
+            }
+          }
+        }
+
+        return [...prefix, ...midEdits, ...suffix];
+      }
+
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function renderDiff(edits) {
+        diffTargets = [];
+        currentTargetIdx = -1;
+
+        if (!textOriginal.value.trim() && !textModified.value.trim()) {
+          unifiedView.innerHTML = `
+            <div class="empty-state">
+              <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.5L19 7.5V19a2 2 0 0 1-2 2z"></path>
+              </svg>
+              <div class="empty-title">Ready to compare</div>
+              <div class="empty-desc">
+                Paste your original and modified texts in the boxes above, or try one of the instant samples below:
+              </div>
+              <div class="samples-chips">
+                <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('editorial')">Article Revision</button>
+                <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('code')">Code Config</button>
+                <button class="btn btn-sm" onclick="window.DiffCraft.loadSample('contract')">Legal Clause</button>
+              </div>
+            </div>`;
+          splitContentLeft.innerHTML = '<span style="color:var(--text-muted)">Empty</span>';
+          splitContentRight.innerHTML = '<span style="color:var(--text-muted)">Empty</span>';
+          updateStats(0, 0, 0, 0);
+          updateChangeCounter();
+          return;
+        }
+
+        const chunks = [];
+        let curChunk = null;
+
+        for (let i = 0; i < edits.length; i++) {
+          const edit = edits[i];
+          if (edit.type === 'equal') {
+            if (curChunk && curChunk.type === 'equal') {
+              curChunk.text += edit.valA;
+            } else {
+              curChunk = { type: 'equal', text: edit.valA };
+              chunks.push(curChunk);
+            }
+          } else {
+            if (curChunk && curChunk.type === 'change') {
+              if (edit.type === 'delete') curChunk.deletions.push(edit.val);
+              else curChunk.additions.push(edit.val);
+            } else {
+              curChunk = {
+                type: 'change',
+                deletions: edit.type === 'delete' ? [edit.val] : [],
+                additions: edit.type === 'add' ? [edit.val] : []
+              };
+              chunks.push(curChunk);
+            }
+          }
+        }
+
+        let unifiedHtml = '';
+        let splitLeftHtml = '';
+        let splitRightHtml = '';
+
+        let delWordCount = 0;
+        let insWordCount = 0;
+        let equalWordCount = 0;
+        let changeCount = 0;
+
+        chunks.forEach((chunk) => {
+          if (chunk.type === 'equal') {
+            const escaped = escapeHtml(chunk.text);
+            unifiedHtml += escaped;
+            splitLeftHtml += escaped;
+            splitRightHtml += escaped;
+
+            const matches = chunk.text.match(/[\p{L}\p{N}_]+/gu);
+            if (matches) equalWordCount += matches.length;
+          } else {
+            changeCount++;
+            let delStr = chunk.deletions.join('');
+            let insStr = chunk.additions.join('');
+
+            const delMatches = delStr.match(/[\p{L}\p{N}_]+/gu);
+            if (delMatches) delWordCount += delMatches.length;
+
+            const insMatches = insStr.match(/[\p{L}\p{N}_]+/gu);
+            if (insMatches) insWordCount += insMatches.length;
+
+            function cleanWs(str) {
+              let before = "", text = str, after = "";
+              const mStart = text.match(/^\s+/);
+              if (mStart) { before = mStart[0]; text = text.slice(mStart[0].length); }
+              const mEnd = text.match(/\s+$/);
+              if (mEnd) { after = mEnd[0]; text = text.slice(0, -mEnd[0].length); }
+              return { before, text, after };
+            }
+
+            if (delStr && !insStr) {
+              const c = cleanWs(delStr);
+              unifiedHtml += `${escapeHtml(c.before)}<del class="diff-del" data-diff-target="${changeCount}" title="Deleted">${escapeHtml(c.text)}</del>${escapeHtml(c.after)}`;
+              splitLeftHtml += `${escapeHtml(c.before)}<del class="diff-del" data-diff-target="${changeCount}">${escapeHtml(c.text)}</del>${escapeHtml(c.after)}`;
+            } else if (insStr && !delStr) {
+              const c = cleanWs(insStr);
+              unifiedHtml += `${escapeHtml(c.before)}<ins class="diff-ins" data-diff-target="${changeCount}" title="Added">${escapeHtml(c.text)}</ins>${escapeHtml(c.after)}`;
+              splitRightHtml += `${escapeHtml(c.before)}<ins class="diff-ins" data-diff-target="${changeCount}">${escapeHtml(c.text)}</ins>${escapeHtml(c.after)}`;
+            } else {
+              const cDel = cleanWs(delStr);
+              const cIns = cleanWs(insStr);
+              const before = cDel.before || cIns.before;
+              const after = cIns.after || cDel.after;
+              unifiedHtml += `${escapeHtml(before)}<del class="diff-del" data-diff-target="${changeCount}" title="Deleted">${escapeHtml(cDel.text)}</del><ins class="diff-ins" data-diff-target="${changeCount}" title="Added">${escapeHtml(cIns.text)}</ins>${escapeHtml(after)}`;
+              splitLeftHtml += `${escapeHtml(before)}<del class="diff-del" data-diff-target="${changeCount}">${escapeHtml(cDel.text)}</del>${escapeHtml(cDel.after)}`;
+              splitRightHtml += `${escapeHtml(before)}<ins class="diff-ins" data-diff-target="${changeCount}">${escapeHtml(cIns.text)}</ins>${escapeHtml(cIns.after)}`;
+            }
+          }
+        });
+
+        unifiedView.innerHTML = unifiedHtml || '<span style="color:var(--text-muted)">(No differences found — texts are identical)</span>';
+        splitContentLeft.innerHTML = splitLeftHtml || '<span style="color:var(--text-muted)">Empty</span>';
+        splitContentRight.innerHTML = splitRightHtml || '<span style="color:var(--text-muted)">Empty</span>';
+
+        diffTargets = Array.from(unifiedView.querySelectorAll('[data-diff-target]'));
+
+        updateStats(delWordCount, insWordCount, equalWordCount, changeCount);
+        updateChangeCounter();
+      }
+
+      function updateStats(delCount, insCount, equalCount, changeCount) {
+        delCountBadge.textContent = `- ${delCount} ${delCount === 1 ? 'word' : 'words'} deleted`;
+        insCountBadge.textContent = `+ ${insCount} ${insCount === 1 ? 'word' : 'words'} added`;
+        equalCountBadge.textContent = `= ${equalCount} unchanged`;
+
+        const totalOriginal = equalCount + delCount;
+        const totalModified = equalCount + insCount;
+
+        let score = 100;
+        if (totalOriginal + totalModified > 0) {
+          score = Math.round((2 * equalCount) / (totalOriginal + totalModified) * 100);
+        } else if (!textOriginal.value.trim() && !textModified.value.trim()) {
+          score = 100;
+        } else {
+          score = 0;
+        }
+
+        similarityScore.textContent = `${score}% Match`;
+        similarityBar.style.width = `${score}%`;
+
+        if (score > 80) {
+          similarityBar.style.background = 'var(--success)';
+        } else if (score > 40) {
+          similarityBar.style.background = 'var(--warning)';
+        } else {
+          similarityBar.style.background = 'var(--danger)';
+        }
+      }
+
+      function updateChangeCounter() {
+        if (diffTargets.length === 0) {
+          changeCounter.textContent = '0 / 0';
+          prevChangeBtn.disabled = true;
+          nextChangeBtn.disabled = true;
+        } else {
+          const currentDisplay = currentTargetIdx >= 0 ? currentTargetIdx + 1 : '-';
+          changeCounter.textContent = `${currentDisplay} / ${diffTargets.length}`;
+          prevChangeBtn.disabled = false;
+          nextChangeBtn.disabled = false;
+        }
+      }
+
+      function jumpToChange(direction) {
+        if (diffTargets.length === 0) return;
+
+        diffTargets.forEach(el => el.classList.remove('diff-target-active'));
+
+        if (direction === 'next') {
+          currentTargetIdx = (currentTargetIdx + 1) % diffTargets.length;
+        } else {
+          currentTargetIdx = (currentTargetIdx - 1 + diffTargets.length) % diffTargets.length;
+        }
+
+        const targetEl = diffTargets[currentTargetIdx];
+        if (targetEl) {
+          targetEl.classList.add('diff-target-active');
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        updateChangeCounter();
+      }
+
+      function updateCounts() {
+        const origVal = textOriginal.value;
+        const modVal = textModified.value;
+
+        const origWords = (origVal.match(/[\p{L}\p{N}_]+/gu) || []).length;
+        const origChars = origVal.length;
+        origCounts.textContent = `${origWords} words • ${origChars} characters`;
+
+        const modWords = (modVal.match(/[\p{L}\p{N}_]+/gu) || []).length;
+        const modChars = modVal.length;
+        modCounts.textContent = `${modWords} words • ${modChars} characters`;
+      }
+
+      function runDiff() {
+        updateCounts();
+        const textA = textOriginal.value;
+        const textB = textModified.value;
+
+        const options = {
+          mode: currentMode,
+          ignoreCase: optIgnoreCase.checked,
+          ignoreWs: optIgnoreWs.checked
+        };
+
+        const edits = computeDiff(textA, textB, options);
+        renderDiff(edits);
+      }
+
+      function scheduleDiff() {
+        updateCounts();
+        if (optLiveDiff.checked) {
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(runDiff, 150);
+        }
+      }
+
+      let toastTimer = null;
+      function showToast(message) {
+        clearTimeout(toastTimer);
+        toastEl.textContent = message;
+        toastEl.classList.add('show');
+        toastTimer = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 2200);
+      }
+
+      function initTheme() {
+        const savedTheme = localStorage.getItem('diffcraft_theme');
+        const attrTheme = document.documentElement.getAttribute('data-theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme || (attrTheme !== 'light' && attrTheme ? attrTheme : (systemPrefersDark ? 'dark' : 'light'));
+        setTheme(theme);
+      }
+
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('diffcraft_theme', theme);
+        themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+
+      themeToggleBtn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+        showToast(`Switched to ${current === 'dark' ? 'light' : 'dark'} mode`);
+      });
+
+      document.querySelectorAll('[data-mode]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMode = btn.getAttribute('data-mode');
+          runDiff();
+          showToast(`Diff mode: ${currentMode}`);
+        });
+      });
+
+      document.querySelectorAll('[data-view]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentView = btn.getAttribute('data-view');
+          if (currentView === 'unified') {
+            unifiedView.style.display = 'block';
+            splitView.style.display = 'none';
+          } else {
+            unifiedView.style.display = 'none';
+            splitView.style.display = 'grid';
+          }
+          showToast(`View: ${currentView}`);
+        });
+      });
+
+      function swapTexts() {
+        const temp = textOriginal.value;
+        textOriginal.value = textModified.value;
+        textModified.value = temp;
+        runDiff();
+        showToast('Texts swapped ⇄');
+      }
+
+      swapBtn.addEventListener('click', swapTexts);
+
+      clearAllBtn.addEventListener('click', () => {
+        textOriginal.value = '';
+        textModified.value = '';
+        runDiff();
+        showToast('Cleared all texts');
+      });
+
+      clearOrigBtn.addEventListener('click', () => {
+        textOriginal.value = '';
+        runDiff();
+        showToast('Cleared original text');
+      });
+
+      clearModBtn.addEventListener('click', () => {
+        textModified.value = '';
+        runDiff();
+        showToast('Cleared modified text');
+      });
+
+      async function pasteClipboard(targetTextarea, name) {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            targetTextarea.value = text;
+            runDiff();
+            showToast(`Pasted into ${name}`);
+          } else {
+            showToast('Clipboard is empty');
+          }
+        } catch (err) {
+          targetTextarea.focus();
+          showToast('Press Ctrl+V to paste');
+        }
+      }
+
+      pasteOrigBtn.addEventListener('click', () => pasteClipboard(textOriginal, 'Original'));
+      pasteModBtn.addEventListener('click', () => pasteClipboard(textModified, 'Modified'));
+
+      function loadSample(key) {
+        const sample = SAMPLES[key];
+        if (sample) {
+          textOriginal.value = sample.orig;
+          textModified.value = sample.mod;
+          runDiff();
+          showToast(`Loaded sample: ${key}`);
+        }
+      }
+
+      window.DiffCraft = { loadSample: loadSample };
+
+      sampleSelect.addEventListener('change', (e) => {
+        if (e.target.value) {
+          loadSample(e.target.value);
+          e.target.value = '';
+        }
+      });
+
+      function setupDragDrop(card, textarea) {
+        ['dragenter', 'dragover'].forEach(name => {
+          card.addEventListener(name, (e) => {
+            e.preventDefault();
+            card.classList.add('dragover');
+          });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+          card.addEventListener(name, (e) => {
+            e.preventDefault();
+            card.classList.remove('dragover');
+          });
+        });
+        card.addEventListener('drop', (e) => {
+          const dt = e.dataTransfer;
+          const files = dt.files;
+          if (files && files.length > 0) {
+            const file = files[0];
+            const reader = new FileReader();
+            reader.onload = () => {
+              textarea.value = reader.result;
+              runDiff();
+              showToast(`Loaded file: ${file.name}`);
+            };
+            reader.readAsText(file);
+          } else {
+            const text = dt.getData('text/plain');
+            if (text) {
+              textarea.value = text;
+              runDiff();
+            }
+          }
+        });
+      }
+
+      setupDragDrop(cardOriginal, textOriginal);
+      setupDragDrop(cardModified, textModified);
+
+      splitPaneLeft.addEventListener('scroll', () => {
+        if (!isSyncScrolling) {
+          isSyncScrolling = true;
+          splitPaneRight.scrollTop = splitPaneLeft.scrollTop;
+          setTimeout(() => { isSyncScrolling = false; }, 40);
+        }
+      });
+      splitPaneRight.addEventListener('scroll', () => {
+        if (!isSyncScrolling) {
+          isSyncScrolling = true;
+          splitPaneLeft.scrollTop = splitPaneRight.scrollTop;
+          setTimeout(() => { isSyncScrolling = false; }, 40);
+        }
+      });
+
+      prevChangeBtn.addEventListener('click', () => jumpToChange('prev'));
+      nextChangeBtn.addEventListener('click', () => jumpToChange('next'));
+
+      copyDiffBtn.addEventListener('click', async () => {
+        const htmlToCopy = currentView === 'unified' ? unifiedView.innerHTML : splitView.innerHTML;
+        try {
+          await navigator.clipboard.writeText(htmlToCopy);
+          showToast('Diff HTML copied to clipboard!');
+        } catch (e) {
+          showToast('Copy failed');
+        }
+      });
+
+      downloadHtmlBtn.addEventListener('click', () => {
+        const diffHtml = unifiedView.innerHTML;
+        const fullDoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DiffCraft Comparison Report</title>
+  <style>
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 2rem; max-width: 900px; margin: auto; line-height: 1.8; color: #1e293b; background: #faf7f4; }
+    h1 { font-family: Merriweather, Georgia, serif; font-size: 1.5rem; color: #0f172a; border-bottom: 1px solid #e6ddd5; padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+    del.diff-del { background-color: rgba(225, 29, 72, 0.10); color: #be123c; text-decoration: line-through; text-decoration-color: #e11d48; text-decoration-thickness: 2px; padding: 1px 4px; border-radius: 2px; border-bottom: 1px solid #e11d48; }
+    ins.diff-ins { background-color: rgba(5, 150, 105, 0.11); color: #047857; text-decoration: none; font-weight: 500; padding: 1px 4px; border-radius: 2px; border-bottom: 1px solid #059669; }
+    .diff-output { white-space: pre-wrap; font-size: 1.05rem; padding: 1.5rem; background: #ffffff; border: 1px solid #e6ddd5; border-radius: 14px; }
+  </style>
+</head>
+<body>
+  <h1>DiffCraft Comparison Report</h1>
+  <div class="diff-output">${diffHtml}</div>
+</body>
+</html>`;
+        const blob = new Blob([fullDoc], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `diff-report-${new Date().toISOString().slice(0, 10)}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Downloaded HTML report!');
+      });
+
+      textOriginal.addEventListener('input', scheduleDiff);
+      textModified.addEventListener('input', scheduleDiff);
+
+      optIgnoreCase.addEventListener('change', runDiff);
+      optIgnoreWs.addEventListener('change', runDiff);
+      compareBtn.addEventListener('click', runDiff);
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          runDiff();
+          showToast('Diff recomputed');
+        }
+        if (e.altKey && (e.key === 's' || e.key === 'S')) {
+          e.preventDefault();
+          swapTexts();
+        }
+        if (e.altKey && (e.key === 'c' || e.key === 'C')) {
+          e.preventDefault();
+          clearAllBtn.click();
+        }
+        if (document.activeElement !== textOriginal && document.activeElement !== textModified) {
+          if (e.key === 'j' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            jumpToChange('next');
+          } else if (e.key === 'k' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            jumpToChange('prev');
+          }
+        }
+      });
+
+      initTheme();
+      updateCounts();
+      loadSample('editorial');
+
+    })();
+  </script>
+</body>
+</html>
