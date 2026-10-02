@@ -1,0 +1,692 @@
+        const { useState, useEffect, useMemo } = React;
+
+        // --- Icons ---
+        const Icons = {
+            Search: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>,
+            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
+            Copy: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
+            ChevronLeft: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>,
+            Layers: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>,
+            Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+            Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
+            Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        };
+
+        // --- API Config ---
+        const PROXY_URL = "https://corsproxy.io/?";
+        const S2_BASE = "https://api.semanticscholar.org/graph/v1";
+        const OA_BASE = "https://api.openalex.org";
+
+        // --- Normalizers ---
+        const normalizeAuthor = (data, source) => {
+            if (source === 'openalex') {
+                return {
+                    id: data.id,
+                    uniqueId: `oa_${data.id}`,
+                    name: data.display_name,
+                    affiliation: data.last_known_institution?.display_name || 'Independent Scholar',
+                    citationCount: data.cited_by_count || 0,
+                    worksCount: data.works_count || 0,
+                    hIndex: data.summary_stats?.h_index || 'N/A',
+                    source: 'openalex',
+                    original: data
+                };
+            } else if (source === 's2') {
+                return {
+                    id: data.authorId,
+                    uniqueId: `s2_${data.authorId}`,
+                    name: data.name,
+                    affiliation: data.affiliations?.[0] || 'Independent Scholar',
+                    citationCount: data.citationCount || 0,
+                    worksCount: data.paperCount || 'N/A',
+                    hIndex: data.hIndex || 'N/A',
+                    source: 's2',
+                    original: data
+                };
+            }
+        };
+
+        const normalizeWork = (data, source) => {
+            let work = {
+                title: '',
+                year: 0,
+                authors: [],
+                journal: '',
+                volume: '',
+                issue: '',
+                pages: '',
+                doi: '',
+                url: '',
+                source: source
+            };
+
+            if (source === 'openalex') {
+                work.title = data.title || 'Untitled Work';
+                work.year = data.publication_year;
+                work.authors = (data.authorships || []).map(ship => ship.author?.display_name).filter(Boolean);
+                work.journal = data.primary_location?.source?.display_name || '';
+                work.volume = data.biblio?.volume || '';
+                work.issue = data.biblio?.issue || '';
+                work.pages = (data.biblio?.first_page && data.biblio?.last_page)
+                    ? `${data.biblio.first_page}-${data.biblio.last_page}`
+                    : (data.biblio?.first_page || '');
+                work.doi = data.doi || '';
+                work.url = data.doi || data.primary_location?.landing_page_url || '';
+            } else if (source === 's2') {
+                work.title = data.title || 'Untitled Work';
+                work.year = data.year;
+                work.authors = (data.authors || []).map(a => a.name).filter(Boolean);
+                work.journal = data.venue || '';
+                work.doi = data.externalIds?.DOI || data.doi || '';
+                work.url = data.url || data.openAccessPdf?.url || (work.doi ? `https://doi.org/${work.doi}` : '');
+            }
+            return work;
+        };
+
+        const deduplicateWorks = (allWorks) => {
+            const uniqueMap = new Map();
+
+            allWorks.forEach(work => {
+                if (!work.title) return;
+                const titleKey = work.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+                const key = `${titleKey}_${work.year || 'nd'}`;
+
+                if (!uniqueMap.has(key)) {
+                    uniqueMap.set(key, work);
+                } else {
+                    const existing = uniqueMap.get(key);
+                    if (!existing.doi && work.doi) {
+                        uniqueMap.set(key, work);
+                    } else if (!existing.journal && work.journal && existing.doi === work.doi) {
+                        uniqueMap.set(key, work);
+                    }
+                }
+            });
+
+            return Array.from(uniqueMap.values()).sort((a, b) => (b.year || 0) - (a.year || 0));
+        };
+
+        const formatAuthorsAPA = (authorNames) => {
+            if (!authorNames || authorNames.length === 0) return "Unknown Author";
+
+            const formatName = (name) => {
+                const parts = name.trim().split(/\s+/);
+                if (parts.length === 1) return parts[0];
+                const last = parts[parts.length - 1];
+                const initials = parts.slice(0, parts.length - 1).map(p => p[0].toUpperCase() + '.').join(' ');
+                return `${last}, ${initials}`;
+            };
+
+            const formattedList = authorNames.map(formatName);
+            if (formattedList.length === 1) return formattedList[0];
+            if (formattedList.length === 2) return `${formattedList[0]} & ${formattedList[1]}`;
+            if (formattedList.length > 20) {
+                return `${formattedList.slice(0, 19).join(', ')}, ... ${formattedList[formattedList.length - 1]}`;
+            }
+            return `${formattedList.slice(0, -1).join(', ')}, & ${formattedList[formattedList.length - 1]}`;
+        };
+
+        const getAPA = (work) => {
+            const authors = formatAuthorsAPA(work.authors);
+            const year = `(${work.year || 'n.d.'})`;
+            const title = work.title;
+            const journal = work.journal || '';
+            const volume = work.volume || '';
+            const issue = work.issue ? `(${work.issue})` : '';
+            const pages = work.pages ? `, ${work.pages}` : '';
+            const doi = work.doi ? (work.doi.startsWith('http') ? work.doi : `https://doi.org/${work.doi}`) : '';
+            const url = (!work.doi && work.url) ? work.url : '';
+
+            let plainText = `${authors} ${year}. ${title}.`;
+            if (journal) {
+                plainText += ` ${journal}`;
+                if (volume) plainText += `, ${volume}`;
+                if (issue) plainText += `${issue}`;
+                if (pages) plainText += `${pages}`;
+                plainText += `.`;
+            }
+            if (doi) plainText += ` ${doi}`;
+            else if (url) plainText += ` ${url}`;
+
+            const jsx = (
+                <span className="apa-citation leading-relaxed text-slate-800 dark:text-stone-200">
+                    <span className="font-semibold text-slate-900 dark:text-white font-sans">{authors}</span> {year}. <span className="font-serif">{title}</span>.{' '}
+                    {journal && (
+                        <span>
+                            <em className="text-slate-700 dark:text-stone-300">{journal}</em>
+                            {volume && <span>, <em>{volume}</em></span>}
+                            {issue}{pages}.
+                        </span>
+                    )}
+                    {doi && (
+                        <a href={doi} target="_blank" rel="noreferrer" className="text-terracotta-deep hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                            {doi}
+                        </a>
+                    )}
+                    {!doi && url && (
+                        <a href={url} target="_blank" rel="noreferrer" className="text-terracotta-deep hover:text-terracotta-deep dark:text-study-accent dark:hover:text-white transition-colors underline ml-1 break-all text-xs font-mono">
+                            {url}
+                        </a>
+                    )}
+                </span>
+            );
+
+            return { plainText, jsx };
+        };
+
+        const copyToClipboard = async (text) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                } catch (e) {
+                    console.warn("Clipboard API failed, trying fallback...", e);
+                }
+            }
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            let success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                success = false;
+            }
+            document.body.removeChild(textArea);
+            return success;
+        };
+
+        // --- Navigation Header ---
+        const Header = ({ resetApp, isDark, toggleTheme }) => (
+            <header className="sticky top-0 z-50 bg-paper/90 dark:bg-study-dark/90 backdrop-blur-md border-b border-paper-hairline dark:border-study-hairline transition-colors duration-300">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                    <div
+                        className="flex items-center gap-3 cursor-pointer group select-none"
+                        onClick={resetApp}
+                    >
+                        <div className="w-8 h-8 bg-terracotta text-white flex items-center justify-center shadow-sm group-hover:bg-terracotta-deep transition-colors">
+                            <Icons.BookOpen />
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="font-serif font-bold text-lg text-slate-900 dark:text-white tracking-tight leading-none">ScholarCite</span>
+                                <span className="text-[11px] font-mono text-terracotta-deep dark:text-study-accent font-semibold">Multi-Source</span>
+                            </div>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">Dr. Manuel D. S. Hopp &bull; Academic Tools</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <a
+                            href="../index.html"
+                            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-terracotta-deep dark:hover:text-white border border-paper-hairline dark:border-study-hairline hover:border-terracotta transition-colors"
+                            title="Return to Main Homepage"
+                        >
+                            <Icons.Home />
+                            <span>Homepage</span>
+                        </a>
+
+                        <button
+                            onClick={toggleTheme}
+                            aria-label="Toggle Theme"
+                            className="p-2 border border-paper-hairline dark:border-study-hairline hover:border-terracotta dark:hover:border-terracotta text-stone-700 dark:text-stone-300 hover:text-terracotta-deep transition-colors"
+                        >
+                            {isDark ? <Icons.Sun /> : <Icons.Moon />}
+                        </button>
+                    </div>
+                </div>
+            </header>
+        );
+
+        // --- Search Screen ---
+        const SearchScreen = ({ onProfilesSelect }) => {
+            const [query, setQuery] = useState('');
+            const [results, setResults] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [hasSearched, setHasSearched] = useState(false);
+            const [status, setStatus] = useState('');
+            const [selectedIds, setSelectedIds] = useState(new Set());
+
+            const searchAuthors = async (e) => {
+                e.preventDefault();
+                if (!query.trim()) return;
+
+                setLoading(true);
+                setHasSearched(true);
+                setStatus('Querying OpenAlex and Semantic Scholar APIs...');
+                setResults([]);
+                setSelectedIds(new Set());
+
+                const p1 = fetch(`${OA_BASE}/authors?search=${encodeURIComponent(query)}&per-page=6`)
+                    .then(res => res.json())
+                    .then(data => (data.results || []).map(r => normalizeAuthor(r, 'openalex')))
+                    .catch(err => {
+                        console.warn('OpenAlex fetch failed:', err);
+                        return [];
+                    });
+
+                const p2 = fetch(`${PROXY_URL}${encodeURIComponent(`${S2_BASE}/author/search?query=${encodeURIComponent(query)}&fields=name,citationCount,hIndex,affiliations,paperCount&limit=6`)}`)
+                    .then(res => res.json())
+                    .then(data => (data.data || []).map(r => normalizeAuthor(r, 's2')))
+                    .catch(err => {
+                        console.warn('Semantic Scholar fetch failed:', err);
+                        return [];
+                    });
+
+                try {
+                    const [oaResults, s2Results] = await Promise.all([p1, p2]);
+                    const combined = [...oaResults, ...s2Results].sort((a, b) => b.citationCount - a.citationCount);
+                    setResults(combined);
+                } catch (err) {
+                    setStatus('Error connecting to academic databases.');
+                } finally {
+                    setLoading(false);
+                    setStatus('');
+                }
+            };
+
+            const toggleSelection = (uniqueId) => {
+                const newSet = new Set(selectedIds);
+                if (newSet.has(uniqueId)) {
+                    newSet.delete(uniqueId);
+                } else {
+                    newSet.add(uniqueId);
+                }
+                setSelectedIds(newSet);
+            };
+
+            const handleCombine = () => {
+                const selectedProfiles = results.filter(r => selectedIds.has(r.uniqueId));
+                onProfilesSelect(selectedProfiles);
+            };
+
+            return (
+                <div className="flex-1 flex flex-col items-center py-16 px-4 fade-in pb-32 max-w-4xl mx-auto w-full">
+                    <div className="text-center max-w-2xl w-full mb-10">
+                        <div className="inline-block border-l-2 border-terracotta pl-3 mb-3">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-terracotta-deep dark:text-study-accent">Bibliographic Query Tool</span>
+                        </div>
+                        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight leading-tight">
+                            Author & Publication Explorer
+                        </h1>
+                        <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed">
+                            Search cross-database profiles from OpenAlex and Semantic Scholar. Select matching author profiles to merge and generate unified APA 7th bibliographies.
+                        </p>
+                    </div>
+
+                    <div className="w-full max-w-2xl mb-10">
+                        <form onSubmit={searchAuthors} className="relative flex shadow-sm border border-paper-hairline dark:border-study-hairline bg-white dark:bg-study-surface focus-within:border-terracotta transition-colors">
+                            <div className="relative flex-grow">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-stone-400">
+                                    <Icons.Search />
+                                </div>
+                                <input
+                                    type="text"
+                                    className="block w-full pl-11 pr-4 py-3.5 text-slate-900 dark:text-white placeholder-stone-400 border-none outline-none text-base bg-transparent font-sans"
+                                    placeholder="Search researcher name (e.g., 'Manuel Hopp', 'Demis Hassabis')"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="px-6 py-3.5 bg-terracotta hover:bg-terracotta-deep text-white font-semibold btn-editorial text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+                            >
+                                {loading ? 'Searching...' : 'Search'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="w-full max-w-2xl space-y-4">
+                        {status && (
+                            <div className="text-center text-xs font-mono text-terracotta-deep dark:text-study-accent animate-pulse py-2">
+                                {status}
+                            </div>
+                        )}
+
+                        {hasSearched && results.length === 0 && !loading && !status && (
+                            <div className="text-center text-stone-500 dark:text-stone-400 py-12 glass-card">
+                                <p className="font-serif text-lg text-slate-800 dark:text-stone-200 mb-1">No researcher profiles found</p>
+                                <p className="text-xs">Try adjusting spelling or searching with alternative name variants.</p>
+                            </div>
+                        )}
+
+                        {results.map((author) => {
+                            const isSelected = selectedIds.has(author.uniqueId);
+                            return (
+                                <div
+                                    key={author.uniqueId}
+                                    onClick={() => toggleSelection(author.uniqueId)}
+                                    className={`p-5 glass-card cursor-pointer select-none transition-all border ${
+                                        isSelected
+                                            ? 'border-terracotta ring-1 ring-terracotta bg-terracotta-50/50 dark:bg-terracotta-900/10'
+                                            : 'border-paper-hairline dark:border-study-hairline hover:border-terracotta/50'
+                                    }`}
+                                >
+                                    <div className="flex items-start gap-4">
+                                        {/* Checkbox */}
+                                        <div className={`w-5 h-5 mt-1 border flex items-center justify-center flex-shrink-0 transition-colors ${
+                                            isSelected ? 'bg-terracotta border-terracotta text-white' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-study-dark'
+                                        }`}>
+                                            {isSelected && <Icons.Check />}
+                                        </div>
+
+                                        <div className="flex-grow">
+                                            <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                                <h3 className="font-serif font-bold text-lg text-slate-900 dark:text-white leading-snug">
+                                                    {author.name}
+                                                </h3>
+                                                <span className={author.source === 'openalex' ? 'keyword-tag text-[10px]' : 'skill-tag text-[10px]'}>
+                                                    {author.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+                                                </span>
+                                            </div>
+
+                                            <p className="text-stone-600 dark:text-stone-300 text-sm mb-3">
+                                                {author.affiliation}
+                                            </p>
+
+                                            <div className="flex items-center gap-4 text-xs text-stone-500 dark:text-stone-400 font-mono">
+                                                <span className="flex items-center gap-1.5">
+                                                    <Icons.FileText />
+                                                    <strong className="text-slate-800 dark:text-stone-200">{author.citationCount.toLocaleString()}</strong> citations
+                                                </span>
+                                                {author.hIndex !== 'N/A' && (
+                                                    <span>&bull; h-index: <strong className="text-slate-800 dark:text-stone-200">{author.hIndex}</strong></span>
+                                                )}
+                                                {author.worksCount !== 'N/A' && (
+                                                    <span>&bull; <strong className="text-slate-800 dark:text-stone-200">{author.worksCount}</strong> works</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Floating Selection Action Bar */}
+                    {selectedIds.size > 0 && (
+                        <div className="fixed bottom-8 z-50 animate-bounce-short">
+                            <button
+                                onClick={handleCombine}
+                                className="bg-slate-900 dark:bg-study-surface text-white px-6 py-3.5 shadow-2xl flex items-center gap-3 hover:bg-terracotta dark:hover:bg-terracotta transition-all border border-paper-hairline dark:border-study-hairline"
+                            >
+                                <span className="bg-terracotta w-6 h-6 flex items-center justify-center text-xs font-mono font-bold text-white">
+                                    {selectedIds.size}
+                                </span>
+                                <span className="font-sans font-semibold text-sm">
+                                    {selectedIds.size > 1 ? 'Merge & View Combined Works' : 'View Author Works'}
+                                </span>
+                                <Icons.Layers />
+                            </button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Citation Card ---
+        const CitationCard = ({ work }) => {
+            const [copied, setCopied] = useState(false);
+            const { plainText, jsx } = getAPA(work);
+
+            const handleCopy = async () => {
+                const ok = await copyToClipboard(plainText);
+                if (ok) {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                }
+            };
+
+            return (
+                <div className="p-5 glass-card relative overflow-hidden group">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                        <div className="flex-grow pr-2">
+                            <div className="mb-3 text-[14px]">
+                                {jsx}
+                            </div>
+                            <div className="flex items-center gap-3 text-xs font-mono text-stone-500 dark:text-stone-400">
+                                <span className={work.source === 'openalex' ? 'keyword-tag text-[10px]' : 'skill-tag text-[10px]'}>
+                                    {work.source === 'openalex' ? 'OpenAlex' : 'Semantic Scholar'}
+                                </span>
+                                <span>{work.year || 'n.d.'}</span>
+                                {work.journal && <span className="truncate max-w-[240px] text-stone-600 dark:text-stone-400">{work.journal}</span>}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleCopy}
+                            className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold transition-colors border ${
+                                copied
+                                    ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border-emerald-300'
+                                    : 'bg-white dark:bg-study-surface text-stone-700 dark:text-stone-300 border-paper-hairline dark:border-study-hairline hover:border-terracotta'
+                            }`}
+                            title="Copy APA Citation"
+                        >
+                            {copied ? <Icons.Check /> : <Icons.Copy />}
+                            <span>{copied ? 'Copied' : 'Copy'}</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Profile Screen ---
+        const ProfileScreen = ({ profiles, onBack }) => {
+            const [works, setWorks] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [allCopied, setAllCopied] = useState(false);
+
+            const primaryProfile = useMemo(() => {
+                return [...profiles].sort((a, b) => b.citationCount - a.citationCount)[0];
+            }, [profiles]);
+
+            useEffect(() => {
+                const fetchAllWorks = async () => {
+                    setLoading(true);
+                    let allFetches = [];
+
+                    profiles.forEach(p => {
+                        if (p.source === 'openalex') {
+                            const promise = fetch(`${OA_BASE}/works?filter=author.id:${encodeURIComponent(p.id)}&sort=publication_date:desc&per-page=100`)
+                                .then(res => res.json())
+                                .then(data => (data.results || []).map(r => normalizeWork(r, 'openalex')))
+                                .catch(e => { console.warn('OA fetch err', e); return []; });
+                            allFetches.push(promise);
+                        } else {
+                            const url = `${S2_BASE}/author/${p.id}/papers?fields=title,year,venue,authors,url,publicationDate,externalIds,openAccessPdf&limit=100`;
+                            const promise = fetch(`${PROXY_URL}${encodeURIComponent(url)}`)
+                                .then(res => res.json())
+                                .then(data => (data.data || []).map(r => normalizeWork(r, 's2')))
+                                .catch(e => { console.warn('S2 fetch err', e); return []; });
+                            allFetches.push(promise);
+                        }
+                    });
+
+                    try {
+                        const resultsArray = await Promise.all(allFetches);
+                        const flattened = resultsArray.flat();
+                        const uniqueSorted = deduplicateWorks(flattened);
+                        setWorks(uniqueSorted);
+                    } catch (error) {
+                        console.error("Failed to fetch publications", error);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+                fetchAllWorks();
+            }, [profiles]);
+
+            const copyAllCitations = async () => {
+                const fullText = works.map(w => getAPA(w).plainText).join("\n\n");
+                const ok = await copyToClipboard(fullText);
+                if (ok) {
+                    setAllCopied(true);
+                    setTimeout(() => setAllCopied(false), 2500);
+                }
+            };
+
+            return (
+                <div className="flex-1 flex flex-col fade-in pb-24">
+                    {/* Header Banner */}
+                    <div className="bg-paper-hero dark:bg-study-hero border-b border-paper-hairline dark:border-study-hairline py-10 transition-colors">
+                        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                            <button
+                                onClick={onBack}
+                                className="text-xs font-semibold text-stone-600 dark:text-stone-400 hover:text-terracotta-deep dark:hover:text-white mb-6 flex items-center gap-1.5 transition-colors border border-paper-hairline dark:border-study-hairline px-3 py-1.5 bg-white dark:bg-study-surface w-fit"
+                            >
+                                <Icons.ChevronLeft />
+                                <span>Back to Search</span>
+                            </button>
+
+                            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                <div className="w-16 h-16 bg-terracotta text-white flex items-center justify-center font-serif text-2xl font-bold shadow-md flex-shrink-0">
+                                    {primaryProfile.name.charAt(0)}
+                                </div>
+
+                                <div className="flex-grow">
+                                    <div className="border-l-3 border-terracotta pl-3 mb-1">
+                                        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+                                            {primaryProfile.name}
+                                        </h1>
+                                    </div>
+                                    <p className="text-stone-600 dark:text-stone-300 text-sm font-medium mb-3">
+                                        {primaryProfile.affiliation}
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {profiles.map(p => (
+                                            <span key={p.uniqueId} className={p.source === 'openalex' ? 'keyword-tag' : 'skill-tag'}>
+                                                {p.source === 'openalex' ? 'OpenAlex Profile' : 'Semantic Scholar Profile'}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 w-full">
+                        {/* Profile Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 mb-10">
+                            {profiles.map(p => (
+                                <div key={p.uniqueId} className="p-5 glass-card border-l-4 border-terracotta">
+                                    <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-2">
+                                        {p.source === 'openalex' ? 'OpenAlex Metrics' : 'Semantic Scholar Metrics'}
+                                    </div>
+                                    <div className="flex gap-6">
+                                        <div>
+                                            <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+                                                {p.citationCount.toLocaleString()}
+                                            </div>
+                                            <div className="text-xs text-stone-500">Citations</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-2xl font-mono font-bold text-slate-900 dark:text-white">
+                                                {p.hIndex}
+                                            </div>
+                                            <div className="text-xs text-stone-500">h-index</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Publications List */}
+                        <div>
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-3 border-b border-paper-hairline dark:border-study-hairline">
+                                <div>
+                                    <h2 className="font-serif text-xl font-bold text-slate-900 dark:text-white">
+                                        Publications & Citations
+                                    </h2>
+                                    <p className="text-xs text-stone-500 dark:text-stone-400 font-mono mt-0.5">
+                                        {works.length} deduplicated works &bull; formatted in APA 7th Edition
+                                    </p>
+                                </div>
+
+                                {works.length > 0 && (
+                                    <button
+                                        onClick={copyAllCitations}
+                                        className="btn-editorial px-4 py-2 bg-terracotta hover:bg-terracotta-deep text-white text-xs font-mono font-semibold flex items-center gap-2 transition-colors"
+                                    >
+                                        {allCopied ? <Icons.Check /> : <Icons.Copy />}
+                                        <span>{allCopied ? 'All Works Copied!' : 'Copy All (APA)'}</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="space-y-4">
+                                {loading ? (
+                                    <div className="space-y-3">
+                                        {[1, 2, 3, 4].map(i => (
+                                            <div key={i} className="p-6 glass-card animate-pulse h-28 bg-stone-100 dark:bg-study-surface/40"></div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    works.map((work, idx) => (
+                                        <CitationCard key={`${work.title}_${idx}`} work={work} />
+                                    ))
+                                )}
+
+                                {!loading && works.length === 0 && (
+                                    <div className="text-center py-12 glass-card text-stone-500">
+                                        No publications found for the selected author profiles.
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [selectedProfiles, setSelectedProfiles] = useState([]);
+            const [isDark, setIsDark] = useState(() => {
+                const saved = localStorage.getItem('scholarcite_theme');
+                if (saved) return saved === 'dark';
+                return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            });
+
+            useEffect(() => {
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('scholarcite_theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('scholarcite_theme', 'light');
+                }
+            }, [isDark]);
+
+            const toggleTheme = () => setIsDark(!isDark);
+
+            return (
+                <div className="flex flex-col min-h-screen">
+                    <Header
+                        resetApp={() => setSelectedProfiles([])}
+                        isDark={isDark}
+                        toggleTheme={toggleTheme}
+                    />
+                    {selectedProfiles.length > 0 ? (
+                        <ProfileScreen
+                            profiles={selectedProfiles}
+                            onBack={() => setSelectedProfiles([])}
+                        />
+                    ) : (
+                        <SearchScreen onProfilesSelect={setSelectedProfiles} />
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    

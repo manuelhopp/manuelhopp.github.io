@@ -6,51 +6,9 @@
     <title>Bipolar Projection | Dr. Manuel D. S. Hopp</title>
     <meta name="description" content="Interactive visualization of the bipolar distance embedding projection formula v = (b - a) / (a + b).">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
+    <!-- Fonts (self-hosted) -->
+    <link rel="stylesheet" href="../assets/css/app-fonts.css">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        terracotta: {
-                            DEFAULT: '#f86116',
-                            light: '#fb7c3c',
-                            deep: '#b83b05',
-                            50: '#fff4ed',
-                            500: '#f86116',
-                            600: '#b83b05',
-                            700: '#8f2e03',
-                        },
-                        paper: {
-                            DEFAULT: '#f1f5f9',
-                            hero: '#edf2f7',
-                            surface: '#ffffff',
-                            hairline: '#dbe3ec',
-                        },
-                        study: {
-                            dark: '#0a0f15',
-                            hero: '#0f161f',
-                            surface: '#101822',
-                            hairline: '#16222f',
-                            accent: '#fb7c3c',
-                        }
-                    },
-                    fontFamily: {
-                        serif: ['Merriweather', 'Georgia', 'serif'],
-                        sans: ['DM Sans', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
 
     <style>
         :root {
@@ -122,6 +80,8 @@
             transform: scale(0.97);
         }
     </style>
+    <!-- Tailwind, precompiled (apps/src/build.sh); last so it keeps the cascade order of the former runtime CDN -->
+    <link rel="stylesheet" href="../assets/css/tailwind-bipolar.css">
 </head>
 <body class="h-screen w-screen flex flex-col relative text-slate-900 dark:text-stone-100">
 
