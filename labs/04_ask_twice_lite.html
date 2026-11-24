@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>Ask twice: why answers vary · Cognitive AI Lab</title>
+<style>:root{
+  --accent:#A11E3B; --accent-soft:#f7e8ec; --on-accent:#fff;
+  --bg:#fbfaf9; --surface:#ffffff; --surface-2:#f3f1ef; --border:#dedad6;
+  --text:#1c1b1a; --muted:#5d5955; --ok:#1d6b43; --ok-soft:#e5f3eb; --warn:#8a5a00; --warn-soft:#fbf1dc;
+  --c1:#2f6db5; --c2:#b5462f; --c3:#2f8f5b; --c4:#8a4fb5; --c5:#b58a2f; --c6:#2f9aa8; --c7:#b52f7a; --c8:#7a7a7a;
+  --radius:10px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --accent:#e2667f; --accent-soft:#3a1c24; --on-accent:#1a0d10;
+  --bg:#161514; --surface:#1f1e1c; --surface-2:#292725; --border:#3a3734;
+  --text:#ece9e5; --muted:#a8a29c; --ok:#6fcf97; --ok-soft:#173325; --warn:#e6b85c; --warn-soft:#3a2e14;
+  --c1:#6fa3e0; --c2:#e08a6f; --c3:#6fcf97; --c4:#b88ae0; --c5:#e0c06f; --c6:#6fcfdc; --c7:#e07ab8; --c8:#a8a8a8;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --accent:#e2667f; --accent-soft:#3a1c24; --on-accent:#1a0d10;
+  --bg:#161514; --surface:#1f1e1c; --surface-2:#292725; --border:#3a3734;
+  --text:#ece9e5; --muted:#a8a29c; --ok:#6fcf97; --ok-soft:#173325; --warn:#e6b85c; --warn-soft:#3a2e14;
+  --c1:#6fa3e0; --c2:#e08a6f; --c3:#6fcf97; --c4:#b88ae0; --c5:#e0c06f; --c6:#6fcfdc; --c7:#e07ab8; --c8:#a8a8a8;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--font)}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px}
+.kicker{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:1.6rem;line-height:1.2;margin:.2em 0 .3em}
+h2{font-size:1.2rem;margin:0 0 .5em}
+h3{font-size:1rem;margin:1em 0 .4em}
+p{margin:.5em 0}
+.meta{color:var(--muted);font-size:.9rem;margin:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:16px 0}
+.step{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:.8rem}
+button,.btn{font:inherit;font-size:.95rem;border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:9px 14px;border-radius:8px;cursor:pointer;min-height:40px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+textarea,input[type=text],select{font:inherit;width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)}
+textarea{min-height:64px;resize:vertical}
+textarea::placeholder{color:var(--muted);opacity:1}
+label{font-weight:600;display:block;margin:.4em 0 .25em}
+details{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;background:var(--surface)}
+details>summary{cursor:pointer;font-weight:600}
+details.answer>summary{color:var(--ok)}
+.seen{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.seen strong:first-child{display:block;margin-bottom:4px}
+.why{border:1px dashed var(--accent);border-radius:8px;padding:12px 14px;margin:12px 0}
+.note{font-size:.85rem;color:var(--muted)}
+.theme-toggle{flex:none;font-size:.85rem;min-height:36px;padding:6px 10px}
+footer{margin-top:32px;border-top:1px solid var(--border);padding-top:12px;font-size:.85rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.bars{display:grid;gap:6px;margin:10px 0}
+.bar{display:grid;grid-template-columns:minmax(90px,30%) 1fr 56px;gap:8px;align-items:center;font-size:.95rem}
+.bar .w{font-family:var(--mono);white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.bar .track{height:22px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px;transition:width .35s}
+.bar.dim .fill{background:var(--c8)} .bar.dim .w{color:var(--muted);text-decoration:line-through}
+.bar .p{text-align:right;font-variant-numeric:tabular-nums}
+.bar.other .fill{background:var(--c8)} .bar.other .w{font-family:var(--font);font-style:italic;color:var(--muted)}
+button.bar{width:100%;text-align:left;background:none;border:1px solid transparent;padding:4px 6px;min-height:34px}
+button.bar:hover{border-color:var(--accent);background:var(--surface-2)}
+.copybox{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:520px){h1{font-size:1.35rem}.card{padding:14px}.bar{grid-template-columns:minmax(70px,34%) 1fr 48px}}
+@media print{.theme-toggle,button{display:none}.card{break-inside:avoid}}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--accent-soft);color:var(--text);font-weight:600}
+.fill{display:block}
+.frame{border:2px solid var(--accent);border-radius:var(--radius);padding:14px 16px;margin:0 0 18px;background:var(--surface)}
+.frame.end{margin:22px 0 0;background:var(--accent-soft)}
+.frame h2{font-size:1.05rem;margin:0 0 8px;color:var(--accent)}
+.frame dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:8px 0 0}
+.frame dt{font-weight:700}
+.frame dd{margin:0}
+.frame .map{margin:4px 0 6px}
+.frame .map svg{width:100%;height:auto;display:block}
+.frame .map-text{display:none;margin:4px 0 8px;font-size:.92rem}
+.frame .who{font-size:.85rem;color:var(--muted);margin:10px 0 0}
+@media (max-width:560px){.frame dl{grid-template-columns:1fr}.frame dd{margin-bottom:6px}.frame .map{display:none}.frame .map-text{display:block}}
+
+.slider{display:grid;gap:6px;margin:8px 0 4px}
+.slider input{width:100%;accent-color:var(--accent);height:32px}
+.ticks{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted)}
+.ticks span{text-align:center;width:20%}
+.tval{font-weight:700;font-size:1.05rem}
+.samples{list-style:none;padding:0;margin:10px 0;display:grid;gap:6px;counter-reset:s}
+.samples li{padding:8px 10px;border-radius:6px;background:var(--surface-2);font-size:.95rem;counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:6px}
+.samples li::before{content:counter(s);color:var(--muted);font-variant-numeric:tabular-nums}
+.samples li b{font-weight:400;color:var(--muted)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--accent-soft);color:var(--text);font-weight:600}
+.bar.other .w{white-space:normal}
+.conf{margin:10px 0}
+.conf .conf-q{margin:0 0 6px;font-weight:600;font-size:.95rem}
+.conf .row button{min-height:36px;padding:6px 12px}
+.conf-fb{margin:8px 0 0;padding:8px 12px;border-left:4px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0}
+.conf-fb:empty{display:none}
+</style>
+<script>(function(){
+  const KEY='cal-theme', root=document.documentElement;
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  window.labStore=store;
+  const saved=store.get(KEY); if(saved) root.dataset.theme=saved;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const b=document.querySelector('.theme-toggle'); if(!b) return;
+    const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    const label=()=>{b.textContent=isDark()?'Light mode':'Dark mode'};
+    label(); b.addEventListener('click',()=>{root.dataset.theme=isDark()?'light':'dark';store.set(KEY,root.dataset.theme);label()});
+    // Remember free-text answers (per browser only) and offer copy-to-clipboard for the learning log
+    document.querySelectorAll('textarea[data-save]').forEach(t=>{
+      const k='cal-u1s-lab4-'+t.dataset.save;
+      const v=store.get(k); if(v) t.value=v; t.addEventListener('input',()=>store.set(k,t.value));
+    });
+    const cb=document.getElementById('copy-answers');
+    if(cb) cb.addEventListener('click',()=>{
+      const txt=[...document.querySelectorAll('textarea[data-save]')].map(t=>'• '+(t.dataset.q||t.dataset.save)+'\n  '+(t.value.trim()||'(no answer yet)')).join('\n\n');
+      const done=()=>{cb.textContent='Copied ✓';setTimeout(()=>cb.textContent='Copy my answers',1800)};
+      if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done,()=>fallback(txt,done))}else fallback(txt,done);
+    });
+    function fallback(txt,done){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{if(document.execCommand('copy'))done();else alert(txt)}catch(e){alert(txt)}a.remove()}
+    // Confidence before the reveal (ungraded). The same code is in all five labs.
+    (function(P){
+      const C=[['g','Guessing'],['f','Fairly sure'],['v','Very sure']], O=[['y','Yes'],['p','Partly'],['n','No']];
+      const M={vn:'You were very sure and wrong. Confident errors like this one are the ones most worth correcting: note what you expected and what is actually the case.',
+        vp:'You were very sure and partly wrong. Confident errors are the ones most worth correcting: note which part you expected differently.',
+        vy:'You were very sure and right. Your picture of this step fits.',
+        fy:'You were fairly sure and right. Check that your reason matches the reason in the answer, too.',
+        fp:'You were fairly sure and partly right. Note which part was wrong and why.',
+        fn:'You were fairly sure and wrong. Note what you expected: this is worth correcting now.',
+        gy:'You were guessing and right. Check why it was right, so that you know the reason next time.',
+        gp:'You were guessing and partly right. Check which part you can explain and which part was luck.',
+        gn:'You were guessing and wrong. That is normal: the reason in the answer is the part to remember.'};
+      const NONE='You did not choose how sure you were. Next time, choose before you check.';
+      function group(label,opts,cur,on){
+        const g=document.createElement('div');g.className='row';g.setAttribute('role','group');g.setAttribute('aria-label',label);
+        opts.forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.setAttribute('aria-pressed',String(k===cur));
+          b.addEventListener('click',()=>{g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));on(k)});g.appendChild(b)});
+        return g;
+      }
+      const all={};
+      document.querySelectorAll('.conf[data-conf]').forEach(box=>{
+        const id=box.dataset.conf, key=P+'conf-'+id, card=box.closest('.card'), st=card&&card.querySelector('.step');
+        const task=st?st.textContent.replace(/^\s*\d+\s*/,'').trim():'';
+        const s=all[id]={c:store.get(key)||'',o:'',pre:''};
+        const fb=document.createElement('p');fb.className='conf-fb';fb.setAttribute('aria-live','polite');
+        s.say=()=>{fb.textContent=s.o?s.pre+(M[s.c+s.o]||NONE):''};
+        const q=document.createElement('p');q.className='conf-q';q.textContent='How sure are you? Choose before you check. This is not graded.';
+        box.append(q,group('How sure are you? '+task,C,s.c,k=>{s.c=k;store.set(key,k);s.say()}));
+        const det=card&&card.querySelector('details.answer');
+        if(det&&!('auto' in box.dataset)){
+          const out=document.createElement('div');out.className='conf';out.hidden=true;
+          const oq=document.createElement('p');oq.className='conf-q';oq.textContent='After checking: were you right?';
+          out.append(oq,group('After checking: were you right? '+task,O,'',k=>{s.o=k;s.say()}),fb);
+          det.after(out);
+          det.addEventListener('toggle',()=>{if(det.open)out.hidden=false});
+        } else box.append(fb);
+      });
+      window.calConf=(id,o,pre)=>{const s=all[id];if(s){s.o=o;s.pre=pre||'';s.say()}};
+    })('cal-u1s-lab4-');
+  });
+  window.pct=(p)=>p>=0.1?Math.round(p*100)+' %':p>=0.001?(p*100).toFixed(1)+' %':'< 0.1 %';
+  window.esc=(s)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  window.showTok=(s)=>esc(s).replace(/ /g,'<span class="sp" aria-hidden="true">·</span>').replace(/\n/g,'<span class="sp">↵</span>');
+})();
+</script>
+<style>.brief{border:2px solid var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 14px;background:var(--surface)}.brief h2{font-size:1.1rem;margin:0 0 6px;color:var(--accent)}.brief p{margin:4px 0}.todo{font-weight:600;margin:4px 0 10px}</style>
+</head><body><div class="wrap">
+<header class="top"><div>
+<div class="kicker">The Cognitive AI Lab · Unit 1 short · Part C · Settings &amp; the window · Lab 4 of 4</div>
+<h1>Ask twice: why answers vary</h1>
+<p class="meta">About 3 minutes · No maths or programming needed · Works offline</p>
+</div><button class="theme-toggle" type="button">Dark mode</button></header>
+<main><section class="brief" aria-labelledby="brief-h"><h2 id="brief-h">In this lab</h2><p><strong>Goal:</strong> See why the same question gives different answers, and why getting the same answer every time does not make it true.</p><p><strong>Your task:</strong> Let the model answer ten times at different temperatures and count the different answers (Task 1). Then decide whether an answer that comes out the same ten times is a finding (Task 2).</p></section><section class="frame" aria-labelledby="bys"><h2 id="bys">Part C · Lab 4 · about 3 minutes</h2><div class="map"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 212" role="img" aria-label="Unit map. You are at: Settings &amp; the window." font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif"><text x="480.0" y="30" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="1" fill="var(--accent)">UNIT 1 IN ONE HOUR</text><text x="480.0" y="54" text-anchor="middle" font-size="17" font-style="italic" fill="var(--text)">Why did the chatbot give Lena a summary that sounded perfect but was partly wrong?</text><line x1="100" y1="118" x2="860" y2="118" stroke="var(--border)" stroke-width="4"/><line x1="100" y1="118" x2="670.0" y2="118" stroke="var(--accent)" stroke-width="4"/><circle cx="100.0" cy="118" r="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="100.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">0</text><text x="100.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">Start</text><text x="100.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Lena&#x27;s puzzle</text><circle cx="290.0" cy="118" r="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="290.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">A</text><text x="290.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">Pieces &amp; neighbours</text><text x="290.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 1 · Labs 1, 2</text><circle cx="480.0" cy="118" r="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="480.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">B</text><text x="480.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">The next word</text><text x="480.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 2 · Lab 3</text><circle cx="670.0" cy="118" r="22" fill="var(--accent)"/><text x="670.0" y="123" text-anchor="middle" font-size="14" font-weight="700" fill="var(--on-accent)">C</text><text x="670.0" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)">YOU ARE HERE</text><text x="670.0" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text)">Settings &amp; the window</text><text x="670.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 3 · Lab 4</text><circle cx="860.0" cy="118" r="16" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/><text x="860.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">✓</text><text x="860.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)">Lena solved</text><text x="860.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Check · test</text></svg></div><p class="map-text">Where you are: Start → Pieces &amp; neighbours → The next word → <strong>C · Settings &amp; the window</strong> → Lena solved</p></section>
+
+<p class="note">Many chat apps do not show the temperature setting. Their answers vary all the same.</p>
+
+<section class="card" aria-labelledby="lab-h">
+<h2 id="lab-h">Try the settings</h2>
+<p><strong>Starting text:</strong> A new study on homework found that …</p>
+<select id="prompt" hidden aria-hidden="true"></select>
+<div class="slider">
+<label for="temp" style="margin-bottom:0">Temperature: <span class="tval" id="tval"></span></label>
+<input type="range" id="temp" min="0" max="4" step="1" value="2" aria-describedby="tdesc">
+<div class="ticks" aria-hidden="true"><span>0<br>always the top token</span><span>0.3</span><span>0.7<br>a common setting</span><span>1.0</span><span>1.5<br>very high</span></div>
+</div>
+<p class="note" id="tdesc"></p>
+<h3>Chances for the first token at this temperature</h3>
+<div class="bars" id="bars"></div>
+<p class="note" id="bnote"></p>
+<div class="row"><button type="button" class="primary" id="gen">Generate 10 answers with these settings</button></div>
+<div id="res" aria-live="polite"></div>
+</section>
+
+<section class="card">
+<div class="step"><b>1</b> Task 1 · Ten times the same question</div>
+<p class="todo">Your task: let the model write the same continuation ten times, at three temperatures, and count the different answers.</p>
+<p>Video 3 used a different starting text. Here the model continues <em>"A new study on homework found that …"</em>. No study is named, so there is nothing true to report.</p>
+<p><strong>Predict:</strong> the slider starts at 0.7. If you ask for the same continuation 10 times, how many <em>different</em> "findings" will you get? Click <em>Generate</em>. Then try temperature 0 and 1.5.</p>
+<div class="conf" data-conf="t1"></div>
+<textarea data-save="t1" data-q="Task 1: Predicted vs. observed number of different answers (0.7, then 0 and 1.5)" placeholder="Prediction for 0.7: … Observed: … At 0: … At 1.5: …" aria-label="Task 1: Predicted vs. observed number of different answers (0.7, then 0 and 1.5)"></textarea>
+<details class="answer"><summary>Compare with the model answer</summary>
+<p>At 0.7 you get 10 different "findings" out of 10, although every token was drawn from the same chances. At 0 you get the same sentence 10 times: the most likely token is taken at every step. At 1.5 all 10 differ, and most stop making sense after a few words.</p>
+</details>
+</section>
+
+<section class="card">
+<div class="step"><b>2</b> Task 2 · Same answer, so true?</div>
+<p class="todo">Your task: decide whether an answer that comes out the same ten times is a finding you could cite.</p>
+<p>At temperature 0 the model wrote ten times: <em>"A new study on homework found that students who took the test were more likely to take the test than those who did not."</em></p>
+<p><strong>Is this a finding you could cite?</strong> And what would you do before you use any answer of a chatbot for your studies?</p>
+<textarea data-save="t2" data-q="Task 2: Is the repeated answer a finding, and what I would do" placeholder="It is / is not a finding, because … Before using an answer I would …" aria-label="Task 2: Is the repeated answer a finding, and what I would do"></textarea>
+<div class="conf" data-conf="t2"></div>
+<details class="answer"><summary>Compare with the model answer</summary>
+<p>No. No study stands behind it: the starting text named none, and the model produced the most likely continuation, ten times the same. The sentence is even circular. A repeated answer is <strong>consistent, not correct</strong>.</p>
+<p>For research use: run important tasks more than once and compare; check a sample yourself; write down the tool, version, date and settings. A low temperature makes answers repeatable, not true.</p>
+</details>
+</section>
+
+
+
+
+
+
+<section class="frame end" aria-labelledby="byg"><h2 id="byg">Before you go on</h2><dl><dt>Take-away</dt><dd>Temperature controls how much answers vary, not whether they are true.</dd></dl><p><strong>Recall:</strong> In one sentence: why could Lena's chatbot get sentences 3 and 4 wrong at all?</p><details class="answer"><summary>Your answer so far</summary><p><strong>Lena's puzzle, part 3 of 3 (Part C):</strong> The paper was never in the window. The chatbot answered from training patterns, which can sound right and be partly wrong. Asking again would give another version, not a checked one.</p></details><dl><dt>Next</dt><dd>Lena solved: you check Lena's summary against the paper.</dd></dl></section>
+</main>
+<footer>
+<p><strong>About the data.</strong> All answers on this page were produced once with the open model GPT-2 (small; Radford et al., 2019) and stored in this page: 10 answers of 20 tokens for each setting, with a fixed random seed. The bars show the model's real chances for the first token after the starting text. Answers were screened for offensive words. A modern chat model may give different numbers and a different range; the way the tokens are drawn is the same.</p>
+<p>The Cognitive AI Lab · Unit 1 short · How language models work</p>
+</footer>
+</div>
+<script>window.LAB_DATA={"A new study on homework found that":{"top":[[" students",-118.871],[" the",-119.911],[" teachers",-120.515],[" children",-120.786],[" those",-120.811],[" people",-120.918],[" a",-120.928],[" more",-120.939],[" most",-121.003],[" only",-121.082],[" kids",-121.138],[" high",-121.202],[" nearly",-121.234],[" about",-121.26],[" while",-121.327],[",",-121.378],[" when",-121.47],[" it",-121.477],[" college",-121.661],[" some",-121.711],[" one",-121.72],[" many",-121.763],[" in",-121.823],[" there",-121.868],[" low",-121.916],[" subjects",-121.932],[" parents",-121.973],[" young",-122.025],[" higher",-122.087],[" even",-122.142],[" almost",-122.146],[" middle",-122.153],[" if",-122.179],[" for",-122.186],[" just",-122.23],[" \"",-122.256],[" older",-122.286],[" school",-122.293],[" half",-122.33],[" math",-122.366]],"rest":{"0.1":0.0,"0.2":0.0,"0.3":0.0001,"0.4":0.0036,"0.5":0.0239,"0.6":0.0779,"0.7":0.1661,"0.8":0.274,"0.9":0.3856,"1.0":0.4903,"1.1":0.5826,"1.2":0.6607,"1.3":0.7247,"1.4":0.7764,"1.5":0.8174,"1.6":0.85,"1.7":0.8757,"1.8":0.8961,"1.9":0.9124,"2.0":0.9254},"runs":{"0|1.0":[" students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"," students who took the test were more likely to take the test than those who did not.\n\n"],"0.3|1.0":[" students who had completed the test at the end of the school year were more likely to have been diagnosed"," students who were given homework that was not a homework assignment were more likely to score higher on math and"," students who were more likely to be in the middle of the day were more likely to be in the"," students who had completed a high school course in math and reading were more likely to have completed high school"," students who were asked to complete homework at a higher rate than those who were not asked to complete it"," the average student who completed a math class was more likely to take a math class than a non-"," students who were more likely to take a math test were more likely to take it than those who were"," students who took the test had a higher grade point average than those who didn't.\n\nThe"," students who took the test had a higher rate of cheating than those who did not.\n\n\""," students who were less likely to complete homework were more likely to take a test than those who were more"],"0.3|0.9":[" students who took the test were more likely to be able to complete it in the first place.\n"," students who had been assigned to a different grade level were more likely to have a lower grade point average"," students who took the test were more likely to have a higher grade point average than students who did not"," students who took the SAT or ACT scored higher on tests that asked them to think about their future."," students who took a math test scored higher on the test than students who did not.\n\nThe"," students who were more likely to take the test had higher grades and were more likely to be admitted to"," students who had been given a homework assignment were more likely to score higher on a math test than those"," students who scored higher on a math test were more likely to be able to complete a homework assignment."," students who took a math class were more likely to take the test than those who did not.\n"," students who were asked to complete a homework assignment were more likely to complete it in the second week of"],"0.7|1.0":[" people who were not involved in homework reported more confusion, difficulty composing sentences, and poorer verbal fluency"," those who had had their students take those tests were rated as less likely to have high school diplomas"," school districts in California are spending $75 million more on homework for first-time learners (about $"," while a test of 'hard pressed' students' knowledge was shown to be more effective at countering real"," students who are less likely to plan for homework and have less flexibility are more likely to miss the test"," students who attended high schools with a lower average score on standardized tests had more trouble completing high school than"," more than half of students who are \"average\" at a high school in the U.S."," teachers are testing students to be more prepared for Tuesday's state holiday.\n\n\"Teachers are"," students who completed more homework per month and those who completed more homework per week were more likely to be"," the average student's homework is more correlated with the time spent in class than with the hours of instruction"],"0.7|0.9":[" people with little to no homework had a lower risk of falling behind in school, and that those with"," students who study math at an advanced level have a significantly lower rate of academic achievement than students who study"," most students in the United States are less motivated to teach themselves and their families the importance of reading and"," more than half of students had trouble getting past the end of a week, often because they had not"," most students took the same type of homework as their peers, but took different kinds of homework.\n"," students who work hard at school are more likely to earn a B.A. and a C."," the number of students who took their first course in elementary school fell by nearly two thirds over the past"," students who spent more time studying and reading in class were less likely to score higher on their math tests"," students who were taught to write a good two-page letter were more likely to think they were getting"," the majority of students who were able to complete the test had completed a single chapter.\n\nThe"],"1.0|1.0":[" 15 per cent of students take a quantitative level of academic study when preparing for exams. It searches for"," U.S. colleges, primarily English major schools, were ill-prepared to handle students from"," highly graded subjects were less likely to perform as well as highly graded students. Read the study HERE."," credit card debts within and under the bank found little in the way of thinking or reflection on the highest"," 31% of just 492 students at schools where those students were 'shedding some tears' scored"," a vocational study (such as one on poker or writing) vastly increases both performances and academic performance among"," participants with fast, SES-based driving experience put on 5% more on their driving tests and"," only 22% of video games were cited for 90% of kids' homework assignments between 1980 and 2000"," high school seniors just add extra minutes in front of their scheduled prep days because the school is exceptionally popular"," 147 older adults from K-12 secondary schools had scores in UK subtests higher than a day lower"],"1.0|0.9":[" 27% of ninth graders successfully completed either verbal arithmetic math or English first, and were subsequently identified"," 40 percent of lower-income students — most of whom are working in retail — fall under the age"," those who had extra time spent studying one project and studying another have just 3.9 seconds left on"," students around the world spend more time on homework than other students. According to Joe Clarke of the National"," learning extra reading and math skills is good for better grades.\n\nResearch into self-esteem,"," 80% of students surveyed said they would rather be studying on an exam than if they had to \""," students who had homework assignments that described their program goals were 30% more likely than those who weren't"," students who attend the federal Family Educational Rights and Privacy Act (FERPA) are more likely to cite"," 2,051 highly motivated students scored on a scale of 0-6 in an ongoing benchmark test"," more than half of teachers during the past 50 years forgot to revise homework assignments in some way in an"],"1.5|1.0":[" 14 percent of students employed in schools maintained burdens on the supply of hips to Charles Kunar will culture"," following vocational 38-mingertua seniors ends up randomly or mismatched. Well spoke TWUumerous"," taking leave doubled fat by same reason. Nine in 10 students got part gas because their immediate results went"," students who looked straight moved past Cooper Reed subject No In in class, dictategRAFT LETTERS"," low Christmas cost it switches 50 warrants annually–a thinking so insightful that astute archaeologists wax poetic–"," teens focus largely on mentoring youths exploring alternatives and shown little motivation to subsidize tuition (approximately salary"," hardest classes went shoulder overboard Answer Nowicker demanded monetary processing for Carson sources donreact – SHAREWWOOD"," training exchanges took so long that students 'all counted relevant grades every diploma send off examinations classification...Ser"," indirectly linked extracurricular participation with activity drive that modified results for adding gratitude. Working is focused"," 62% of 11th and grade English crebury leaders report that standardized assignment leads them to saving time"],"1.5|0.9":[" homework capabilities showing students appetite to chew as much merchandise as plates same grade in purple combat competitive against lion"," foreigners who nodded at 50% fewer questions per degree answered 50% less desired helpful questions, which at"," nearly 800 university students simply committed one better numeric assignments because 1,498 - more exercise appeared advantageous to"," days barely wrapped between class and meditation seemed informative for putting anxiety professionals on chance dates,\" NerdMagin"," offering homework again back in field immediately changed students' minds, particularly after their help towels lost their grip"," mixed parenting factors helped employees devote ends faster. | Joseph Hetting Data Rank apps deliver answers to problems"," people good no cognitive review tests scored higher when the scoreors were high at their key participants of all"," 34,115 minutes involving Oisin's rap composing transcripts had leaked in 2014-10-06,"," math areas anIQ titles easier at lead timesax .NET Researchers Daniel \"Shirlo\" Wilkinson"," overwhelming exijuding was also correlated with brains grown organically with willpower (reading had good working memory"]},"nuc":{"0.3":1,"0.7":88,"1.0":731,"1.5":8454}}};</script><script>(function(){
+  const D=window.LAB_DATA, $=id=>document.getElementById(id), P=Object.keys(D);
+  const TEMPS=[0,0.3,0.7,1.0,1.5], DESC=['Always the most likely token. Same input, same output.','Low: mostly the top tokens. Only temperature 0 gives the same answer every time.','Medium: a common setting in some tools.','High: unlikely tokens get a fair chance.','Very high: rare tokens are chosen often.'];
+  
+  const sel=$('prompt'); P.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p+' …';sel.appendChild(o)});
+  function probs(){
+    const d=D[sel.value], T=TEMPS[+$('temp').value];
+    if(T===0){return {top:d.top.map(([w],i)=>[w,i?0:1]),rest:0}}
+    const mx=d.top[0][1], e=d.top.map(([w,l])=>[w,Math.exp((l-mx)/T)]);
+    const rest=d.rest[String(T===1?'1.0':T)], s=e.reduce((a,x)=>a+x[1],0);
+    return {top:e.map(([w,v])=>[w,v/s*(1-rest)]),rest};
+  }
+  function render(){
+    const T=TEMPS[+$('temp').value]; $('tval').textContent=T.toFixed(1); $('tdesc').textContent=DESC[+$('temp').value];
+    
+    const {top,rest}=probs(), show=top.slice(0,8), max=Math.max(show[0][1],rest,1e-9);
+    $('bars').innerHTML=show.map(([w,p],i)=>{
+      return `<div class="bar"><span class="w">${showTok(w)}</span><span class="track"><span class="fill" style="width:${(p/max*100).toFixed(1)}%"></span></span><span class="p">${pct(p)}</span></div>`}).join('')+
+      `<div class="bar other"><span class="w">all other tokens together</span><span class="track"><span class="fill" style="width:${(rest/max*100).toFixed(1)}%"></span></span><span class="p">${pct(rest)}</span></div>`;
+    $('bnote').textContent=T===0?'At temperature 0 the top token is always chosen.':'The top 8 of about 50,000 possible tokens are shown. Any of them can be chosen.';
+  }
+  function gen(){
+    const T=TEMPS[+$('temp').value], key=(T===1?'1.0':String(T))+'|1.0';
+    const runs=D[sel.value].runs[key], uniq=new Set(runs).size;
+    $('res').innerHTML=`<p style="margin-top:14px"><span class="pill">${uniq} different answer${uniq>1?'s':''} out of ${runs.length}</span> at temperature ${T.toFixed(1)}</p><ol class="samples">`+
+      runs.map(r=>`<li><span><b>${esc(sel.value)}</b>${esc(r).replace(/\n+/g,' ')} …</span></li>`).join('')+'</ol>';
+  }
+  $('temp').addEventListener('input',()=>{render();$('res').innerHTML=''});
+  sel.addEventListener('change',()=>{render();$('res').innerHTML=''});
+  $('gen').onclick=gen; render();
+})();
+</script>
+</body></html>

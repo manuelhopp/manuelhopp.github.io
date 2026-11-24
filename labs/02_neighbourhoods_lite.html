@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<title>Word neighbourhoods · Cognitive AI Lab</title>
+<style>:root{
+  --accent:#A11E3B; --accent-soft:#f7e8ec; --on-accent:#fff;
+  --bg:#fbfaf9; --surface:#ffffff; --surface-2:#f3f1ef; --border:#dedad6;
+  --text:#1c1b1a; --muted:#5d5955; --ok:#1d6b43; --ok-soft:#e5f3eb; --warn:#8a5a00; --warn-soft:#fbf1dc;
+  --c1:#2f6db5; --c2:#b5462f; --c3:#2f8f5b; --c4:#8a4fb5; --c5:#b58a2f; --c6:#2f9aa8; --c7:#b52f7a; --c8:#7a7a7a;
+  --radius:10px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --accent:#e2667f; --accent-soft:#3a1c24; --on-accent:#1a0d10;
+  --bg:#161514; --surface:#1f1e1c; --surface-2:#292725; --border:#3a3734;
+  --text:#ece9e5; --muted:#a8a29c; --ok:#6fcf97; --ok-soft:#173325; --warn:#e6b85c; --warn-soft:#3a2e14;
+  --c1:#6fa3e0; --c2:#e08a6f; --c3:#6fcf97; --c4:#b88ae0; --c5:#e0c06f; --c6:#6fcfdc; --c7:#e07ab8; --c8:#a8a8a8;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --accent:#e2667f; --accent-soft:#3a1c24; --on-accent:#1a0d10;
+  --bg:#161514; --surface:#1f1e1c; --surface-2:#292725; --border:#3a3734;
+  --text:#ece9e5; --muted:#a8a29c; --ok:#6fcf97; --ok-soft:#173325; --warn:#e6b85c; --warn-soft:#3a2e14;
+  --c1:#6fa3e0; --c2:#e08a6f; --c3:#6fcf97; --c4:#b88ae0; --c5:#e0c06f; --c6:#6fcfdc; --c7:#e07ab8; --c8:#a8a8a8;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 var(--font)}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border-bottom:3px solid var(--accent);padding-bottom:12px;margin-bottom:20px}
+.kicker{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:1.6rem;line-height:1.2;margin:.2em 0 .3em}
+h2{font-size:1.2rem;margin:0 0 .5em}
+h3{font-size:1rem;margin:1em 0 .4em}
+p{margin:.5em 0}
+.meta{color:var(--muted);font-size:.9rem;margin:0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin:16px 0}
+.step{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px}
+.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:.8rem}
+button,.btn{font:inherit;font-size:.95rem;border:1px solid var(--border);background:var(--surface-2);color:var(--text);padding:9px 14px;border-radius:8px;cursor:pointer;min-height:40px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:600}
+button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+textarea,input[type=text],select{font:inherit;width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)}
+textarea{min-height:64px;resize:vertical}
+textarea::placeholder{color:var(--muted);opacity:1}
+label{font-weight:600;display:block;margin:.4em 0 .25em}
+details{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;background:var(--surface)}
+details>summary{cursor:pointer;font-weight:600}
+details.answer>summary{color:var(--ok)}
+.seen{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.seen strong:first-child{display:block;margin-bottom:4px}
+.why{border:1px dashed var(--accent);border-radius:8px;padding:12px 14px;margin:12px 0}
+.note{font-size:.85rem;color:var(--muted)}
+.theme-toggle{flex:none;font-size:.85rem;min-height:36px;padding:6px 10px}
+footer{margin-top:32px;border-top:1px solid var(--border);padding-top:12px;font-size:.85rem;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.bars{display:grid;gap:6px;margin:10px 0}
+.bar{display:grid;grid-template-columns:minmax(90px,30%) 1fr 56px;gap:8px;align-items:center;font-size:.95rem}
+.bar .w{font-family:var(--mono);white-space:pre;overflow:hidden;text-overflow:ellipsis}
+.bar .track{height:22px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px;transition:width .35s}
+.bar.dim .fill{background:var(--c8)} .bar.dim .w{color:var(--muted);text-decoration:line-through}
+.bar .p{text-align:right;font-variant-numeric:tabular-nums}
+.bar.other .fill{background:var(--c8)} .bar.other .w{font-family:var(--font);font-style:italic;color:var(--muted)}
+button.bar{width:100%;text-align:left;background:none;border:1px solid transparent;padding:4px 6px;min-height:34px}
+button.bar:hover{border-color:var(--accent);background:var(--surface-2)}
+.copybox{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:520px){h1{font-size:1.35rem}.card{padding:14px}.bar{grid-template-columns:minmax(70px,34%) 1fr 48px}}
+@media print{.theme-toggle,button{display:none}.card{break-inside:avoid}}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;background:var(--accent-soft);color:var(--text);font-weight:600}
+.fill{display:block}
+.frame{border:2px solid var(--accent);border-radius:var(--radius);padding:14px 16px;margin:0 0 18px;background:var(--surface)}
+.frame.end{margin:22px 0 0;background:var(--accent-soft)}
+.frame h2{font-size:1.05rem;margin:0 0 8px;color:var(--accent)}
+.frame dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:8px 0 0}
+.frame dt{font-weight:700}
+.frame dd{margin:0}
+.frame .map{margin:4px 0 6px}
+.frame .map svg{width:100%;height:auto;display:block}
+.frame .map-text{display:none;margin:4px 0 8px;font-size:.92rem}
+.frame .who{font-size:.85rem;color:var(--muted);margin:10px 0 0}
+@media (max-width:560px){.frame dl{grid-template-columns:1fr}.frame dd{margin-bottom:6px}.frame .map{display:none}.frame .map-text{display:block}}
+
+.mapwrap{position:relative;background:var(--surface-2);border-radius:8px;overflow-x:auto}
+svg.map{width:100%;height:auto;display:block}
+svg.map text{font:12px var(--font);fill:var(--text);cursor:pointer}
+svg.map circle{cursor:pointer;stroke:var(--surface);stroke-width:1.5}
+svg.map .lnk{stroke:var(--accent);stroke-width:2;opacity:.8}
+svg.map g.fade{opacity:.65}
+svg.map g.sel text{font-weight:700}
+svg.map g.sel circle{stroke:var(--text);stroke-width:2.5}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.85rem;margin:8px 0}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.nb{list-style:none;padding:0;margin:8px 0;display:grid;gap:4px}
+.nb li{display:grid;grid-template-columns:minmax(110px,35%) 1fr 48px;gap:8px;align-items:center}
+.nb .track{height:14px;background:var(--surface-2);border-radius:4px;overflow:hidden}
+.nb .fill{height:100%;background:var(--accent)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:620px){.two{grid-template-columns:1fr}svg.map{min-width:640px}svg.map text{font-size:15px}}
+.conf{margin:10px 0}
+.conf .conf-q{margin:0 0 6px;font-weight:600;font-size:.95rem}
+.conf .row button{min-height:36px;padding:6px 12px}
+.conf-fb{margin:8px 0 0;padding:8px 12px;border-left:4px solid var(--accent);background:var(--surface-2);border-radius:0 8px 8px 0}
+.conf-fb:empty{display:none}
+</style>
+<script>(function(){
+  const KEY='cal-theme', root=document.documentElement;
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  window.labStore=store;
+  const saved=store.get(KEY); if(saved) root.dataset.theme=saved;
+  document.addEventListener('DOMContentLoaded',()=>{
+    const b=document.querySelector('.theme-toggle'); if(!b) return;
+    const isDark=()=>root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    const label=()=>{b.textContent=isDark()?'Light mode':'Dark mode'};
+    label(); b.addEventListener('click',()=>{root.dataset.theme=isDark()?'light':'dark';store.set(KEY,root.dataset.theme);label()});
+    // Remember free-text answers (per browser only) and offer copy-to-clipboard for the learning log
+    document.querySelectorAll('textarea[data-save]').forEach(t=>{
+      const k='cal-u1s-lab2-'+t.dataset.save;
+      const v=store.get(k); if(v) t.value=v; t.addEventListener('input',()=>store.set(k,t.value));
+    });
+    const cb=document.getElementById('copy-answers');
+    if(cb) cb.addEventListener('click',()=>{
+      const txt=[...document.querySelectorAll('textarea[data-save]')].map(t=>'• '+(t.dataset.q||t.dataset.save)+'\n  '+(t.value.trim()||'(no answer yet)')).join('\n\n');
+      const done=()=>{cb.textContent='Copied ✓';setTimeout(()=>cb.textContent='Copy my answers',1800)};
+      if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(done,()=>fallback(txt,done))}else fallback(txt,done);
+    });
+    function fallback(txt,done){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{if(document.execCommand('copy'))done();else alert(txt)}catch(e){alert(txt)}a.remove()}
+    // Confidence before the reveal (ungraded). The same code is in all five labs.
+    (function(P){
+      const C=[['g','Guessing'],['f','Fairly sure'],['v','Very sure']], O=[['y','Yes'],['p','Partly'],['n','No']];
+      const M={vn:'You were very sure and wrong. Confident errors like this one are the ones most worth correcting: note what you expected and what is actually the case.',
+        vp:'You were very sure and partly wrong. Confident errors are the ones most worth correcting: note which part you expected differently.',
+        vy:'You were very sure and right. Your picture of this step fits.',
+        fy:'You were fairly sure and right. Check that your reason matches the reason in the answer, too.',
+        fp:'You were fairly sure and partly right. Note which part was wrong and why.',
+        fn:'You were fairly sure and wrong. Note what you expected: this is worth correcting now.',
+        gy:'You were guessing and right. Check why it was right, so that you know the reason next time.',
+        gp:'You were guessing and partly right. Check which part you can explain and which part was luck.',
+        gn:'You were guessing and wrong. That is normal: the reason in the answer is the part to remember.'};
+      const NONE='You did not choose how sure you were. Next time, choose before you check.';
+      function group(label,opts,cur,on){
+        const g=document.createElement('div');g.className='row';g.setAttribute('role','group');g.setAttribute('aria-label',label);
+        opts.forEach(([k,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.setAttribute('aria-pressed',String(k===cur));
+          b.addEventListener('click',()=>{g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));on(k)});g.appendChild(b)});
+        return g;
+      }
+      const all={};
+      document.querySelectorAll('.conf[data-conf]').forEach(box=>{
+        const id=box.dataset.conf, key=P+'conf-'+id, card=box.closest('.card'), st=card&&card.querySelector('.step');
+        const task=st?st.textContent.replace(/^\s*\d+\s*/,'').trim():'';
+        const s=all[id]={c:store.get(key)||'',o:'',pre:''};
+        const fb=document.createElement('p');fb.className='conf-fb';fb.setAttribute('aria-live','polite');
+        s.say=()=>{fb.textContent=s.o?s.pre+(M[s.c+s.o]||NONE):''};
+        const q=document.createElement('p');q.className='conf-q';q.textContent='How sure are you? Choose before you check. This is not graded.';
+        box.append(q,group('How sure are you? '+task,C,s.c,k=>{s.c=k;store.set(key,k);s.say()}));
+        const det=card&&card.querySelector('details.answer');
+        if(det&&!('auto' in box.dataset)){
+          const out=document.createElement('div');out.className='conf';out.hidden=true;
+          const oq=document.createElement('p');oq.className='conf-q';oq.textContent='After checking: were you right?';
+          out.append(oq,group('After checking: were you right? '+task,O,'',k=>{s.o=k;s.say()}),fb);
+          det.after(out);
+          det.addEventListener('toggle',()=>{if(det.open)out.hidden=false});
+        } else box.append(fb);
+      });
+      window.calConf=(id,o,pre)=>{const s=all[id];if(s){s.o=o;s.pre=pre||'';s.say()}};
+    })('cal-u1s-lab2-');
+  });
+  window.pct=(p)=>p>=0.1?Math.round(p*100)+' %':p>=0.001?(p*100).toFixed(1)+' %':'< 0.1 %';
+  window.esc=(s)=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  window.showTok=(s)=>esc(s).replace(/ /g,'<span class="sp" aria-hidden="true">·</span>').replace(/\n/g,'<span class="sp">↵</span>');
+})();
+</script>
+<style>.brief{border:2px solid var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 14px;background:var(--surface)}.brief h2{font-size:1.1rem;margin:0 0 6px;color:var(--accent)}.brief p{margin:4px 0}.todo{font-weight:600;margin:4px 0 10px}</style>
+</head><body><div class="wrap">
+<header class="top"><div>
+<div class="kicker">The Cognitive AI Lab · Unit 1 short · Part A · Pieces &amp; neighbours · Lab 2 of 4</div>
+<h1>Word neighbourhoods</h1>
+<p class="meta">About 3 minutes · No maths or programming needed · Works offline</p>
+</div><button class="theme-toggle" type="button">Dark mode</button></header>
+<main><section class="brief" aria-labelledby="brief-h"><h2 id="brief-h">In this lab</h2><p><strong>Goal:</strong> See which words end up as neighbours on a word map, and why that can mix up opposites.</p><p><strong>Your task:</strong> Look up words on the map and compare how close they are: first two pairs of opposites (Task 1), then the words of Lena's sentence 3 (Task 2).</p></section><section class="frame" aria-labelledby="bys"><h2 id="bys">Part A · Lab 2 · about 3 minutes</h2><div class="map"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 212" role="img" aria-label="Unit map. You are at: Pieces &amp; neighbours." font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif"><text x="480.0" y="30" text-anchor="middle" font-size="13" font-weight="700" letter-spacing="1" fill="var(--accent)">UNIT 1 IN ONE HOUR</text><text x="480.0" y="54" text-anchor="middle" font-size="17" font-style="italic" fill="var(--text)">Why did the chatbot give Lena a summary that sounded perfect but was partly wrong?</text><line x1="100" y1="118" x2="860" y2="118" stroke="var(--border)" stroke-width="4"/><line x1="100" y1="118" x2="290.0" y2="118" stroke="var(--accent)" stroke-width="4"/><circle cx="100.0" cy="118" r="16" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="100.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent)">0</text><text x="100.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">Start</text><text x="100.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Lena&#x27;s puzzle</text><circle cx="290.0" cy="118" r="22" fill="var(--accent)"/><text x="290.0" y="123" text-anchor="middle" font-size="14" font-weight="700" fill="var(--on-accent)">A</text><text x="290.0" y="86" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent)">YOU ARE HERE</text><text x="290.0" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="var(--text)">Pieces &amp; neighbours</text><text x="290.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 1 · Labs 1, 2</text><circle cx="480.0" cy="118" r="16" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/><text x="480.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">B</text><text x="480.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)">The next word</text><text x="480.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 2 · Lab 3</text><circle cx="670.0" cy="118" r="16" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/><text x="670.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">C</text><text x="670.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)">Settings &amp; the window</text><text x="670.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Video 3 · Lab 4</text><circle cx="860.0" cy="118" r="16" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/><text x="860.0" y="123" text-anchor="middle" font-size="13" font-weight="700" fill="var(--muted)">✓</text><text x="860.0" y="164" text-anchor="middle" font-size="14" font-weight="600" fill="var(--muted)">Lena solved</text><text x="860.0" y="184" text-anchor="middle" font-size="12" fill="var(--muted)">Check · test</text></svg></div><p class="map-text">Where you are: Start → <strong>A · Pieces &amp; neighbours</strong> → The next word → Settings &amp; the window → Lena solved</p></section>
+
+<p class="note">The map shows 64 words from education and psychology. It uses one fixed list of numbers per word, a simpler and older form than the lists inside chat models.</p>
+
+<section class="card" aria-labelledby="map-h">
+<h2 id="map-h">The word map</h2>
+<label for="pick">Choose a word (or click one on the map)</label>
+<select id="pick"></select>
+<div class="legend" id="legend" aria-label="Colour legend: word groups chosen by the course team"></div>
+<div class="mapwrap"><svg class="map" id="map" viewBox="0 0 800 560" role="img" aria-label="Map of 64 words; similar words are placed near each other"></svg></div>
+<div class="two">
+<div><h3 id="nb-h">Closest neighbours</h3><ul class="nb" id="nb" aria-live="polite"></ul></div>
+<div><h3>Compare two words</h3>
+<div class="row"><select id="a" aria-label="First word" style="width:auto;flex:1"></select><select id="b" aria-label="Second word" style="width:auto;flex:1"></select></div>
+<p id="cmp" aria-live="polite"></p></div>
+</div>
+<p class="note">Closeness is shown from 0 (the two words are used in unrelated sentences) to 100 (the two lists point in exactly the same direction; in practice only a word compared with itself). On this map the highest value is 88; unrelated words such as <code>banana</code> and <code>curriculum</code> still get a small value (3), and only 8 of 2,016 pairs get 0. The map is fixed: it was computed once and does not change. The colours show groups chosen by the course team, not by the model.</p>
+<p class="note">On a keyboard, choose a word in the drop-down. On a narrow screen, scroll the map sideways or use the list below.</p>
+</section>
+
+
+<section class="card">
+<div class="step"><b>1</b> Task 1 · Opposites as neighbours</div>
+<p class="todo">Your task: check on the map whether opposites, such as <em>increase</em> and <em>decrease</em>, are close neighbours.</p>
+<p><strong>Predict:</strong> will <code>increase</code> and <code>decrease</code> be close neighbours, and will <code>true</code> and <code>false</code>? Then check.</p>
+<div class="conf" data-conf="t2"></div>
+<p>Look up <code>effective</code>. Then compare <code>increase</code> with <code>decrease</code> and <code>true</code> with <code>false</code>. <strong>What surprises you?</strong></p>
+<textarea data-save="t2" data-q="Task 1: What opposites as neighbours mean" placeholder="I was surprised that …" aria-label="Task 1: What opposites as neighbours mean"></textarea>
+<details class="answer"><summary>Compare with the model answer</summary>
+<p>The closest neighbour of <code>effective</code> is <code>ineffective</code> (62), ahead of <code>increase</code> (54). Compared with each other, <code>increase</code> and <code>decrease</code> have a closeness of 88, the highest on the whole map, and <code>true</code> and <code>false</code> 59. Opposites are used in almost the same sentences ("the intervention was … "), so they end up as neighbours. Being close on the map says nothing about whether two words mean the same, and nothing about which one is true.</p>
+<p>So when you check AI summaries of studies, look closely at the direction of effects.</p>
+</details>
+</section>
+
+
+<section class="card">
+<div class="step"><b>2</b> Task 2 · Lena's words</div>
+<p class="todo">Your task: look up <em>praise</em> and <em>reward</em> and find the neighbours that could explain Lena's mix-up.</p>
+<p>Remember sentence 3 of Lena's summary: <em>"Praise and rewards had the strongest effect, while detailed feedback on the task … had only a small effect."</em> Look up <code>praise</code>, then <code>reward</code>, and read their closest neighbours. The higher the closeness, the more similar the sentences in which two words are used. <strong>Which neighbours could make this kind of mix-up easy?</strong></p>
+<textarea data-save="t4" data-q="Task 2: Which neighbours make Lena's sentence 3 easy to mix up" placeholder="praise is close to … reward is close to … This could explain …" aria-label="Task 2: Which neighbours make Lena's sentence 3 easy to mix up"></textarea>
+<div class="conf" data-conf="t4"></div>
+<details class="answer"><summary>Compare with the model answer</summary>
+<p>Across all 64 words, the closest neighbour of <code>praise</code> is <code>joy</code> (59). Among the feedback words, it is its opposite, <code>criticism</code> (58), followed by <code>reward</code> (48). Words for kinds of feedback, and their opposites, fill the same slots in sentences about what works, so they may be easy to swap. The map has single words only, so it cannot test the phrase <em>detailed feedback on the task</em> itself. This is a plausible explanation for Lena's sentence 3, not proof.</p>
+</details>
+</section>
+
+
+
+
+
+
+<section class="frame end" aria-labelledby="byg"><h2 id="byg">Before you go on</h2><p><strong>Recall:</strong> In one sentence: which of Lena's sentences does this part explain, and how?</p><details class="answer"><summary>Your answer so far</summary><p><strong>Lena's puzzle, part 1 of 3 (Part A):</strong> Words used in similar sentences are neighbours, even opposites. In a sentence about which feedback works best, such words fill the same slots, so naming the wrong kind of feedback can be about as likely as the correct one. That is a plausible explanation for Lena's sentence 3.</p></details><dl><dt>Next</dt><dd>Part B · The next word.</dd></dl></section>
+</main>
+<footer>
+<p><strong>About the data.</strong> The word lists (300 numbers per word) come from the open English model <em>en_core_web_lg</em> of the spaCy library (version 3.8). These are fixed word vectors, which are a simpler, older form of the embeddings inside large language models: in a chat model the numbers for a word also change with the sentence around it. The flat map was made with the t-SNE method and is only approximate. All numbers were calculated once and stored in this page.</p>
+<p>The Cognitive AI Lab · Unit 1 short · How language models work</p>
+</footer>
+</div>
+<script>window.LAB_DATA={"groups":{"anxiety":"Feelings","depression":"Feelings","stress":"Feelings","fear":"Feelings","worry":"Feelings","happiness":"Feelings","joy":"Feelings","anger":"Feelings","memory":"Thinking & memory","attention":"Thinking & memory","perception":"Thinking & memory","learning":"Thinking & memory","recall":"Thinking & memory","forgetting":"Thinking & memory","knowledge":"Thinking & memory","thinking":"Thinking & memory","motivation":"Thinking & memory","teacher":"School","student":"School","pupil":"School","classroom":"School","school":"School","homework":"School","lesson":"School","curriculum":"School","exam":"School","grade":"School","survey":"Research methods","questionnaire":"Research methods","interview":"Research methods","experiment":"Research methods","sample":"Research methods","hypothesis":"Research methods","variable":"Research methods","correlation":"Research methods","statistics":"Research methods","data":"Research methods","computer":"Technology","software":"Technology","internet":"Technology","algorithm":"Technology","smartphone":"Technology","keyboard":"Technology","feedback":"Feedback","praise":"Feedback","criticism":"Feedback","reward":"Feedback","punishment":"Feedback","correction":"Feedback","apple":"Food","bread":"Food","cheese":"Food","soup":"Food","banana":"Food","effective":"Opposites","ineffective":"Opposites","increase":"Opposites","decrease":"Opposites","true":"Opposites","false":"Opposites","valid":"Opposites","invalid":"Opposites","success":"Opposites","failure":"Opposites"},"words":["anxiety","depression","stress","fear","worry","happiness","joy","anger","memory","attention","perception","learning","recall","forgetting","knowledge","thinking","motivation","teacher","student","pupil","classroom","school","homework","lesson","curriculum","exam","grade","survey","questionnaire","interview","experiment","sample","hypothesis","variable","correlation","statistics","data","computer","software","internet","algorithm","smartphone","keyboard","feedback","praise","criticism","reward","punishment","correction","apple","bread","cheese","soup","banana","effective","ineffective","increase","decrease","true","false","valid","invalid","success","failure"],"xy":[[0.077,0.514],[0.054,0.553],[0.101,0.563],[0.095,0.381],[0.048,0.343],[0.272,0.253],[0.286,0.211],[0.102,0.431],[0.585,0.977],[0.104,0.233],[0.153,0.296],[0.504,0.194],[0.0,0.215],[0.011,0.322],[0.462,0.223],[0.051,0.274],[0.201,0.309],[0.655,0.206],[0.623,0.238],[0.692,0.256],[0.576,0.162],[0.628,0.165],[0.563,0.068],[0.527,0.112],[0.559,0.217],[0.58,0.0],[0.657,0.1],[0.545,0.663],[0.561,0.619],[0.576,0.5],[0.352,0.974],[0.605,0.652],[0.372,0.921],[0.457,0.878],[0.394,0.876],[0.522,0.748],[0.513,0.799],[0.641,0.933],[0.63,0.886],[0.68,0.883],[0.425,0.81],[0.71,0.993],[0.661,1.0],[0.094,0.147],[0.27,0.122],[0.262,0.064],[0.202,0.165],[0.177,0.099],[0.364,0.798],[0.901,0.941],[0.972,0.904],[0.96,0.958],[1.0,0.948],[0.926,0.895],[0.213,0.661],[0.221,0.615],[0.172,0.753],[0.193,0.781],[0.316,0.421],[0.33,0.466],[0.393,0.578],[0.363,0.578],[0.23,0.361],[0.202,0.524]],"sim":[[1.0,0.834,0.738,0.653,0.502,0.487,0.4,0.662,0.315,0.438,0.474,0.377,0.264,0.344,0.314,0.397,0.508,0.232,0.228,0.213,0.271,0.245,0.334,0.254,0.205,0.247,0.208,0.225,0.387,0.177,0.223,0.163,0.289,0.159,0.304,0.254,0.126,0.171,0.128,0.201,0.121,0.075,0.085,0.274,0.199,0.306,0.233,0.274,0.167,0.11,0.124,0.11,0.138,0.058,0.368,0.305,0.385,0.454,0.236,0.258,0.123,0.074,0.326,0.396],[0.834,1.0,0.654,0.508,0.39,0.44,0.302,0.533,0.321,0.325,0.392,0.302,0.25,0.287,0.241,0.343,0.423,0.187,0.159,0.183,0.172,0.199,0.224,0.201,0.149,0.184,0.191,0.285,0.374,0.16,0.233,0.19,0.32,0.197,0.347,0.284,0.185,0.11,0.076,0.158,0.095,0.055,0.062,0.219,0.127,0.247,0.194,0.245,0.194,0.117,0.156,0.139,0.199,0.119,0.308,0.28,0.372,0.47,0.234,0.221,0.108,0.077,0.287,0.458],[0.738,0.654,1.0,0.52,0.552,0.467,0.371,0.489,0.332,0.434,0.422,0.414,0.2,0.373,0.32,0.398,0.542,0.272,0.232,0.167,0.298,0.26,0.389,0.313,0.251,0.269,0.238,0.254,0.301,0.151,0.28,0.199,0.348,0.244,0.385,0.226,0.222,0.253,0.192,0.195,0.188,0.095,0.142,0.327,0.166,0.254,0.295,0.266,0.279,0.139,0.158,0.138,0.157,0.119,0.425,0.296,0.467,0.524,0.25,0.165,0.147,0.086,0.332,0.444],[0.653,0.508,0.52,1.0,0.682,0.535,0.549,0.755,0.28,0.509,0.552,0.373,0.373,0.533,0.432,0.563,0.507,0.254,0.208,0.143,0.239,0.278,0.247,0.351,0.175,0.164,0.134,0.173,0.163,0.222,0.284,0.084,0.266,0.117,0.217,0.208,0.137,0.211,0.137,0.245,0.073,0.119,0.104,0.245,0.449,0.496,0.359,0.493,0.183,0.148,0.254,0.205,0.185,0.155,0.275,0.332,0.362,0.341,0.462,0.438,0.162,0.119,0.403,0.46],[0.502,0.39,0.552,0.682,1.0,0.435,0.411,0.486,0.305,0.54,0.353,0.344,0.399,0.667,0.337,0.622,0.404,0.266,0.246,0.12,0.24,0.309,0.461,0.346,0.148,0.25,0.241,0.173,0.124,0.199,0.235,0.135,0.157,0.173,0.196,0.251,0.219,0.337,0.227,0.329,0.111,0.196,0.206,0.294,0.314,0.366,0.298,0.308,0.207,0.195,0.262,0.251,0.235,0.207,0.249,0.292,0.347,0.354,0.401,0.289,0.2,0.167,0.338,0.385],[0.487,0.44,0.467,0.535,0.435,1.0,0.776,0.499,0.248,0.398,0.442,0.362,0.146,0.424,0.4,0.451,0.563,0.247,0.195,0.157,0.215,0.21,0.275,0.268,0.133,0.134,0.102,0.155,0.19,0.149,0.273,0.076,0.248,0.112,0.235,0.191,0.117,0.151,0.112,0.224,0.095,0.076,0.073,0.228,0.42,0.238,0.448,0.309,0.107,0.188,0.251,0.18,0.22,0.218,0.174,0.102,0.295,0.25,0.471,0.289,0.141,0.093,0.475,0.271],[0.4,0.302,0.371,0.549,0.411,0.776,1.0,0.519,0.308,0.418,0.322,0.393,0.27,0.442,0.372,0.413,0.44,0.292,0.173,0.128,0.256,0.261,0.217,0.338,0.136,0.104,0.134,0.049,0.061,0.142,0.228,0.082,0.077,0.054,0.082,0.071,0.051,0.165,0.12,0.212,-0.014,0.105,0.179,0.23,0.589,0.254,0.414,0.302,0.106,0.22,0.32,0.215,0.251,0.219,0.127,0.032,0.227,0.164,0.465,0.206,0.07,0.05,0.427,0.24],[0.662,0.533,0.489,0.755,0.486,0.499,0.519,1.0,0.249,0.458,0.447,0.315,0.256,0.428,0.319,0.415,0.51,0.294,0.242,0.201,0.222,0.228,0.245,0.321,0.167,0.093,0.094,0.125,0.208,0.202,0.139,0.075,0.153,0.069,0.152,0.143,0.066,0.105,0.081,0.166,0.004,0.04,0.078,0.249,0.43,0.531,0.301,0.418,0.143,0.108,0.157,0.121,0.157,0.083,0.206,0.29,0.282,0.275,0.297,0.297,0.118,0.098,0.282,0.367],[0.315,0.321,0.332,0.28,0.305,0.248,0.308,0.249,1.0,0.283,0.323,0.315,0.389,0.336,0.296,0.316,0.27,0.194,0.204,0.186,0.204,0.176,0.166,0.183,0.132,0.141,0.195,0.089,0.111,0.085,0.191,0.241,0.207,0.32,0.257,0.202,0.443,0.484,0.29,0.222,0.323,0.247,0.388,0.247,0.179,0.123,0.213,0.134,0.264,0.231,0.156,0.099,0.109,0.082,0.191,0.111,0.276,0.256,0.309,0.195,0.186,0.303,0.194,0.367],[0.438,0.325,0.434,0.509,0.54,0.398,0.418,0.458,0.283,1.0,0.544,0.461,0.422,0.443,0.515,0.553,0.512,0.34,0.356,0.282,0.361,0.337,0.366,0.319,0.275,0.164,0.24,0.258,0.236,0.348,0.285,0.162,0.238,0.149,0.248,0.265,0.224,0.278,0.176,0.348,0.119,0.215,0.209,0.445,0.479,0.497,0.442,0.328,0.254,0.146,0.196,0.153,0.136,0.1,0.42,0.287,0.431,0.342,0.425,0.271,0.18,0.078,0.508,0.375],[0.474,0.392,0.422,0.552,0.353,0.442,0.322,0.447,0.323,0.544,1.0,0.481,0.367,0.346,0.548,0.535,0.574,0.25,0.267,0.321,0.31,0.216,0.184,0.266,0.298,0.149,0.153,0.292,0.305,0.167,0.372,0.15,0.466,0.248,0.465,0.298,0.271,0.245,0.193,0.239,0.26,0.162,0.125,0.374,0.274,0.449,0.321,0.286,0.324,0.157,0.133,0.084,0.092,0.114,0.32,0.314,0.383,0.365,0.419,0.37,0.272,0.176,0.374,0.352],[0.377,0.302,0.414,0.373,0.344,0.362,0.393,0.315,0.315,0.461,0.481,1.0,0.281,0.336,0.689,0.58,0.546,0.577,0.547,0.339,0.698,0.562,0.508,0.659,0.677,0.339,0.377,0.264,0.271,0.258,0.404,0.225,0.259,0.218,0.269,0.283,0.266,0.416,0.378,0.324,0.269,0.127,0.266,0.413,0.288,0.276,0.34,0.25,0.205,0.165,0.177,0.113,0.145,0.091,0.396,0.216,0.335,0.244,0.322,0.139,0.185,0.045,0.492,0.242],[0.264,0.25,0.2,0.373,0.399,0.146,0.27,0.256,0.389,0.422,0.367,0.281,1.0,0.403,0.26,0.444,0.222,0.265,0.204,0.157,0.202,0.275,0.214,0.282,0.162,0.107,0.211,0.272,0.243,0.285,0.293,0.219,0.171,0.157,0.208,0.255,0.217,0.242,0.125,0.141,0.112,0.107,0.204,0.255,0.329,0.334,0.252,0.22,0.212,0.176,0.249,0.242,0.199,0.123,0.213,0.224,0.27,0.249,0.26,0.194,0.185,0.168,0.255,0.399],[0.344,0.287,0.373,0.533,0.667,0.424,0.442,0.428,0.336,0.443,0.346,0.336,0.403,1.0,0.34,0.608,0.399,0.255,0.198,0.159,0.216,0.25,0.414,0.4,0.129,0.156,0.14,0.063,0.082,0.166,0.244,0.084,0.206,0.113,0.163,0.154,0.101,0.245,0.105,0.231,0.095,0.112,0.225,0.188,0.354,0.321,0.338,0.338,0.194,0.206,0.295,0.23,0.245,0.224,0.147,0.265,0.136,0.179,0.356,0.26,0.182,0.187,0.299,0.357],[0.314,0.241,0.32,0.432,0.337,0.4,0.372,0.319,0.296,0.515,0.548,0.689,0.26,0.34,1.0,0.517,0.512,0.396,0.392,0.217,0.43,0.326,0.345,0.449,0.507,0.361,0.269,0.332,0.269,0.256,0.303,0.236,0.341,0.232,0.335,0.384,0.413,0.413,0.424,0.357,0.25,0.134,0.137,0.385,0.312,0.309,0.335,0.244,0.21,0.153,0.195,0.127,0.103,0.075,0.407,0.221,0.361,0.241,0.47,0.317,0.349,0.144,0.51,0.346],[0.397,0.343,0.398,0.563,0.622,0.451,0.413,0.415,0.316,0.553,0.535,0.58,0.444,0.608,0.517,1.0,0.538,0.392,0.337,0.161,0.379,0.402,0.431,0.459,0.34,0.211,0.25,0.219,0.167,0.29,0.44,0.148,0.338,0.145,0.247,0.202,0.182,0.355,0.229,0.308,0.19,0.15,0.204,0.349,0.316,0.419,0.33,0.303,0.194,0.261,0.289,0.253,0.284,0.225,0.348,0.274,0.27,0.196,0.504,0.274,0.222,0.105,0.458,0.329],[0.508,0.423,0.542,0.507,0.404,0.563,0.44,0.51,0.27,0.512,0.574,0.546,0.222,0.399,0.512,0.538,1.0,0.369,0.353,0.254,0.397,0.335,0.437,0.432,0.389,0.186,0.171,0.222,0.35,0.283,0.323,0.165,0.367,0.16,0.304,0.261,0.179,0.22,0.203,0.268,0.152,0.125,0.105,0.412,0.356,0.403,0.493,0.342,0.157,0.117,0.134,0.09,0.13,0.113,0.382,0.312,0.39,0.319,0.38,0.288,0.214,0.09,0.572,0.383],[0.232,0.187,0.272,0.254,0.266,0.247,0.292,0.294,0.194,0.34,0.25,0.577,0.265,0.255,0.396,0.392,0.369,1.0,0.742,0.546,0.68,0.758,0.511,0.624,0.612,0.371,0.507,0.214,0.194,0.354,0.235,0.243,0.142,0.056,0.119,0.187,0.106,0.334,0.201,0.175,0.048,0.01,0.198,0.241,0.269,0.286,0.239,0.312,0.133,0.147,0.149,0.118,0.157,0.116,0.233,0.174,0.21,0.139,0.267,0.163,0.162,0.1,0.241,0.172],[0.228,0.159,0.232,0.208,0.246,0.195,0.173,0.242,0.204,0.356,0.267,0.547,0.204,0.198,0.392,0.337,0.353,0.742,1.0,0.507,0.637,0.74,0.498,0.439,0.599,0.369,0.469,0.311,0.285,0.326,0.282,0.29,0.171,0.138,0.198,0.303,0.239,0.412,0.232,0.237,0.098,0.08,0.186,0.259,0.171,0.265,0.28,0.249,0.126,0.093,0.072,0.06,0.107,0.02,0.242,0.15,0.284,0.191,0.227,0.197,0.287,0.13,0.298,0.213],[0.213,0.183,0.167,0.143,0.12,0.157,0.128,0.201,0.186,0.282,0.321,0.339,0.157,0.159,0.217,0.161,0.254,0.546,0.507,1.0,0.398,0.457,0.298,0.288,0.33,0.215,0.356,0.134,0.197,0.063,0.187,0.178,0.183,0.153,0.222,0.154,0.1,0.14,0.052,0.019,0.139,0.013,0.121,0.194,0.16,0.191,0.219,0.229,0.276,0.006,0.036,0.023,0.006,-0.015,0.19,0.183,0.285,0.299,0.112,0.14,0.115,0.108,0.144,0.185],[0.271,0.172,0.298,0.239,0.24,0.215,0.256,0.222,0.204,0.361,0.31,0.698,0.202,0.216,0.43,0.379,0.397,0.68,0.637,0.398,1.0,0.675,0.596,0.591,0.713,0.402,0.5,0.269,0.27,0.253,0.362,0.255,0.173,0.107,0.165,0.2,0.201,0.442,0.273,0.229,0.084,0.131,0.237,0.314,0.173,0.248,0.219,0.26,0.13,0.14,0.114,0.081,0.121,0.105,0.338,0.242,0.245,0.185,0.163,0.117,0.158,0.048,0.285,0.156],[0.245,0.199,0.26,0.278,0.309,0.21,0.261,0.228,0.176,0.337,0.216,0.562,0.275,0.25,0.326,0.402,0.335,0.758,0.74,0.457,0.675,1.0,0.531,0.517,0.63,0.354,0.58,0.288,0.219,0.274,0.267,0.223,0.1,0.044,0.124,0.285,0.156,0.393,0.2,0.253,0.035,0.06,0.156,0.181,0.211,0.264,0.193,0.28,0.108,0.195,0.168,0.15,0.192,0.117,0.239,0.176,0.249,0.174,0.257,0.165,0.184,0.07,0.313,0.198],[0.334,0.224,0.389,0.247,0.461,0.275,0.217,0.245,0.166,0.366,0.184,0.508,0.214,0.414,0.345,0.431,0.437,0.511,0.498,0.298,0.596,0.531,1.0,0.624,0.492,0.467,0.47,0.259,0.326,0.281,0.308,0.258,0.205,0.143,0.218,0.3,0.201,0.402,0.226,0.295,0.2,0.093,0.223,0.321,0.202,0.282,0.255,0.262,0.184,0.135,0.194,0.157,0.216,0.138,0.216,0.2,0.169,0.175,0.147,0.116,0.204,0.109,0.24,0.187],[0.254,0.201,0.313,0.351,0.346,0.268,0.338,0.321,0.183,0.319,0.266,0.659,0.282,0.4,0.449,0.459,0.432,0.624,0.439,0.288,0.591,0.517,0.624,1.0,0.557,0.386,0.417,0.219,0.22,0.323,0.362,0.312,0.173,0.127,0.166,0.205,0.16,0.284,0.233,0.23,0.139,0.053,0.254,0.291,0.287,0.299,0.284,0.362,0.227,0.182,0.228,0.166,0.224,0.196,0.261,0.176,0.167,0.11,0.291,0.147,0.18,0.051,0.308,0.237],[0.205,0.149,0.251,0.175,0.148,0.133,0.136,0.167,0.132,0.275,0.298,0.677,0.162,0.129,0.507,0.34,0.389,0.612,0.599,0.33,0.713,0.63,0.492,0.557,1.0,0.403,0.489,0.317,0.338,0.211,0.285,0.265,0.223,0.127,0.192,0.256,0.228,0.33,0.307,0.19,0.15,0.065,0.13,0.269,0.169,0.297,0.164,0.212,0.164,0.065,0.071,0.05,0.075,0.031,0.347,0.254,0.242,0.142,0.156,0.101,0.23,0.058,0.331,0.188],[0.247,0.184,0.269,0.164,0.25,0.134,0.104,0.093,0.141,0.164,0.149,0.339,0.107,0.156,0.361,0.211,0.186,0.371,0.369,0.215,0.402,0.354,0.467,0.386,0.403,1.0,0.382,0.319,0.357,0.263,0.176,0.393,0.109,0.115,0.182,0.246,0.204,0.3,0.29,0.155,0.143,0.124,0.09,0.194,0.049,0.081,0.128,0.183,0.189,0.071,0.067,0.027,0.069,0.061,0.219,0.114,0.183,0.16,0.153,0.13,0.289,0.159,0.252,0.231],[0.208,0.191,0.238,0.134,0.241,0.102,0.134,0.094,0.195,0.24,0.153,0.377,0.211,0.14,0.269,0.25,0.171,0.507,0.469,0.356,0.5,0.58,0.47,0.417,0.489,0.382,1.0,0.181,0.17,0.109,0.189,0.274,0.106,0.167,0.261,0.171,0.161,0.267,0.145,0.14,0.117,0.091,0.163,0.155,0.138,0.106,0.139,0.17,0.198,0.141,0.167,0.179,0.13,0.125,0.255,0.129,0.283,0.258,0.217,0.114,0.15,0.023,0.191,0.213],[0.225,0.285,0.254,0.173,0.173,0.155,0.049,0.125,0.089,0.258,0.292,0.264,0.272,0.063,0.332,0.219,0.222,0.214,0.311,0.134,0.269,0.288,0.259,0.219,0.317,0.319,0.181,1.0,0.64,0.342,0.36,0.444,0.298,0.173,0.375,0.525,0.543,0.251,0.315,0.276,0.208,0.245,0.064,0.355,0.112,0.254,0.179,0.048,0.202,0.105,0.051,0.063,0.05,0.03,0.261,0.127,0.352,0.28,0.12,0.14,0.285,0.125,0.306,0.224],[0.387,0.374,0.301,0.163,0.124,0.19,0.061,0.208,0.111,0.236,0.305,0.271,0.243,0.082,0.269,0.167,0.35,0.194,0.285,0.197,0.27,0.219,0.326,0.22,0.338,0.357,0.17,0.64,1.0,0.361,0.281,0.481,0.32,0.185,0.341,0.393,0.347,0.177,0.203,0.158,0.217,0.096,0.086,0.41,0.086,0.181,0.191,0.122,0.196,0.004,0.038,0.033,0.087,0.015,0.254,0.166,0.194,0.204,0.047,0.115,0.279,0.159,0.199,0.211],[0.177,0.16,0.151,0.222,0.199,0.149,0.142,0.202,0.085,0.348,0.167,0.258,0.285,0.166,0.256,0.29,0.283,0.354,0.326,0.063,0.253,0.274,0.281,0.323,0.211,0.263,0.109,0.342,0.361,1.0,0.238,0.307,0.1,-0.016,0.068,0.202,0.132,0.143,0.084,0.195,0.017,0.042,0.082,0.297,0.296,0.345,0.093,0.131,0.102,0.059,0.039,0.053,0.06,0.027,0.123,0.04,0.034,-0.037,0.222,0.126,0.097,-0.02,0.297,0.165],[0.223,0.233,0.28,0.284,0.235,0.273,0.228,0.139,0.191,0.285,0.372,0.404,0.293,0.244,0.303,0.44,0.323,0.235,0.282,0.187,0.362,0.267,0.308,0.362,0.285,0.176,0.189,0.36,0.281,0.238,1.0,0.397,0.529,0.241,0.385,0.264,0.329,0.313,0.24,0.248,0.349,0.114,0.181,0.314,0.137,0.259,0.223,0.249,0.277,0.245,0.253,0.248,0.276,0.263,0.285,0.248,0.262,0.245,0.274,0.211,0.18,0.132,0.365,0.303],[0.163,0.19,0.199,0.084,0.135,0.076,0.082,0.075,0.241,0.162,0.15,0.225,0.219,0.084,0.236,0.148,0.165,0.243,0.29,0.178,0.255,0.223,0.258,0.312,0.265,0.393,0.274,0.444,0.481,0.307,0.397,1.0,0.244,0.349,0.382,0.328,0.44,0.239,0.308,0.184,0.263,0.114,0.182,0.353,0.063,0.067,0.149,0.129,0.249,0.192,0.178,0.217,0.214,0.146,0.201,0.071,0.237,0.254,0.184,0.158,0.312,0.242,0.18,0.161],[0.289,0.32,0.348,0.266,0.157,0.248,0.077,0.153,0.207,0.238,0.466,0.259,0.171,0.206,0.341,0.338,0.367,0.142,0.171,0.183,0.173,0.1,0.205,0.173,0.223,0.109,0.106,0.298,0.32,0.1,0.529,0.244,1.0,0.333,0.61,0.282,0.313,0.121,0.081,0.088,0.425,0.029,0.042,0.251,0.1,0.297,0.219,0.214,0.265,0.07,0.107,0.05,0.105,0.071,0.264,0.3,0.257,0.311,0.304,0.346,0.328,0.26,0.255,0.359],[0.159,0.197,0.244,0.117,0.173,0.112,0.054,0.069,0.32,0.149,0.248,0.218,0.157,0.113,0.232,0.145,0.16,0.056,0.138,0.153,0.107,0.044,0.143,0.127,0.127,0.115,0.167,0.173,0.185,-0.016,0.241,0.349,0.333,1.0,0.484,0.264,0.471,0.241,0.219,0.168,0.432,0.074,0.227,0.319,0.016,0.05,0.179,0.069,0.371,0.043,0.064,0.059,0.099,0.046,0.278,0.191,0.366,0.417,0.276,0.311,0.362,0.375,0.163,0.307],[0.304,0.347,0.385,0.217,0.196,0.235,0.082,0.152,0.257,0.248,0.465,0.269,0.208,0.163,0.335,0.247,0.304,0.119,0.198,0.222,0.165,0.124,0.218,0.166,0.192,0.182,0.261,0.375,0.341,0.068,0.385,0.382,0.61,0.484,1.0,0.471,0.526,0.174,0.208,0.165,0.481,0.082,0.09,0.319,0.07,0.156,0.223,0.144,0.437,0.073,0.109,0.071,0.084,0.037,0.301,0.254,0.422,0.498,0.331,0.317,0.345,0.265,0.269,0.362],[0.254,0.284,0.226,0.208,0.251,0.191,0.071,0.143,0.202,0.265,0.298,0.283,0.255,0.154,0.384,0.202,0.261,0.187,0.303,0.154,0.2,0.285,0.3,0.205,0.256,0.246,0.171,0.525,0.393,0.202,0.264,0.328,0.282,0.264,0.471,1.0,0.587,0.325,0.328,0.354,0.322,0.16,0.065,0.274,0.085,0.217,0.137,0.171,0.217,0.097,0.063,0.05,0.067,0.013,0.243,0.209,0.366,0.341,0.236,0.329,0.312,0.25,0.316,0.308],[0.126,0.185,0.222,0.137,0.219,0.117,0.051,0.066,0.443,0.224,0.271,0.266,0.217,0.101,0.413,0.182,0.179,0.106,0.239,0.1,0.201,0.156,0.201,0.16,0.228,0.204,0.161,0.543,0.347,0.132,0.329,0.44,0.313,0.471,0.526,0.587,1.0,0.49,0.521,0.394,0.47,0.322,0.228,0.39,0.015,0.136,0.123,0.043,0.368,0.179,0.054,0.03,0.045,0.013,0.271,0.143,0.355,0.334,0.265,0.293,0.417,0.39,0.231,0.327],[0.171,0.11,0.253,0.211,0.337,0.151,0.165,0.105,0.484,0.278,0.245,0.416,0.242,0.245,0.413,0.355,0.22,0.334,0.412,0.14,0.442,0.393,0.402,0.284,0.33,0.3,0.267,0.251,0.177,0.143,0.313,0.239,0.121,0.241,0.174,0.325,0.49,1.0,0.671,0.564,0.306,0.365,0.543,0.296,0.061,0.122,0.15,0.107,0.242,0.354,0.12,0.123,0.076,0.116,0.241,0.144,0.213,0.184,0.203,0.168,0.214,0.224,0.199,0.309],[0.128,0.076,0.192,0.137,0.227,0.112,0.12,0.081,0.29,0.176,0.193,0.378,0.125,0.105,0.424,0.229,0.203,0.201,0.232,0.052,0.273,0.2,0.226,0.233,0.307,0.29,0.145,0.315,0.203,0.084,0.24,0.308,0.081,0.219,0.208,0.328,0.521,0.671,1.0,0.501,0.396,0.393,0.352,0.31,0.093,0.13,0.176,0.055,0.271,0.308,0.075,0.074,0.046,0.021,0.291,0.135,0.219,0.167,0.176,0.131,0.235,0.24,0.3,0.241],[0.201,0.158,0.195,0.245,0.329,0.224,0.212,0.166,0.222,0.348,0.239,0.324,0.141,0.231,0.357,0.308,0.268,0.175,0.237,0.019,0.229,0.253,0.295,0.23,0.19,0.155,0.14,0.276,0.158,0.195,0.248,0.184,0.088,0.168,0.165,0.354,0.394,0.564,0.501,1.0,0.173,0.348,0.264,0.29,0.154,0.216,0.206,0.137,0.085,0.314,0.148,0.121,0.152,0.116,0.308,0.184,0.293,0.192,0.255,0.185,0.23,0.168,0.313,0.211],[0.121,0.095,0.188,0.073,0.111,0.095,-0.014,0.004,0.323,0.119,0.26,0.269,0.112,0.095,0.25,0.19,0.152,0.048,0.098,0.139,0.084,0.035,0.2,0.139,0.15,0.143,0.117,0.208,0.217,0.017,0.349,0.263,0.425,0.432,0.481,0.322,0.47,0.306,0.396,0.173,1.0,0.148,0.178,0.327,0.003,0.082,0.171,0.067,0.412,0.11,0.049,0.014,0.042,0.009,0.291,0.192,0.213,0.241,0.198,0.188,0.256,0.319,0.185,0.25],[0.075,0.055,0.095,0.119,0.196,0.076,0.105,0.04,0.247,0.215,0.162,0.127,0.107,0.112,0.134,0.15,0.125,0.01,0.08,0.013,0.131,0.06,0.093,0.053,0.065,0.124,0.091,0.245,0.096,0.042,0.114,0.114,0.029,0.074,0.082,0.16,0.322,0.365,0.393,0.348,0.148,1.0,0.42,0.165,0.07,0.071,0.144,0.029,0.037,0.349,0.072,0.01,0.052,0.09,0.153,0.047,0.234,0.164,0.18,0.04,0.127,0.087,0.218,0.096],[0.085,0.062,0.142,0.104,0.206,0.073,0.179,0.078,0.388,0.209,0.125,0.266,0.204,0.225,0.137,0.204,0.105,0.198,0.186,0.121,0.237,0.156,0.223,0.254,0.13,0.09,0.163,0.064,0.086,0.082,0.181,0.182,0.042,0.227,0.09,0.065,0.228,0.543,0.352,0.264,0.178,0.42,1.0,0.275,0.154,0.094,0.057,0.041,0.184,0.312,0.126,0.123,0.093,0.143,0.148,0.088,0.092,0.098,0.172,0.097,0.12,0.18,0.077,0.154],[0.274,0.219,0.327,0.245,0.294,0.228,0.23,0.249,0.247,0.445,0.374,0.413,0.255,0.188,0.385,0.349,0.412,0.241,0.259,0.194,0.314,0.181,0.321,0.291,0.269,0.194,0.155,0.355,0.41,0.297,0.314,0.353,0.251,0.319,0.319,0.274,0.39,0.296,0.31,0.29,0.327,0.165,0.275,1.0,0.314,0.349,0.325,0.132,0.383,0.105,0.061,0.069,0.061,0.058,0.369,0.198,0.334,0.269,0.235,0.195,0.262,0.149,0.354,0.274],[0.199,0.127,0.166,0.449,0.314,0.42,0.589,0.43,0.179,0.479,0.274,0.288,0.329,0.354,0.312,0.316,0.356,0.269,0.171,0.16,0.173,0.211,0.202,0.287,0.169,0.049,0.138,0.112,0.086,0.296,0.137,0.063,0.1,0.016,0.07,0.085,0.015,0.061,0.093,0.154,0.003,0.07,0.154,0.314,1.0,0.582,0.476,0.372,0.148,0.085,0.256,0.144,0.173,0.075,0.163,0.191,0.185,0.072,0.373,0.253,0.067,0.01,0.428,0.243],[0.306,0.247,0.254,0.496,0.366,0.238,0.254,0.531,0.123,0.497,0.449,0.276,0.334,0.321,0.309,0.419,0.403,0.286,0.265,0.191,0.248,0.264,0.282,0.299,0.297,0.081,0.106,0.254,0.181,0.345,0.259,0.067,0.297,0.05,0.156,0.217,0.136,0.122,0.13,0.216,0.082,0.071,0.094,0.349,0.582,1.0,0.23,0.412,0.218,0.121,0.121,0.096,0.09,0.066,0.242,0.353,0.206,0.132,0.273,0.313,0.225,0.151,0.315,0.368],[0.233,0.194,0.295,0.359,0.298,0.448,0.414,0.301,0.213,0.442,0.321,0.34,0.252,0.338,0.335,0.33,0.493,0.239,0.28,0.219,0.219,0.193,0.255,0.284,0.164,0.128,0.139,0.179,0.191,0.093,0.223,0.149,0.219,0.179,0.223,0.137,0.123,0.15,0.176,0.206,0.171,0.144,0.057,0.325,0.476,0.23,1.0,0.476,0.168,0.137,0.243,0.156,0.153,0.141,0.297,0.217,0.411,0.294,0.313,0.212,0.262,0.108,0.459,0.285],[0.274,0.245,0.266,0.493,0.308,0.309,0.302,0.418,0.134,0.328,0.286,0.25,0.22,0.338,0.244,0.303,0.342,0.312,0.249,0.229,0.26,0.28,0.262,0.362,0.212,0.183,0.17,0.048,0.122,0.131,0.249,0.129,0.214,0.069,0.144,0.171,0.043,0.107,0.055,0.137,0.067,0.029,0.041,0.132,0.372,0.412,0.476,1.0,0.276,0.081,0.178,0.108,0.107,0.154,0.273,0.349,0.231,0.218,0.29,0.282,0.195,0.169,0.205,0.349],[0.167,0.194,0.279,0.183,0.207,0.107,0.106,0.143,0.264,0.254,0.324,0.205,0.212,0.194,0.21,0.194,0.157,0.133,0.126,0.276,0.13,0.108,0.184,0.227,0.164,0.189,0.198,0.202,0.196,0.102,0.277,0.249,0.265,0.371,0.437,0.217,0.368,0.242,0.271,0.085,0.412,0.037,0.184,0.383,0.148,0.218,0.168,0.276,1.0,0.076,0.042,0.009,0.034,0.022,0.295,0.19,0.299,0.365,0.229,0.256,0.224,0.246,0.127,0.368],[0.11,0.117,0.139,0.148,0.195,0.188,0.22,0.108,0.231,0.146,0.157,0.165,0.176,0.206,0.153,0.261,0.117,0.147,0.093,0.006,0.14,0.195,0.135,0.182,0.065,0.071,0.141,0.105,0.004,0.059,0.245,0.192,0.07,0.043,0.073,0.097,0.179,0.354,0.308,0.314,0.11,0.349,0.312,0.105,0.085,0.121,0.137,0.081,0.076,1.0,0.507,0.503,0.412,0.583,0.094,0.053,0.127,0.134,0.186,0.135,0.083,0.134,0.123,0.152],[0.124,0.156,0.158,0.254,0.262,0.251,0.32,0.157,0.156,0.196,0.133,0.177,0.249,0.295,0.195,0.289,0.134,0.149,0.072,0.036,0.114,0.168,0.194,0.228,0.071,0.067,0.167,0.051,0.038,0.039,0.253,0.178,0.107,0.064,0.109,0.063,0.054,0.12,0.075,0.148,0.049,0.072,0.126,0.061,0.256,0.121,0.243,0.178,0.042,0.507,1.0,0.757,0.681,0.585,0.095,0.08,0.182,0.175,0.223,0.145,0.075,0.064,0.166,0.125],[0.11,0.139,0.138,0.205,0.251,0.18,0.215,0.121,0.099,0.153,0.084,0.113,0.242,0.23,0.127,0.253,0.09,0.118,0.06,0.023,0.081,0.15,0.157,0.166,0.05,0.027,0.179,0.063,0.033,0.053,0.248,0.217,0.05,0.059,0.071,0.05,0.03,0.123,0.074,0.121,0.014,0.01,0.123,0.069,0.144,0.096,0.156,0.108,0.009,0.503,0.757,1.0,0.688,0.561,0.062,0.03,0.138,0.14,0.147,0.071,0.066,0.023,0.126,0.083],[0.138,0.199,0.157,0.185,0.235,0.22,0.251,0.157,0.109,0.136,0.092,0.145,0.199,0.245,0.103,0.284,0.13,0.157,0.107,0.006,0.121,0.192,0.216,0.224,0.075,0.069,0.13,0.05,0.087,0.06,0.276,0.214,0.105,0.099,0.084,0.067,0.045,0.076,0.046,0.152,0.042,0.052,0.093,0.061,0.173,0.09,0.153,0.107,0.034,0.412,0.681,0.688,1.0,0.488,0.131,0.107,0.147,0.148,0.175,0.063,0.094,0.083,0.131,0.065],[0.058,0.119,0.119,0.155,0.207,0.218,0.219,0.083,0.082,0.1,0.114,0.091,0.123,0.224,0.075,0.225,0.113,0.116,0.02,-0.015,0.105,0.117,0.138,0.196,0.031,0.061,0.125,0.03,0.015,0.027,0.263,0.146,0.071,0.046,0.037,0.013,0.013,0.116,0.021,0.116,0.009,0.09,0.143,0.058,0.075,0.066,0.141,0.154,0.022,0.583,0.585,0.561,0.488,1.0,0.062,0.043,0.127,0.127,0.178,0.115,0.021,0.03,0.087,0.089],[0.368,0.308,0.425,0.275,0.249,0.174,0.127,0.206,0.191,0.42,0.32,0.396,0.213,0.147,0.407,0.348,0.382,0.233,0.242,0.19,0.338,0.239,0.216,0.261,0.347,0.219,0.255,0.261,0.254,0.123,0.285,0.201,0.264,0.278,0.301,0.243,0.271,0.241,0.291,0.308,0.291,0.153,0.148,0.369,0.163,0.242,0.297,0.273,0.295,0.094,0.095,0.062,0.131,0.062,1.0,0.618,0.536,0.48,0.351,0.24,0.338,0.174,0.465,0.346],[0.305,0.28,0.296,0.332,0.292,0.102,0.032,0.29,0.111,0.287,0.314,0.216,0.224,0.265,0.221,0.274,0.312,0.174,0.15,0.183,0.242,0.176,0.2,0.176,0.254,0.114,0.129,0.127,0.166,0.04,0.248,0.071,0.3,0.191,0.254,0.209,0.143,0.144,0.135,0.184,0.192,0.047,0.088,0.198,0.191,0.353,0.217,0.349,0.19,0.053,0.08,0.03,0.107,0.043,0.618,1.0,0.297,0.35,0.185,0.379,0.254,0.397,0.29,0.469],[0.385,0.372,0.467,0.362,0.347,0.295,0.227,0.282,0.276,0.431,0.383,0.335,0.27,0.136,0.361,0.27,0.39,0.21,0.284,0.285,0.245,0.249,0.169,0.167,0.242,0.183,0.283,0.352,0.194,0.034,0.262,0.237,0.257,0.366,0.422,0.366,0.355,0.213,0.219,0.293,0.213,0.234,0.092,0.334,0.185,0.206,0.411,0.231,0.299,0.127,0.182,0.138,0.147,0.127,0.536,0.297,1.0,0.88,0.249,0.22,0.221,0.119,0.443,0.411],[0.454,0.47,0.524,0.341,0.354,0.25,0.164,0.275,0.256,0.342,0.365,0.244,0.249,0.179,0.241,0.196,0.319,0.139,0.191,0.299,0.185,0.174,0.175,0.11,0.142,0.16,0.258,0.28,0.204,-0.037,0.245,0.254,0.311,0.417,0.498,0.341,0.334,0.184,0.167,0.192,0.241,0.164,0.098,0.269,0.072,0.132,0.294,0.218,0.365,0.134,0.175,0.14,0.148,0.127,0.48,0.35,0.88,1.0,0.185,0.223,0.186,0.161,0.299,0.438],[0.236,0.234,0.25,0.462,0.401,0.471,0.465,0.297,0.309,0.425,0.419,0.322,0.26,0.356,0.47,0.504,0.38,0.267,0.227,0.112,0.163,0.257,0.147,0.291,0.156,0.153,0.217,0.12,0.047,0.222,0.274,0.184,0.304,0.276,0.331,0.236,0.265,0.203,0.176,0.255,0.198,0.18,0.172,0.235,0.373,0.273,0.313,0.29,0.229,0.186,0.223,0.147,0.175,0.178,0.351,0.185,0.249,0.185,1.0,0.593,0.393,0.282,0.513,0.371],[0.258,0.221,0.165,0.438,0.289,0.289,0.206,0.297,0.195,0.271,0.37,0.139,0.194,0.26,0.317,0.274,0.288,0.163,0.197,0.14,0.117,0.165,0.116,0.147,0.101,0.13,0.114,0.14,0.115,0.126,0.211,0.158,0.346,0.311,0.317,0.329,0.293,0.168,0.131,0.185,0.188,0.04,0.097,0.195,0.253,0.313,0.212,0.282,0.256,0.135,0.145,0.071,0.063,0.115,0.24,0.379,0.22,0.223,0.593,1.0,0.428,0.482,0.292,0.413],[0.123,0.108,0.147,0.162,0.2,0.141,0.07,0.118,0.186,0.18,0.272,0.185,0.185,0.182,0.349,0.222,0.214,0.162,0.287,0.115,0.158,0.184,0.204,0.18,0.23,0.289,0.15,0.285,0.279,0.097,0.18,0.312,0.328,0.362,0.345,0.312,0.417,0.214,0.235,0.23,0.256,0.127,0.12,0.262,0.067,0.225,0.262,0.195,0.224,0.083,0.075,0.066,0.094,0.021,0.338,0.254,0.221,0.186,0.393,0.428,1.0,0.701,0.192,0.309],[0.074,0.077,0.086,0.119,0.167,0.093,0.05,0.098,0.303,0.078,0.176,0.045,0.168,0.187,0.144,0.105,0.09,0.1,0.13,0.108,0.048,0.07,0.109,0.051,0.058,0.159,0.023,0.125,0.159,-0.02,0.132,0.242,0.26,0.375,0.265,0.25,0.39,0.224,0.24,0.168,0.319,0.087,0.18,0.149,0.01,0.151,0.108,0.169,0.246,0.134,0.064,0.023,0.083,0.03,0.174,0.397,0.119,0.161,0.282,0.482,0.701,1.0,0.065,0.397],[0.326,0.287,0.332,0.403,0.338,0.475,0.427,0.282,0.194,0.508,0.374,0.492,0.255,0.299,0.51,0.458,0.572,0.241,0.298,0.144,0.285,0.313,0.24,0.308,0.331,0.252,0.191,0.306,0.199,0.297,0.365,0.18,0.255,0.163,0.269,0.316,0.231,0.199,0.3,0.313,0.185,0.218,0.077,0.354,0.428,0.315,0.459,0.205,0.127,0.123,0.166,0.126,0.131,0.087,0.465,0.29,0.443,0.299,0.513,0.292,0.192,0.065,1.0,0.472],[0.396,0.458,0.444,0.46,0.385,0.271,0.24,0.367,0.367,0.375,0.352,0.242,0.399,0.357,0.346,0.329,0.383,0.172,0.213,0.185,0.156,0.198,0.187,0.237,0.188,0.231,0.213,0.224,0.211,0.165,0.303,0.161,0.359,0.307,0.362,0.308,0.327,0.309,0.241,0.211,0.25,0.096,0.154,0.274,0.243,0.368,0.285,0.349,0.368,0.152,0.125,0.083,0.065,0.089,0.346,0.469,0.411,0.438,0.371,0.413,0.309,0.397,0.472,1.0]]};</script><script>(function(){
+  const D=window.LAB_DATA, W=D.words, $=id=>document.getElementById(id), NS='http://www.w3.org/2000/svg';
+  const G=[...new Set(W.map(w=>D.groups[w]))], col=g=>`var(--c${G.indexOf(g)+1})`;
+  const sim=(a,b)=>D.sim[W.indexOf(a)][W.indexOf(b)], sc=v=>Math.round(Math.max(0,v)*100);
+  $('legend').innerHTML=G.map(g=>`<span><i style="background:${col(g)}"></i>${esc(g)}</span>`).join('');
+  const sorted=[...W].sort();
+  for(const id of ['pick','a','b']) sorted.forEach(w=>{const o=document.createElement('option');o.value=o.textContent=w;$(id).appendChild(o)});
+  const svg=$('map'), px=([x,y])=>[40+x*700,30+y*490], nodes={};
+  const lnk=document.createElementNS(NS,'g'); svg.appendChild(lnk);
+  // Greedy label placement: try right, left, above, below; keep the first spot that overlaps no placed label or dot
+  const boxes=W.map((w,i)=>{const [x,y]=px(D.xy[i]);return [x-7,y-7,x+7,y+7]});
+  const hit=(a,b)=>a[0]<b[2]&&b[0]<a[2]&&a[1]<b[3]&&b[1]<a[3];
+  const place=W.map((w,i)=>{
+    const [x,y]=px(D.xy[i]), tw=w.length*7+4, cands=[[x+10,y+4,'start'],[x-10,y+4,'end'],[x,y-11,'middle'],[x,y+19,'middle'],[x+10,y-8,'start'],[x+10,y+16,'start'],[x-10,y-8,'end'],[x-10,y+16,'end']];
+    const bx=([tx,ty,a])=>{const x0=a==='start'?tx:a==='end'?tx-tw:tx-tw/2;return [x0,ty-11,x0+tw,ty+3]};
+    for(const c of cands){const b=bx(c);if(b[0]>=0&&b[2]<=800&&!boxes.some((o,k)=>k!==i&&hit(b,o))){boxes.push(b);return c}}
+    boxes.push(bx(cands[0]));return cands[0];
+  });
+  W.forEach((w,i)=>{
+    const [x,y]=px(D.xy[i]), g=document.createElementNS(NS,'g'), [tx,ty,an]=place[i];
+    g.innerHTML=`<circle cx="${x}" cy="${y}" r="7" fill="${col(D.groups[w])}"></circle><text x="${tx}" y="${ty}" text-anchor="${an}">${esc(w)}</text>`;
+    g.addEventListener('click',()=>select(w)); svg.appendChild(g); nodes[w]=g;
+  });
+  function select(w){
+    $('pick').value=w;
+    const i=W.indexOf(w), nb=W.map((v,j)=>[v,D.sim[i][j]]).filter(([v])=>v!==w).sort((a,b)=>b[1]-a[1]).slice(0,5), set=new Set([w,...nb.map(x=>x[0])]);
+    for(const [v,g] of Object.entries(nodes)){g.classList.toggle('fade',!set.has(v));g.classList.toggle('sel',v===w)}
+    const [x0,y0]=px(D.xy[i]);
+    lnk.innerHTML=nb.map(([v])=>{const [x,y]=px(D.xy[W.indexOf(v)]);return `<line class="lnk" x1="${x0}" y1="${y0}" x2="${x}" y2="${y}"></line>`}).join('');
+    $('nb-h').textContent=`Closest neighbours of "${w}"`;
+    $('nb').innerHTML=nb.map(([v,s])=>`<li><span>${esc(v)}</span><span class="track"><span class="fill" style="width:${sc(s)}%"></span></span><span>${sc(s)}</span></li>`).join('');
+  }
+  function cmp(){const a=$('a').value,b=$('b').value,s=sc(sim(a,b));
+    $('cmp').innerHTML=`Closeness of <strong>${esc(a)}</strong> and <strong>${esc(b)}</strong>: <span class="pill" style="font-weight:700">${s}</span>`}
+  $('pick').onchange=()=>select($('pick').value); $('a').onchange=cmp; $('b').onchange=cmp;
+  $('a').value='increase'; $('b').value='decrease'; cmp(); select('teacher');
+})();
+</script>
+</body></html>
